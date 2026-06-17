@@ -22,6 +22,36 @@
       center: [-96.7970, 33.0137],
       zoom: 10
     });
+
+    map.on('load', async () => {
+      const response = await fetch(
+        'https://data.usajobs.gov/api/search?LocationName=Dallas,Texas&ResultsPerPage=25',
+        {
+          headers: {
+            'Authorization-Key': 'OqqpmePnZJbPca30g9gSSQHCDbUTS5DatiFtX3wKMc0=',
+            'User-Agent': 'corey.spence.shs@gmail.com'
+          }
+        }
+      );
+
+      const data = await response.json();
+      const jobs = data.SearchResult.SearchResultItems;
+
+      jobs.forEach(job => {
+        const title = job.MatchedObjectDescriptor.PositionTitle;
+        const org = job.MatchedObjectDescriptor.OrganizationName;
+        const url = job.MatchedObjectDescriptor.ApplyURI[0];
+        const lat = parseFloat(job.MatchedObjectDescriptor.PositionLocationDisplay) || 33.0137;
+        const lng = -96.7970;
+
+        new mapboxgl.Marker({ color: '#00ff88' })
+          .setLngLat([lng, lat])
+          .setPopup(new mapboxgl.Popup().setHTML(
+            `<strong>${title}</strong><br>${org}<br><a href="${url}" target="_blank">Apply</a>`
+          ))
+          .addTo(map);
+      });
+    });
   </script>
 </body>
 </html>
