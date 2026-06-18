@@ -13,219 +13,174 @@
     /* ── Layout ── */
     #app { display: flex; height: 100vh; width: 100vw; }
     #sidebar {
-      width: 340px;
-      min-width: 340px;
-      height: 100vh;
+      width: 320px; min-width: 320px; height: 100vh;
       background: #0f0f0f;
       border-right: 1px solid rgba(255,255,255,0.07);
-      display: flex;
-      flex-direction: column;
-      z-index: 10;
+      display: flex; flex-direction: column; z-index: 10;
     }
     #map-wrap { flex: 1; position: relative; }
     #map { position: absolute; inset: 0; }
 
-    /* ── Sidebar header ── */
-    #sidebar-header {
-      padding: 18px 16px 14px;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-      flex-shrink: 0;
-    }
-    .logo {
-      font-size: 16px;
-      font-weight: 800;
-      color: #00ff88;
-      letter-spacing: 0.05em;
-      margin-bottom: 2px;
-    }
-    .tagline {
-      font-size: 11px;
-      color: rgba(255,255,255,0.35);
-      letter-spacing: 0.03em;
+    /* ── Vignette overlay ── */
+    #vignette {
+      position: absolute; inset: 0; z-index: 2;
+      pointer-events: none;
+      background: radial-gradient(
+        ellipse 62% 62% at 50% 50%,
+        transparent 38%,
+        rgba(5,5,5,0.45) 62%,
+        rgba(5,5,5,0.82) 80%,
+        rgba(5,5,5,0.96) 100%
+      );
     }
 
-    /* ── Category filters ── */
+    /* ── Sidebar header ── */
+    #sidebar-header {
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo { font-size: 15px; font-weight: 800; color: #00ff88; letter-spacing: 0.05em; }
+    .tagline { font-size: 10px; color: rgba(255,255,255,0.3); letter-spacing: 0.03em; margin-top: 1px; }
+
+    /* ── Locate button ── */
+    #locate-btn {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 600; color: #00ff88;
+      background: rgba(0,255,136,0.08);
+      border: 1px solid rgba(0,255,136,0.25);
+      border-radius: 8px; padding: 5px 10px;
+      cursor: pointer; transition: all 0.18s; white-space: nowrap;
+      flex-shrink: 0;
+    }
+    #locate-btn:hover { background: rgba(0,255,136,0.15); }
+    #locate-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
+    #locate-btn.locating { opacity: 0.6; pointer-events: none; animation: pulse 1s infinite; }
+
+    /* ── Filter dropdown ── */
     #filter-wrap {
-      padding: 12px 12px 8px;
+      padding: 10px 12px 10px;
       border-bottom: 1px solid rgba(255,255,255,0.06);
       flex-shrink: 0;
     }
-    #filter-label {
-      font-size: 10px;
-      color: rgba(255,255,255,0.3);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin-bottom: 8px;
+    #filter-select-wrap { position: relative; }
+    #filter-select-wrap::after {
+      content: '▾';
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      color: rgba(255,255,255,0.35); font-size: 11px; pointer-events: none;
     }
-    #filters {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
+    #category-select {
+      width: 100%; appearance: none; -webkit-appearance: none;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px; padding: 8px 28px 8px 12px;
+      color: #fff; font-size: 12px; font-weight: 600;
+      cursor: pointer; outline: none;
+      font-family: inherit;
     }
-    .filter-btn {
-      font-size: 11px;
-      font-weight: 600;
-      padding: 4px 10px;
-      border-radius: 20px;
-      border: 1.5px solid;
-      cursor: pointer;
-      transition: all 0.18s;
-      background: transparent;
-      letter-spacing: 0.02em;
-      white-space: nowrap;
-      opacity: 0.45;
+    #category-select:focus { border-color: rgba(0,255,136,0.4); }
+    #category-select option { background: #1a1a1a; color: #fff; }
+
+    /* Active category indicator dot */
+    #cat-dot {
+      display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+      margin-right: 6px; vertical-align: middle; transition: background 0.2s;
     }
-    .filter-btn.active { opacity: 1; }
 
     /* ── Job count bar ── */
     #count-bar {
-      padding: 10px 16px 8px;
-      font-size: 12px;
-      color: rgba(255,255,255,0.4);
-      flex-shrink: 0;
+      padding: 8px 16px 6px; font-size: 11px;
+      color: rgba(255,255,255,0.35); flex-shrink: 0;
       border-bottom: 1px solid rgba(255,255,255,0.04);
+      display: flex; align-items: center; gap: 6px;
     }
-    #count-bar span { color: #fff; font-weight: 700; }
+    #count-bar strong { color: #fff; font-weight: 700; }
 
     /* ── Job list ── */
-    #job-list {
-      flex: 1;
-      overflow-y: auto;
-      padding: 8px 8px;
-    }
-    #job-list::-webkit-scrollbar { width: 4px; }
+    #job-list { flex: 1; overflow-y: auto; padding: 8px; }
+    #job-list::-webkit-scrollbar { width: 3px; }
     #job-list::-webkit-scrollbar-track { background: transparent; }
-    #job-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+    #job-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
 
     .job-card {
       background: rgba(255,255,255,0.03);
       border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 10px;
-      padding: 11px 13px;
-      margin-bottom: 6px;
-      cursor: pointer;
-      transition: all 0.15s;
-      border-left: 3px solid;
+      border-radius: 10px; padding: 11px 13px; margin-bottom: 6px;
+      cursor: pointer; transition: all 0.15s; border-left: 3px solid;
     }
-    .job-card:hover {
-      background: rgba(255,255,255,0.06);
-      border-color: rgba(255,255,255,0.12);
-      transform: translateX(2px);
-    }
-    .job-card.active {
-      background: rgba(255,255,255,0.07);
-    }
-    .card-title {
-      font-size: 12px;
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: 3px;
-      line-height: 1.35;
-    }
-    .card-company {
-      font-size: 11px;
-      color: rgba(255,255,255,0.45);
-      margin-bottom: 6px;
-    }
-    .card-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .card-cat {
-      font-size: 10px;
-      font-weight: 600;
-      padding: 2px 7px;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.06);
-      letter-spacing: 0.03em;
-    }
-    .card-apply {
-      font-size: 10px;
-      font-weight: 700;
-      color: #00ff88;
-      text-decoration: none;
-      letter-spacing: 0.04em;
-    }
+    .job-card:hover { background: rgba(255,255,255,0.06); transform: translateX(2px); }
+    .job-card.active { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15); }
+    .card-title { font-size: 12px; font-weight: 700; color: #fff; margin-bottom: 3px; line-height: 1.35; }
+    .card-company { font-size: 11px; color: rgba(255,255,255,0.4); margin-bottom: 6px; }
+    .card-footer { display: flex; align-items: center; justify-content: space-between; }
+    .card-cat { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 10px; background: rgba(255,255,255,0.06); letter-spacing: 0.02em; }
+    .card-apply { font-size: 10px; font-weight: 700; color: #00ff88; text-decoration: none; letter-spacing: 0.04em; }
     .card-apply:hover { text-decoration: underline; }
 
-    #empty-state {
-      text-align: center;
-      padding: 40px 20px;
-      color: rgba(255,255,255,0.25);
-      font-size: 13px;
-      line-height: 1.6;
-      display: none;
-    }
-    #loading-state {
-      text-align: center;
-      padding: 40px 20px;
-      color: rgba(255,255,255,0.3);
-      font-size: 12px;
-    }
+    #empty-state { text-align:center; padding:40px 20px; color:rgba(255,255,255,0.25); font-size:13px; line-height:1.6; display:none; }
+    #loading-state { text-align:center; padding:40px 20px; color:rgba(255,255,255,0.3); font-size:12px; }
     .pulse { animation: pulse 1.5s infinite; }
-    @keyframes pulse { 0%,100% { opacity:0.3; } 50% { opacity:0.8; } }
+    @keyframes pulse { 0%,100%{opacity:0.3} 50%{opacity:0.8} }
 
-    /* ── Map overlays ── */
+    /* ── Zoom hint ── */
     #zoom-hint {
-      position: absolute;
-      bottom: 28px;
-      right: 12px;
-      z-index: 5;
-      background: rgba(10,10,10,0.75);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 8px;
-      padding: 6px 11px;
-      color: rgba(255,255,255,0.35);
-      font-size: 11px;
-      transition: opacity 0.4s;
-      pointer-events: none;
+      position: absolute; bottom: 28px; right: 12px; z-index: 6;
+      background: rgba(10,10,10,0.7); border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 8px; padding: 5px 10px;
+      color: rgba(255,255,255,0.3); font-size: 11px;
+      transition: opacity 0.4s; pointer-events: none;
     }
 
     /* ── Popup ── */
     .mapboxgl-popup-content {
-      background: #111 !important;
-      border: 1px solid rgba(0,255,136,0.25) !important;
-      border-radius: 10px !important;
-      padding: 14px 16px !important;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.6) !important;
-      min-width: 200px;
+      background: #111 !important; border: 1px solid rgba(0,255,136,0.25) !important;
+      border-radius: 10px !important; padding: 14px 16px !important;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6) !important; min-width: 200px;
     }
-    .mapboxgl-popup-tip { display: none !important; }
-    .mapboxgl-popup-close-button { color: rgba(255,255,255,0.4) !important; font-size:16px !important; top:6px !important; right:8px !important; }
+    .mapboxgl-popup-tip { display:none !important; }
+    .mapboxgl-popup-close-button { color:rgba(255,255,255,0.4)!important; font-size:16px!important; top:6px!important; right:8px!important; }
     .popup-title { font-size:13px; font-weight:700; color:#fff; margin-bottom:4px; line-height:1.3; padding-right:16px; }
     .popup-company { font-size:12px; color:rgba(255,255,255,0.5); margin-bottom:10px; }
-    .popup-apply {
-      display:inline-block; font-size:12px; font-weight:600;
-      color:#0a0a0a; background:#00ff88; border-radius:6px;
-      padding:5px 12px; text-decoration:none; letter-spacing:0.02em;
-    }
+    .popup-apply { display:inline-block; font-size:12px; font-weight:600; color:#0a0a0a; background:#00ff88; border-radius:6px; padding:5px 12px; text-decoration:none; letter-spacing:0.02em; }
     .popup-apply:hover { opacity:0.85; }
 
-    /* ── Mobile responsive ── */
+    /* ── Mobile ── */
     @media (max-width: 640px) {
       #app { flex-direction: column; }
-      #sidebar { width: 100%; min-width: unset; height: 45vh; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.07); }
-      #map-wrap { flex: 1; }
+      #sidebar { width:100%; min-width:unset; height:44vh; border-right:none; border-bottom:1px solid rgba(255,255,255,0.07); }
+      #map-wrap { flex:1; }
     }
   </style>
 </head>
 <body>
 <div id="app">
 
-  <!-- ── Sidebar ── -->
   <div id="sidebar">
     <div id="sidebar-header">
-      <div class="logo">Labor Network</div>
-      <div class="tagline">Hyperlocal jobs · Dallas–Fort Worth</div>
+      <div>
+        <div class="logo">Labor Network</div>
+        <div class="tagline">Hyperlocal jobs · DFW</div>
+      </div>
+      <button id="locate-btn" title="Use my location">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+          <circle cx="12" cy="12" r="8" stroke-opacity="0.4"/>
+        </svg>
+        Locate me
+      </button>
     </div>
 
     <div id="filter-wrap">
-      <div id="filter-label">Filter by category</div>
-      <div id="filters"></div>
+      <div id="filter-select-wrap">
+        <span id="cat-dot"></span>
+        <select id="category-select" style="padding-left:24px"></select>
+      </div>
     </div>
 
-    <div id="count-bar"><span id="job-count">—</span> jobs found</div>
+    <div id="count-bar">
+      <strong id="job-count">—</strong> jobs found
+    </div>
 
     <div id="job-list">
       <div id="loading-state" class="pulse">Loading jobs near you…</div>
@@ -233,301 +188,212 @@
     </div>
   </div>
 
-  <!-- ── Map ── -->
   <div id="map-wrap">
     <div id="map"></div>
-    <div id="zoom-hint">Zoom in to explore your neighborhood →</div>
+    <div id="vignette"></div>
+    <div id="zoom-hint">Zoom in to explore →</div>
   </div>
 
 </div>
-
 <script>
-  // ── Config ──────────────────────────────────────────────────────────────
   mapboxgl.accessToken = 'pk.eyJ1IjoiY29yZXlkZXZkZnciLCJhIjoiY21xaHVvanM2MDE3bDJ0cHB4NTF4andpdiJ9.7zXPq8gI54J5-OEEh69E5w';
   const APP_ID  = 'b7919541';
   const APP_KEY = '3f2d6edcdeb9e34e2532ad7e64f6f7b2';
-  const CENTER  = [-96.7970, 33.0137];
+  let CENTER    = [-96.7970, 33.0137];
   const RADIUS  = 25;
 
-  // ── Categories ──────────────────────────────────────────────────────────
   const CATEGORIES = [
-    { tag: 'all',                         label: 'All',          color: '#00ff88' },
-    { tag: 'logistics-warehouse-jobs',    label: 'Warehouse',    color: '#ff9f43' },
-    { tag: 'manufacturing-jobs',          label: 'Manufacturing',color: '#54a0ff' },
-    { tag: 'trade-construction-jobs',     label: 'Trades',       color: '#ffd32a' },
-    { tag: 'retail-jobs',                 label: 'Retail',       color: '#c56cf0' },
-    { tag: 'customer-services-jobs',      label: 'Customer Svc', color: '#ff6b81' },
-    { tag: 'engineering-jobs',            label: 'Engineering',  color: '#0be881' },
-    { tag: 'admin-jobs',                  label: 'Admin',        color: '#67e8f9' },
+    { tag:'all',                       label:'All Categories',  color:'#00ff88' },
+    { tag:'logistics-warehouse-jobs',  label:'Warehouse',       color:'#ff9f43' },
+    { tag:'manufacturing-jobs',        label:'Manufacturing',   color:'#54a0ff' },
+    { tag:'trade-construction-jobs',   label:'Trades',          color:'#ffd32a' },
+    { tag:'retail-jobs',               label:'Retail',          color:'#c56cf0' },
+    { tag:'customer-services-jobs',    label:'Customer Service',color:'#ff6b81' },
+    { tag:'engineering-jobs',          label:'Engineering',     color:'#0be881' },
+    { tag:'admin-jobs',                label:'Admin',           color:'#67e8f9' },
   ];
-
-  // color lookup by tag
   const colorMap = {};
   CATEGORIES.forEach(c => { colorMap[c.tag] = c.color; });
 
-  // ── State ────────────────────────────────────────────────────────────────
-  let allJobs = [];       // all fetched jobs
-  let activeFilter = 'all';
-  let activePopup = null;
-  let activeCard  = null;
+  let allJobs = [], activeFilter = 'all', activePopup = null, activeCard = null;
 
-  // ── Map init ─────────────────────────────────────────────────────────────
+  // ── Map ──────────────────────────────────────────────────────────────────
   const map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/dark-v11',
-    center: CENTER,
-    zoom: 10,
-    minZoom: 8,
-    maxZoom: 17
+    center: CENTER, zoom: 10, minZoom: 8, maxZoom: 19,
+    pitch: 0, bearing: 0
   });
-  map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right');
+  map.addControl(new mapboxgl.NavigationControl({ showCompass: true }), 'top-right');
 
-  // ── Circle helper ────────────────────────────────────────────────────────
-  function makeCircle(center, radiusMiles, steps = 64) {
-    const coords = [];
-    const R = 3958.8;
-    const lat = center[1] * Math.PI / 180;
-    for (let i = 0; i <= steps; i++) {
-      const a = (i / steps) * 2 * Math.PI;
-      coords.push([
-        center[0] + (radiusMiles / R) * Math.sin(a) / Math.cos(lat) * 180 / Math.PI,
-        center[1] + (radiusMiles / R) * Math.cos(a) * 180 / Math.PI
-      ]);
+  // ── Locate me ─────────────────────────────────────────────────────────────
+  document.getElementById('locate-btn').addEventListener('click', () => {
+    const btn = document.getElementById('locate-btn');
+    if (!navigator.geolocation) { alert('Geolocation not supported by your browser.'); return; }
+    btn.classList.add('locating');
+    btn.textContent = 'Locating…';
+    navigator.geolocation.getCurrentPosition(pos => {
+      CENTER = [pos.coords.longitude, pos.coords.latitude];
+      map.flyTo({ center: CENTER, zoom: 12, pitch: 45, duration: 1400 });
+      updateCircle();
+      btn.classList.remove('locating');
+      btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8" stroke-opacity="0.4"/></svg> Located`;
+      btn.style.color = '#fff';
+    }, () => {
+      btn.classList.remove('locating');
+      btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8" stroke-opacity="0.4"/></svg> Locate me`;
+    });
+  });
+
+  // ── Circle ───────────────────────────────────────────────────────────────
+  function makeCircle(center, radiusMiles, steps=64) {
+    const coords=[], R=3958.8, lat=center[1]*Math.PI/180;
+    for(let i=0;i<=steps;i++){
+      const a=(i/steps)*2*Math.PI;
+      coords.push([center[0]+(radiusMiles/R)*Math.sin(a)/Math.cos(lat)*180/Math.PI, center[1]+(radiusMiles/R)*Math.cos(a)*180/Math.PI]);
     }
-    return { type:'FeatureCollection', features:[{ type:'Feature', geometry:{ type:'Polygon', coordinates:[coords] } }] };
+    return {type:'FeatureCollection',features:[{type:'Feature',geometry:{type:'Polygon',coordinates:[coords]}}]};
+  }
+  function updateCircle() {
+    if(map.getSource('radius-circle')) map.getSource('radius-circle').setData(makeCircle(CENTER,RADIUS));
   }
 
-  // ── Build filter buttons ─────────────────────────────────────────────────
-  const filtersEl = document.getElementById('filters');
+  // ── Dropdown filter ───────────────────────────────────────────────────────
+  const sel = document.getElementById('category-select');
+  const dot = document.getElementById('cat-dot');
   CATEGORIES.forEach(cat => {
-    const btn = document.createElement('button');
-    btn.className = 'filter-btn' + (cat.tag === 'all' ? ' active' : '');
-    btn.textContent = cat.label;
-    btn.dataset.tag = cat.tag;
-    btn.style.borderColor = cat.color;
-    btn.style.color = cat.color;
-    btn.addEventListener('click', () => setFilter(cat.tag));
-    filtersEl.appendChild(btn);
+    const opt = document.createElement('option');
+    opt.value = cat.tag; opt.textContent = cat.label;
+    sel.appendChild(opt);
   });
-
-  function setFilter(tag) {
-    activeFilter = tag;
-    document.querySelectorAll('.filter-btn').forEach(b => {
-      b.classList.toggle('active', b.dataset.tag === tag);
-    });
+  function syncDot() {
+    const cat = CATEGORIES.find(c => c.tag === sel.value) || CATEGORIES[0];
+    dot.style.background = cat.color;
+  }
+  syncDot();
+  sel.addEventListener('change', () => {
+    activeFilter = sel.value;
+    syncDot();
     renderSidebar();
     updateMapLayer();
-  }
+  });
 
-  // ── Filtered jobs ────────────────────────────────────────────────────────
   function filteredJobs() {
-    if (activeFilter === 'all') return allJobs;
-    return allJobs.filter(j => j.category === activeFilter);
+    return activeFilter === 'all' ? allJobs : allJobs.filter(j => j.category === activeFilter);
   }
 
-  // ── Sidebar render ───────────────────────────────────────────────────────
+  // ── Sidebar render ────────────────────────────────────────────────────────
   function renderSidebar() {
     const jobs = filteredJobs();
     const list = document.getElementById('job-list');
-    const empty = document.getElementById('empty-state');
-    const loading = document.getElementById('loading-state');
-
-    loading.style.display = 'none';
-    empty.style.display = jobs.length === 0 ? 'block' : 'none';
+    document.getElementById('loading-state').style.display = 'none';
+    document.getElementById('empty-state').style.display = jobs.length===0 ? 'block':'none';
     document.getElementById('job-count').textContent = jobs.length;
-
-    // Remove old cards
-    list.querySelectorAll('.job-card').forEach(el => el.remove());
-
-    const catInfo = tag => CATEGORIES.find(c => c.tag === tag) || CATEGORIES[0];
-
-    jobs.forEach((job, i) => {
+    list.querySelectorAll('.job-card').forEach(el=>el.remove());
+    const catInfo = tag => CATEGORIES.find(c=>c.tag===tag)||CATEGORIES[0];
+    jobs.forEach((job,i) => {
       const cat = catInfo(job.category);
       const card = document.createElement('div');
-      card.className = 'job-card';
-      card.dataset.index = i;
-      card.style.borderLeftColor = cat.color;
-      card.innerHTML = `
-        <div class="card-title">${job.title}</div>
-        <div class="card-company">${job.company}</div>
-        <div class="card-footer">
-          <span class="card-cat" style="color:${cat.color}">${cat.label}</span>
-          <a class="card-apply" href="${job.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Apply →</a>
-        </div>
-      `;
-      card.addEventListener('click', () => focusJob(job, card));
+      card.className='job-card'; card.dataset.index=i; card.style.borderLeftColor=cat.color;
+      card.innerHTML=`<div class="card-title">${job.title}</div><div class="card-company">${job.company}</div><div class="card-footer"><span class="card-cat" style="color:${cat.color}">${cat.label}</span><a class="card-apply" href="${job.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Apply →</a></div>`;
+      card.addEventListener('click',()=>focusJob(job,card));
       list.appendChild(card);
     });
   }
 
-  // ── Focus job (sidebar → map) ────────────────────────────────────────────
   function focusJob(job, card) {
-    if (activeCard) activeCard.classList.remove('active');
-    card.classList.add('active');
-    activeCard = card;
-
-    if (activePopup) activePopup.remove();
-
-    map.flyTo({ center: [job.lng, job.lat], zoom: Math.max(map.getZoom(), 13), duration: 600 });
-
-    const cat = CATEGORIES.find(c => c.tag === job.category) || CATEGORIES[0];
-    activePopup = new mapboxgl.Popup({ closeButton: true, maxWidth: '260px' })
-      .setLngLat([job.lng, job.lat])
-      .setHTML(`
-        <div class="popup-title">${job.title}</div>
-        <div class="popup-company">${job.company}</div>
-        <a class="popup-apply" href="${job.url}" target="_blank" rel="noopener">View & Apply →</a>
-      `)
+    if(activeCard) activeCard.classList.remove('active');
+    card.classList.add('active'); activeCard=card;
+    if(activePopup) activePopup.remove();
+    map.flyTo({ center:[job.lng,job.lat], zoom:Math.max(map.getZoom(),15), pitch:50, duration:800 });
+    activePopup = new mapboxgl.Popup({closeButton:true,maxWidth:'260px'})
+      .setLngLat([job.lng,job.lat])
+      .setHTML(`<div class="popup-title">${job.title}</div><div class="popup-company">${job.company}</div><a class="popup-apply" href="${job.url}" target="_blank" rel="noopener">View & Apply →</a>`)
       .addTo(map);
   }
 
-  // ── Update map GeoJSON ───────────────────────────────────────────────────
   function updateMapLayer() {
-    const jobs = filteredJobs();
-    const geojson = {
-      type: 'FeatureCollection',
-      features: jobs.map(job => ({
-        type: 'Feature',
-        geometry: { type:'Point', coordinates:[job.lng, job.lat] },
-        properties: { title: job.title, company: job.company, url: job.url, category: job.category, color: colorMap[job.category] || '#00ff88' }
-      }))
-    };
-    if (map.getSource('jobs')) {
-      map.getSource('jobs').setData(geojson);
-    }
+    const jobs=filteredJobs();
+    const geojson={type:'FeatureCollection',features:jobs.map(job=>({type:'Feature',geometry:{type:'Point',coordinates:[job.lng,job.lat]},properties:{title:job.title,company:job.company,url:job.url,category:job.category,color:colorMap[job.category]||'#00ff88'}}))};
+    if(map.getSource('jobs')) map.getSource('jobs').setData(geojson);
   }
 
-  // ── Fetch jobs (multi-category) ──────────────────────────────────────────
   async function fetchCategory(tag) {
-    const catParam = (tag === 'all') ? '' : `&category=${tag}`;
+    const catParam=(tag==='all')?'':`&category=${tag}`;
     try {
-      const res = await fetch(
-        `https://api.adzuna.com/v1/api/jobs/us/search/1?app_id=${APP_ID}&app_key=${APP_KEY}&where=Dallas,TX&results_per_page=50&distance=${RADIUS}${catParam}`
-      );
-      const data = await res.json();
-      return (data.results || [])
-        .filter(j => j.latitude && j.longitude)
-        .map(j => ({
-          id:      j.id,
-          title:   j.title,
-          company: j.company?.display_name || 'Unknown',
-          url:     j.redirect_url,
-          lat:     j.latitude,
-          lng:     j.longitude,
-          category: tag === 'all' ? (j.category?.tag || 'all') : tag
-        }));
-    } catch(e) {
-      console.warn('Fetch failed for', tag, e);
-      return [];
-    }
+      const res=await fetch(`https://api.adzuna.com/v1/api/jobs/us/search/1?app_id=${APP_ID}&app_key=${APP_KEY}&where=Dallas,TX&results_per_page=50&distance=${RADIUS}${catParam}`);
+      const data=await res.json();
+      return (data.results||[]).filter(j=>j.latitude&&j.longitude).map(j=>({id:j.id,title:j.title,company:j.company?.display_name||'Unknown',url:j.redirect_url,lat:j.latitude,lng:j.longitude,category:tag==='all'?(j.category?.tag||'all'):tag}));
+    } catch(e){ console.warn('Fetch failed',tag,e); return []; }
   }
 
-  // ── Map load ─────────────────────────────────────────────────────────────
+  // ── Map load ──────────────────────────────────────────────────────────────
   map.on('load', async () => {
 
+    // 3D buildings layer
+    map.addLayer({
+      id: '3d-buildings', source: 'composite', 'source-layer': 'building',
+      filter: ['==','extrude','true'], type: 'fill-extrusion',
+      minzoom: 14,
+      paint: {
+        'fill-extrusion-color': '#1a1a2e',
+        'fill-extrusion-height': ['interpolate',['linear'],['zoom'],14,0,14.5,['get','height']],
+        'fill-extrusion-base': ['interpolate',['linear'],['zoom'],14,0,14.5,['get','min_height']],
+        'fill-extrusion-opacity': 0.75
+      }
+    });
+
     // Radius circle
-    map.addSource('radius-circle', { type:'geojson', data: makeCircle(CENTER, RADIUS) });
-    map.addLayer({ id:'radius-fill', type:'fill', source:'radius-circle', paint:{ 'fill-color':'#00ff88', 'fill-opacity':0.03 } });
-    map.addLayer({ id:'radius-outline', type:'line', source:'radius-circle', paint:{ 'line-color':'#00ff88', 'line-width':1.5, 'line-opacity':0.3, 'line-dasharray':[4,3] } });
+    map.addSource('radius-circle',{type:'geojson',data:makeCircle(CENTER,RADIUS)});
+    map.addLayer({id:'radius-fill',type:'fill',source:'radius-circle',paint:{'fill-color':'#00ff88','fill-opacity':0.03}});
+    map.addLayer({id:'radius-outline',type:'line',source:'radius-circle',paint:{'line-color':'#00ff88','line-width':1.5,'line-opacity':0.3,'line-dasharray':[4,3]}});
 
-    // Jobs source (empty to start)
-    map.addSource('jobs', {
-      type: 'geojson',
-      data: { type:'FeatureCollection', features:[] },
-      cluster: true,
-      clusterMaxZoom: 13,
-      clusterRadius: 48
-    });
+    // Jobs source
+    map.addSource('jobs',{type:'geojson',data:{type:'FeatureCollection',features:[]},cluster:true,clusterMaxZoom:13,clusterRadius:48});
 
-    // Cluster circles
-    map.addLayer({
-      id: 'clusters', type:'circle', source:'jobs',
-      filter: ['has','point_count'],
-      paint: {
-        'circle-color': ['step',['get','point_count'],'#00cc6e',5,'#00ff88',15,'#66ffbb'],
-        'circle-radius': ['step',['get','point_count'],18,5,24,15,30],
-        'circle-opacity': 0.9,
-        'circle-stroke-width': 1.5,
-        'circle-stroke-color': 'rgba(0,255,136,0.3)'
-      }
-    });
+    map.addLayer({id:'clusters',type:'circle',source:'jobs',filter:['has','point_count'],paint:{'circle-color':['step',['get','point_count'],'#00cc6e',5,'#00ff88',15,'#66ffbb'],'circle-radius':['step',['get','point_count'],18,5,24,15,30],'circle-opacity':0.9,'circle-stroke-width':1.5,'circle-stroke-color':'rgba(0,255,136,0.3)'}});
+    map.addLayer({id:'cluster-count',type:'symbol',source:'jobs',filter:['has','point_count'],layout:{'text-field':'{point_count_abbreviated}','text-font':['DIN Pro Bold','Arial Unicode MS Bold'],'text-size':12},paint:{'text-color':'#0a0a0a'}});
+    map.addLayer({id:'unclustered-point',type:'circle',source:'jobs',filter:['!',['has','point_count']],paint:{'circle-color':['coalesce',['get','color'],'#00ff88'],'circle-radius':['interpolate',['linear'],['zoom'],13,6,16,10],'circle-stroke-width':1.5,'circle-stroke-color':'rgba(255,255,255,0.2)','circle-opacity':0.95}});
 
-    map.addLayer({
-      id:'cluster-count', type:'symbol', source:'jobs',
-      filter:['has','point_count'],
-      layout:{ 'text-field':'{point_count_abbreviated}', 'text-font':['DIN Pro Bold','Arial Unicode MS Bold'], 'text-size':12 },
-      paint:{ 'text-color':'#0a0a0a' }
-    });
-
-    // Unclustered — color by category
-    map.addLayer({
-      id:'unclustered-point', type:'circle', source:'jobs',
-      filter:['!',['has','point_count']],
-      paint: {
-        'circle-color': ['coalesce',['get','color'],'#00ff88'],
-        'circle-radius': ['interpolate',['linear'],['zoom'],13,6,16,10],
-        'circle-stroke-width': 1.5,
-        'circle-stroke-color': 'rgba(255,255,255,0.2)',
-        'circle-opacity': 0.95
-      }
-    });
-
-    // Cluster click → expand
-    map.on('click','clusters', e => {
-      const f = map.queryRenderedFeatures(e.point, { layers:['clusters'] });
-      map.getSource('jobs').getClusterExpansionZoom(f[0].properties.cluster_id, (err, zoom) => {
-        if (!err) map.easeTo({ center: f[0].geometry.coordinates, zoom, duration:500 });
+    map.on('click','clusters',e=>{
+      const f=map.queryRenderedFeatures(e.point,{layers:['clusters']});
+      map.getSource('jobs').getClusterExpansionZoom(f[0].properties.cluster_id,(err,zoom)=>{
+        if(!err) map.easeTo({center:f[0].geometry.coordinates,zoom,duration:500});
       });
     });
 
-    // Pin click → popup + highlight card
-    map.on('click','unclustered-point', e => {
-      const { title, company, url } = e.features[0].properties;
-      const coords = e.features[0].geometry.coordinates.slice();
-      if (activePopup) activePopup.remove();
-      activePopup = new mapboxgl.Popup({ closeButton:true, maxWidth:'260px' })
-        .setLngLat(coords)
-        .setHTML(`<div class="popup-title">${title}</div><div class="popup-company">${company}</div><a class="popup-apply" href="${url}" target="_blank" rel="noopener">View & Apply →</a>`)
-        .addTo(map);
-
-      // Highlight matching sidebar card
-      const jobs = filteredJobs();
-      const idx = jobs.findIndex(j => j.title === title && j.company === company);
-      if (idx >= 0) {
-        const card = document.querySelector(`.job-card[data-index="${idx}"]`);
-        if (card) {
-          if (activeCard) activeCard.classList.remove('active');
-          card.classList.add('active');
-          activeCard = card;
-          card.scrollIntoView({ behavior:'smooth', block:'nearest' });
-        }
+    map.on('click','unclustered-point',e=>{
+      const{title,company,url}=e.features[0].properties;
+      const coords=e.features[0].geometry.coordinates.slice();
+      if(activePopup) activePopup.remove();
+      activePopup=new mapboxgl.Popup({closeButton:true,maxWidth:'260px'}).setLngLat(coords).setHTML(`<div class="popup-title">${title}</div><div class="popup-company">${company}</div><a class="popup-apply" href="${url}" target="_blank" rel="noopener">View & Apply →</a>`).addTo(map);
+      map.flyTo({center:coords,zoom:Math.max(map.getZoom(),15),pitch:50,duration:700});
+      const jobs=filteredJobs();
+      const idx=jobs.findIndex(j=>j.title===title&&j.company===company);
+      if(idx>=0){
+        const card=document.querySelector(`.job-card[data-index="${idx}"]`);
+        if(card){if(activeCard)activeCard.classList.remove('active');card.classList.add('active');activeCard=card;card.scrollIntoView({behavior:'smooth',block:'nearest'});}
       }
     });
 
-    map.on('mouseenter','clusters', () => map.getCanvas().style.cursor='pointer');
-    map.on('mouseleave','clusters', () => map.getCanvas().style.cursor='');
-    map.on('mouseenter','unclustered-point', () => map.getCanvas().style.cursor='pointer');
-    map.on('mouseleave','unclustered-point', () => map.getCanvas().style.cursor='');
+    map.on('mouseenter','clusters',()=>map.getCanvas().style.cursor='pointer');
+    map.on('mouseleave','clusters',()=>map.getCanvas().style.cursor='');
+    map.on('mouseenter','unclustered-point',()=>map.getCanvas().style.cursor='pointer');
+    map.on('mouseleave','unclustered-point',()=>map.getCanvas().style.cursor='');
 
-    map.on('zoom', () => {
-      const hint = document.getElementById('zoom-hint');
-      const z = map.getZoom();
-      hint.style.opacity = z > 12 ? '0' : '1';
-      const fade = Math.max(0, Math.min(1, (14-z)/2));
-      map.setPaintProperty('radius-fill','fill-opacity', 0.03*fade);
-      map.setPaintProperty('radius-outline','line-opacity', 0.3*fade);
+    map.on('zoom',()=>{
+      const z=map.getZoom();
+      document.getElementById('zoom-hint').style.opacity=z>12?'0':'1';
+      const fade=Math.max(0,Math.min(1,(14-z)/2));
+      map.setPaintProperty('radius-fill','fill-opacity',0.03*fade);
+      map.setPaintProperty('radius-outline','line-opacity',0.3*fade);
     });
 
-    // ── Fetch all non-medical categories in parallel ──
-    const tagsToFetch = CATEGORIES.filter(c => c.tag !== 'all').map(c => c.tag);
-    const results = await Promise.all(tagsToFetch.map(fetchCategory));
-
-    // Deduplicate by job id
-    const seen = new Set();
-    results.flat().forEach(job => {
-      if (!seen.has(job.id)) { seen.add(job.id); allJobs.push(job); }
-    });
-
+    // Fetch jobs
+    const tagsToFetch=CATEGORIES.filter(c=>c.tag!=='all').map(c=>c.tag);
+    const results=await Promise.all(tagsToFetch.map(fetchCategory));
+    const seen=new Set();
+    results.flat().forEach(job=>{if(!seen.has(job.id)){seen.add(job.id);allJobs.push(job);}});
     renderSidebar();
     updateMapLayer();
   });
