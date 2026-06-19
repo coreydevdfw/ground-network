@@ -142,12 +142,19 @@
 
     /* ── Map overlays ── */
     #zoom-hint { position:absolute; bottom:28px; right:12px; z-index:6; background:rgba(10,10,10,0.7); border:1px solid rgba(255,255,255,0.07); border-radius:8px; padding:5px 10px; color:rgba(255,255,255,0.3); font-size:11px; transition:opacity 0.4s; pointer-events:none; }
-    #location-banner { position:absolute; bottom:56px; left:50%; transform:translateX(-50%); z-index:8; background:rgba(15,15,15,0.92); border:1px solid rgba(0,255,136,0.3); border-radius:10px; padding:10px 16px; display:flex; align-items:center; gap:10px; font-size:12px; color:rgba(255,255,255,0.7); white-space:nowrap; box-shadow:0 4px 20px rgba(0,0,0,0.5); opacity:0; pointer-events:none; transition:opacity 0.4s; }
+    #location-banner { position:absolute; bottom:56px; left:50%; transform:translateX(-50%); z-index:8; background:rgba(15,15,15,0.95); border:1px solid rgba(0,255,136,0.3); border-radius:10px; padding:10px 14px; display:flex; align-items:center; gap:10px; font-size:12px; color:rgba(255,255,255,0.7); box-shadow:0 4px 20px rgba(0,0,0,0.5); opacity:0; pointer-events:none; transition:opacity 0.4s; max-width: calc(100vw - 24px); width: max-content; }
     #location-banner.show { opacity:1; pointer-events:auto; }
-    #location-banner button { font-size:11px; font-weight:700; color:#0a0a0a; background:#00ff88; border:none; border-radius:6px; padding:4px 10px; cursor:pointer; font-family:inherit; }
+    #location-banner button { font-size:11px; font-weight:700; color:#0a0a0a; background:#00ff88; border:none; border-radius:6px; padding:6px 12px; cursor:pointer; font-family:inherit; flex-shrink: 0; }
+    @media (max-width: 640px) {
+      #location-banner { bottom: 12px; left: 12px; right: 12px; transform: none; width: auto; max-width: none; font-size: 11px; }
+    }
 
-    /* ── Route line color on map ── */
-    /* handled via Mapbox layer paint */
+    /* ── Mapbox attribution — required by ToS, restyled to blend in ── */
+    .mapboxgl-ctrl-logo { opacity: 0.35; filter: grayscale(1) brightness(1.8); }
+    .mapboxgl-ctrl-attrib { background: rgba(10,10,10,0.55) !important; border-radius: 6px 0 0 0; }
+    .mapboxgl-ctrl-attrib a { color: rgba(255,255,255,0.4) !important; font-size: 10px !important; }
+    .mapboxgl-ctrl-attrib-button { filter: invert(1) brightness(0.7); }
+    .mapboxgl-ctrl-bottom-left { z-index: 3; }
 
     /* ── User location marker ── */
     .user-location-marker {
@@ -323,13 +330,23 @@
       .addTo(map);
   }
 
+  async function refetchJobsAroundCenter() {
+    document.getElementById('job-count').textContent = '…';
+    const tagsToFetch = CATEGORIES.filter(c=>c.tag!=='all'&&c.tag!=='placeholder').map(c=>c.tag);
+    const results = await Promise.all(tagsToFetch.map(fetchCategory));
+    allJobs = [];
+    const seen = new Set();
+    results.flat().forEach(job=>{ if(!seen.has(job.id)){ seen.add(job.id); allJobs.push(job); } });
+    if (activeFilter !== 'placeholder') { renderSidebar(); updateMapLayer(); }
+  }
+
   function requestLocation() {
     if (!navigator.geolocation) return;
     const btn = document.getElementById('locate-btn');
     document.getElementById('location-banner').classList.remove('show');
     btn.classList.add('locating');
     btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg> Locating…`;
-    navigator.geolocation.getCurrentPosition(pos => {
+    navigator.geolocation.getCurrentPosition(async pos => {
       CENTER = [pos.coords.longitude, pos.coords.latitude];
       const accuracy = Math.round(pos.coords.accuracy); // meters
       userLocated = true;
@@ -340,10 +357,13 @@
       btn.classList.add('located');
       btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg> Located (±${accuracy}m)`;
       console.log('Geolocation accuracy:', accuracy, 'meters | coords:', CENTER);
+      routeCache = {};
+      await refetchJobsAroundCenter();
     }, (err) => {
       btn.classList.remove('locating');
       btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8" stroke-opacity="0.35"/></svg> Share location`;
       console.warn('Geolocation error:', err.message);
+      alert('Location access was blocked or unavailable. You can still browse jobs in the default DFW area, or enable location permissions in your browser settings and try again.');
     }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
   }
   document.getElementById('locate-btn').addEventListener('click', requestLocation);
