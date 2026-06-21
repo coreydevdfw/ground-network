@@ -381,10 +381,10 @@
           <div class="mode-label">Bike</div>
           <div class="mode-time loading" id="time-cycling">—</div>
         </div>
-        <div class="commute-mode" id="mode-dart" onclick="openDartTripPlanner()" title="Opens DART's trip planner in a new tab">
+        <div class="commute-mode" id="mode-dart" onclick="openDartTripPlanner()" title="Nearest DART rail station">
           <div class="mode-icon">🚈</div>
           <div class="mode-label">DART</div>
-          <div class="mode-time" id="time-dart" style="font-size:9px; color:rgba(255,255,255,0.4); font-weight:500;">Open planner</div>
+          <div class="mode-time loading" id="time-dart">—</div>
         </div>
       </div>
       <a id="uber-link" href="#" target="_blank" rel="noopener">
@@ -443,6 +443,36 @@
   const RADIUS  = 25;
   let currentJob = null;
   let currentDartDest = null;
+  let dartStations = [];
+  let nearestDartStation = null; // set per-job in loadCommute
+
+  // Load real DART station data once (extracted from DART's published GTFS feed,
+  // dart.org/about/about-dart/fixed-route-schedule). 90 named rail/streetcar
+  // stations with merged platform coordinates — small static file, no API calls.
+  fetch('dart-stations.json')
+    .then(res => res.json())
+    .then(data => { dartStations = data; })
+    .catch(() => { console.warn('Could not load dart-stations.json — DART nearest-station feature will be unavailable.'); });
+
+  function haversineMiles(lat1, lon1, lat2, lon2) {
+    const R = 3958.8;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  function findNearestDartStation(lat, lon) {
+    if (!dartStations.length) return null;
+    let nearest = null, minDist = Infinity;
+    for (const station of dartStations) {
+      const dist = haversineMiles(lat, lon, station.lat, station.lon);
+      if (dist < minDist) { minDist = dist; nearest = station; }
+    }
+    return { ...nearest, distance: minDist };
+  }
+
+
   let activeMode = 'driving';
 
   const CATEGORIES = [
@@ -671,7 +701,7 @@
     document.getElementById('commute-panel').classList.add('visible');
 
     // Reset times
-    ['driving','walking','cycling'].forEach(m => {
+    ['driving','walking','cycling','dart'].forEach(m => {
       const el = document.getElementById(`time-${m}`);
       el.textContent = '…'; el.className = 'mode-time loading';
     });
@@ -686,6 +716,22 @@
       `&dropoff[nickname]=${encodeURIComponent(job.company || job.title)}`;
     document.getElementById('uber-link').href = uberUrl;
     currentDartDest = dest; // used by openDartTripPlanner()
+
+    // Real nearest-DART-station calculation from local GTFS-derived data
+    nearestDartStation = findNearestDartStation(job.lat, job.lng);
+    const dartEl = document.getElementById('time-dart');
+    if (nearestDartStation) {
+      const miles = nearestDartStation.distance;
+      dartEl.className = 'mode-time';
+      if (miles < 0.3) {
+        dartEl.innerHTML = `<span style="font-size:9px;">${nearestDartStation.name}</span>`;
+      } else {
+        dartEl.textContent = `${miles.toFixed(1)} mi to station`;
+      }
+    } else {
+      dartEl.className = 'mode-time unrealistic';
+      dartEl.textContent = 'No data';
+    }
 
     // Fetch all three modes
     const [driveRoute, walkRoute, bikeRoute] = await Promise.all([
@@ -754,12 +800,13 @@
 
   // DART blocks automated access to their site, so the exact trip-planner query
   // parameter format can't be verified from here. Rather than risk silently
-  // broken pre-fill links, we open DART's trip planner directly — always works,
-  // just without guaranteed auto-fill of origin/destination.
-  // tripplan.dart.org appears to be a dead/deprecated subdomain (reported as a dead link).
-  // The current, live trip planner is hosted directly on dart.org.
+  // Opens DART's main site. We deliberately don't guess a deep-link query
+  // format since DART blocks automated verification of their trip-planner
+  // page — better to reliably open a real, working page than risk another
+  // broken link. The real value here is the nearest-station distance shown
+  // on the card itself, computed locally from DART's published GTFS data.
   function openDartTripPlanner() {
-    window.open('https://www.dart.org/trip/trip-planner/trip-planner-map', '_blank', 'noopener');
+    window.open('https://www.dart.org/', '_blank', 'noopener');
   }
 
   function closeCommute() {
