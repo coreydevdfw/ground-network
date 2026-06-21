@@ -74,6 +74,17 @@
     }
     #view-toggle button.active { background: rgba(0,255,136,0.14); color: #00ff88; }
     #view-toggle button svg { width: 13px; height: 13px; }
+
+    #reset-filter-btn {
+      flex-shrink: 0; width: 34px; height: 34px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px; color: rgba(255,255,255,0.4); cursor: pointer;
+      transition: all 0.15s;
+    }
+    #reset-filter-btn:hover { background: rgba(255,107,107,0.1); border-color: rgba(255,107,107,0.3); color: #ff6b6b; }
+    #reset-filter-btn svg { width: 14px; height: 14px; }
+    #reset-filter-btn:disabled { opacity: 0.3; pointer-events: none; }
     #cat-dot { position: absolute; left: 10px; width: 8px; height: 8px; border-radius: 50%; pointer-events: none; transition: background 0.2s; z-index: 1; }
     #filter-select-wrap::after { content: '▾'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.3); font-size: 11px; pointer-events: none; }
     #category-select {
@@ -221,6 +232,9 @@
         <span id="cat-dot"></span>
         <select id="category-select"></select>
       </div>
+      <button id="reset-filter-btn" title="Reset filters">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 2.6-6.4M3 4v5h5"/></svg>
+      </button>
       <div id="view-toggle">
         <button id="toggle-pins" class="active" title="Pin view">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.5-7-11a7 7 0 1114 0c0 4.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
@@ -288,7 +302,7 @@
   mapboxgl.accessToken = 'pk.eyJ1IjoiY29yZXlkZXZkZnciLCJhIjoiY21xaHVvanM2MDE3bDJ0cHB4NTF4andpdiJ9.7zXPq8gI54J5-OEEh69E5w';
   const APP_ID  = 'b7919541';
   const APP_KEY = '3f2d6edcdeb9e34e2532ad7e64f6f7b2';
-  const JOOBLE_KEY = '793b9078-aa0b-4215-bb1a-0cd3d05d245f'; 
+  const JOOBLE_KEY = ''; // ← paste your Jooble API key here once approved, e.g. 'abc123xyz'
   let CENTER    = [-96.7970, 33.0137];
   let userLocated = false;
   const RADIUS  = 25;
@@ -540,7 +554,22 @@
     const ls = document.getElementById('list-section');
     ls.style.display = 'flex'; ls.style.flexDirection = 'column'; ls.style.overflow = 'hidden'; ls.style.flex = '1';
     renderSidebar(); updateMapLayer();
+    document.getElementById('reset-filter-btn').disabled = false;
   });
+
+  // ── Reset filters ─────────────────────────────────────────────────────────
+  document.getElementById('reset-filter-btn').addEventListener('click', () => {
+    sel.value = 'placeholder';
+    activeFilter = 'placeholder';
+    syncDot();
+    document.getElementById('list-section').style.display = 'none';
+    document.getElementById('pre-select').style.display = 'flex';
+    document.getElementById('reset-filter-btn').disabled = true;
+    closeCommute();
+    if (activeCard) { activeCard.classList.remove('active'); activeCard = null; }
+    updateMapLayer();
+  });
+  document.getElementById('reset-filter-btn').disabled = true;
 
   // ── View toggle: pins/clusters vs heatmap ───────────────────────────────────
   let viewMode = 'pins';
@@ -649,9 +678,10 @@
       }
     }, 'clusters');
 
-    map.addLayer({id:'clusters',type:'circle',source:'jobs',filter:['has','point_count'],paint:{'circle-color':['step',['get','point_count'],'#00cc6e',5,'#00ff88',15,'#66ffbb'],'circle-radius':['step',['get','point_count'],18,5,24,15,30],'circle-opacity':0.9,'circle-stroke-width':1.5,'circle-stroke-color':'rgba(0,255,136,0.3)'}});
-    map.addLayer({id:'cluster-count',type:'symbol',source:'jobs',filter:['has','point_count'],layout:{'text-field':'{point_count_abbreviated}','text-font':['DIN Pro Bold','Arial Unicode MS Bold'],'text-size':12},paint:{'text-color':'#0a0a0a'}});
-    map.addLayer({id:'unclustered-point',type:'circle',source:'jobs',filter:['!',['has','point_count']],paint:{'circle-color':['coalesce',['get','color'],'#00ff88'],'circle-radius':['interpolate',['linear'],['zoom'],13,6,16,10],'circle-stroke-width':1.5,'circle-stroke-color':'rgba(255,255,255,0.2)','circle-opacity':0.95}});
+    map.addLayer({id:'clusters',type:'circle',source:'jobs',filter:['has','point_count'],paint:{'circle-color':['step',['get','point_count'],'#00cc6e',5,'#00ff88',15,'#66ffbb'],'circle-radius':['step',['get','point_count'],20,5,26,15,33],'circle-opacity':0.92,'circle-stroke-width':2,'circle-stroke-color':'rgba(255,255,255,0.25)'}});
+    map.addLayer({id:'cluster-count',type:'symbol',source:'jobs',filter:['has','point_count'],layout:{'text-field':['concat','💼 ','{point_count_abbreviated}'],'text-font':['DIN Pro Bold','Arial Unicode MS Bold'],'text-size':12,'text-allow-overlap':true},paint:{'text-color':'#0a0a0a'}});
+    map.addLayer({id:'unclustered-pulse',type:'circle',source:'jobs',filter:['!',['has','point_count']],paint:{'circle-color':['coalesce',['get','color'],'#00ff88'],'circle-radius':['interpolate',['linear'],['zoom'],13,8,16,14],'circle-opacity':0.18,'circle-blur':0.6}});
+    map.addLayer({id:'unclustered-point',type:'circle',source:'jobs',filter:['!',['has','point_count']],paint:{'circle-color':['coalesce',['get','color'],'#00ff88'],'circle-radius':['interpolate',['linear'],['zoom'],13,6,16,10],'circle-stroke-width':2,'circle-stroke-color':'#fff','circle-opacity':0.98}});
 
     map.on('click','clusters',e=>{
       const f=map.queryRenderedFeatures(e.point,{layers:['clusters']});
@@ -677,6 +707,24 @@
     map.on('mouseleave','clusters',()=>map.getCanvas().style.cursor='');
     map.on('mouseenter','unclustered-point',()=>map.getCanvas().style.cursor='pointer');
     map.on('mouseleave','unclustered-point',()=>map.getCanvas().style.cursor='');
+
+    // Gentle pulsing glow on job pins — pure paint-property animation, no DOM marker overhead
+    let pulseStart = null;
+    function animatePulse(ts) {
+      if (!pulseStart) pulseStart = ts;
+      const elapsed = (ts - pulseStart) / 1000;
+      const t = (Math.sin(elapsed * 1.6) + 1) / 2; // 0..1 breathing cycle
+      if (map.getLayer('unclustered-pulse')) {
+        const z = map.getZoom();
+        const base = z < 14.5 ? (8 + (z-13)*2) : 14;
+        map.setPaintProperty('unclustered-pulse', 'circle-radius', [
+          'interpolate',['linear'],['zoom'],13, base*(1+t*0.5), 16, (base+6)*(1+t*0.5)
+        ]);
+        map.setPaintProperty('unclustered-pulse', 'circle-opacity', 0.12 + t*0.14);
+      }
+      requestAnimationFrame(animatePulse);
+    }
+    requestAnimationFrame(animatePulse);
 
     map.on('zoom',()=>{
       const z=map.getZoom();
