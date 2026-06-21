@@ -178,6 +178,41 @@
     .mapboxgl-ctrl-attrib-button { filter: invert(1) brightness(0.7); }
     .mapboxgl-ctrl-bottom-left { z-index: 3; }
 
+    /* ── 3D animated job pin marker (DOM-based, synced to unclustered points only) ── */
+    .job-pin-3d {
+      width: 28px; height: 36px; position: relative; cursor: pointer;
+      transform-origin: bottom center;
+      animation: pin3dDrop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both, pin3dBob 2.4s ease-in-out 0.4s infinite;
+    }
+    .job-pin-3d .pin3d-body {
+      width: 24px; height: 24px; border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg); position: absolute; top: 1px; left: 2px;
+      box-shadow: 0 3px 7px rgba(0,0,0,0.55), inset 0 -3px 5px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.4);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .job-pin-3d .pin3d-emoji {
+      transform: rotate(45deg); font-size: 11px; line-height: 1; user-select: none;
+    }
+    .job-pin-3d .pin3d-shadow {
+      position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%);
+      width: 13px; height: 4px; background: rgba(0,0,0,0.4); border-radius: 50%;
+      filter: blur(1.5px);
+    }
+    .job-pin-3d:hover .pin3d-body {
+      transform: rotate(-45deg) scale(1.2) translateY(-2px);
+      box-shadow: 0 5px 10px rgba(0,0,0,0.6), inset 0 -3px 5px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.45);
+    }
+    @keyframes pin3dDrop {
+      0%   { transform: translateY(-24px) scale(0.4); opacity: 0; }
+      65%  { transform: translateY(2px) scale(1.08); opacity: 1; }
+      100% { transform: translateY(0) scale(1); opacity: 1; }
+    }
+    @keyframes pin3dBob {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-3px); }
+    }
+
     /* ── User location marker ── */
     .user-location-marker {
       width: 18px; height: 18px; position: relative;
@@ -630,6 +665,77 @@
     const jobs = activeFilter==='placeholder' ? [] : filteredJobs();
     const geojson={type:'FeatureCollection',features:jobs.map(job=>({type:'Feature',geometry:{type:'Point',coordinates:[job.lng,job.lat]},properties:{title:job.title,company:job.company,url:job.url,category:job.category,color:colorMap[job.category]||'#00ff88'}}))};
     if(map.getSource('jobs')) map.getSource('jobs').setData(geojson);
+    syncJobPinMarkers();
+  }
+
+  // ── 3D pin marker sync ───────────────────────────────────────────────────
+  // Renders animated DOM pins only for points NOT currently absorbed into a cluster.
+  // The underlying circle layer stays invisible and handles click/hover hit-detection.
+  let jobPinMarkers = {}; // key: "lng,lat" -> mapboxgl.Marker
+
+  function categoryEmoji(tag) {
+    const map = {
+      'logistics-warehouse-jobs': '📦', 'manufacturing-jobs': '🏭',
+      'trade-construction-jobs': '🔨', 'retail-jobs': '🛍️',
+      'customer-services-jobs': '🎧', 'engineering-jobs': '⚙️',
+      'admin-jobs': '🗂️'
+    };
+    return map[tag] || '💼';
+  }
+
+  function syncJobPinMarkers() {
+    if (!map.getSource('jobs') || !map.isStyleLoaded()) return;
+    let rendered;
+    try {
+      rendered = map.queryRenderedFeatures({ layers: ['unclustered-point'] });
+    } catch(e) { return; } // style/layer not ready yet
+
+    const activeKeys = new Set();
+
+    rendered.forEach(f => {
+      const [lng, lat] = f.geometry.coordinates;
+      const key = `${lng.toFixed(6)},${lat.toFixed(6)}`;
+      activeKeys.add(key);
+      if (jobPinMarkers[key]) return; // already rendered
+
+      const props = f.properties;
+      const el = document.createElement('div');
+      el.className = 'job-pin-3d';
+      el.innerHTML = `
+        <div class="pin3d-body" style="background:${props.color || '#00ff88'}">
+          <span class="pin3d-emoji">${categoryEmoji(props.category)}</span>
+        </div>
+        <div class="pin3d-shadow"></div>
+      `;
+      el.addEventListener('click', () => {
+        if(activePopup) activePopup.remove();
+        activePopup = new mapboxgl.Popup({closeButton:true,maxWidth:'260px'})
+          .setLngLat([lng,lat])
+          .setHTML(`<div class="popup-title">${props.title}</div><div class="popup-company">${props.company}</div><a class="popup-apply" href="${props.url}" target="_blank" rel="noopener">View & Apply →</a>`)
+          .addTo(map);
+        map.flyTo({center:[lng,lat],zoom:Math.max(map.getZoom(),15),pitch:50,duration:700});
+        const jobs = filteredJobs();
+        const idx = jobs.findIndex(j=>j.title===props.title&&j.company===props.company);
+        if(idx>=0){
+          const card=document.querySelector(`.job-card[data-index="${idx}"]`);
+          if(card){if(activeCard)activeCard.classList.remove('active');card.classList.add('active');activeCard=card;card.scrollIntoView({behavior:'smooth',block:'nearest'});}
+          loadCommute(jobs[idx]);
+        }
+      });
+
+      const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
+        .setLngLat([lng, lat])
+        .addTo(map);
+      jobPinMarkers[key] = marker;
+    });
+
+    // Remove markers for points no longer rendered (clustered away or filtered out)
+    Object.keys(jobPinMarkers).forEach(key => {
+      if (!activeKeys.has(key)) {
+        jobPinMarkers[key].remove();
+        delete jobPinMarkers[key];
+      }
+    });
   }
 
   async function fetchCategory(tag) {
@@ -680,8 +786,8 @@
 
     map.addLayer({id:'clusters',type:'circle',source:'jobs',filter:['has','point_count'],paint:{'circle-color':['step',['get','point_count'],'#00cc6e',5,'#00ff88',15,'#66ffbb'],'circle-radius':['step',['get','point_count'],20,5,26,15,33],'circle-opacity':0.92,'circle-stroke-width':2,'circle-stroke-color':'rgba(255,255,255,0.25)'}});
     map.addLayer({id:'cluster-count',type:'symbol',source:'jobs',filter:['has','point_count'],layout:{'text-field':['concat','💼 ','{point_count_abbreviated}'],'text-font':['DIN Pro Bold','Arial Unicode MS Bold'],'text-size':12,'text-allow-overlap':true},paint:{'text-color':'#0a0a0a'}});
-    map.addLayer({id:'unclustered-pulse',type:'circle',source:'jobs',filter:['!',['has','point_count']],paint:{'circle-color':['coalesce',['get','color'],'#00ff88'],'circle-radius':['interpolate',['linear'],['zoom'],13,8,16,14],'circle-opacity':0.18,'circle-blur':0.6}});
-    map.addLayer({id:'unclustered-point',type:'circle',source:'jobs',filter:['!',['has','point_count']],paint:{'circle-color':['coalesce',['get','color'],'#00ff88'],'circle-radius':['interpolate',['linear'],['zoom'],13,6,16,10],'circle-stroke-width':2,'circle-stroke-color':'#fff','circle-opacity':0.98}});
+    map.addLayer({id:'unclustered-pulse',type:'circle',source:'jobs',filter:['!',['has','point_count']],paint:{'circle-color':['coalesce',['get','color'],'#00ff88'],'circle-radius':['interpolate',['linear'],['zoom'],13,8,16,14],'circle-opacity':0,'circle-blur':0.6}});
+    map.addLayer({id:'unclustered-point',type:'circle',source:'jobs',filter:['!',['has','point_count']],paint:{'circle-color':['coalesce',['get','color'],'#00ff88'],'circle-radius':['interpolate',['linear'],['zoom'],13,6,16,10],'circle-stroke-width':2,'circle-stroke-color':'#fff','circle-opacity':0}});
 
     map.on('click','clusters',e=>{
       const f=map.queryRenderedFeatures(e.point,{layers:['clusters']});
@@ -708,24 +814,6 @@
     map.on('mouseenter','unclustered-point',()=>map.getCanvas().style.cursor='pointer');
     map.on('mouseleave','unclustered-point',()=>map.getCanvas().style.cursor='');
 
-    // Gentle pulsing glow on job pins — pure paint-property animation, no DOM marker overhead
-    let pulseStart = null;
-    function animatePulse(ts) {
-      if (!pulseStart) pulseStart = ts;
-      const elapsed = (ts - pulseStart) / 1000;
-      const t = (Math.sin(elapsed * 1.6) + 1) / 2; // 0..1 breathing cycle
-      if (map.getLayer('unclustered-pulse')) {
-        const z = map.getZoom();
-        const base = z < 14.5 ? (8 + (z-13)*2) : 14;
-        map.setPaintProperty('unclustered-pulse', 'circle-radius', [
-          'interpolate',['linear'],['zoom'],13, base*(1+t*0.5), 16, (base+6)*(1+t*0.5)
-        ]);
-        map.setPaintProperty('unclustered-pulse', 'circle-opacity', 0.12 + t*0.14);
-      }
-      requestAnimationFrame(animatePulse);
-    }
-    requestAnimationFrame(animatePulse);
-
     map.on('zoom',()=>{
       const z=map.getZoom();
       document.getElementById('zoom-hint').style.opacity=z>12?'0':'1';
@@ -733,6 +821,10 @@
       map.setPaintProperty('radius-fill','fill-opacity',0.03*fade);
       map.setPaintProperty('radius-outline','line-opacity',0.3*fade);
     });
+
+    // Keep 3D pin markers in sync as the map pans, zooms, or clusters expand/collapse
+    map.on('moveend', syncJobPinMarkers);
+    map.on('sourcedata', (e) => { if (e.sourceId === 'jobs' && e.isSourceLoaded) syncJobPinMarkers(); });
 
     const tagsToFetch=CATEGORIES.filter(c=>c.tag!=='all'&&c.tag!=='placeholder').map(c=>c.tag);
     const results=await Promise.all(tagsToFetch.map(fetchCategory));
