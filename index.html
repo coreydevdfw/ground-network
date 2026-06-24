@@ -997,12 +997,12 @@
   function syncJobPinMarkers() {
     if (!map.getSource('jobs') || !map.isStyleLoaded()) return;
 
-    // 3D pins only make sense once individual points stop being clustered.
-    // The 'jobs' source uses clusterMaxZoom: 13 (see map init below), so above
-    // zoom 13 every point renders as 'unclustered-point' — that's when pins apply.
-    // This is a deterministic zoom check rather than a queryRenderedFeatures lookup,
-    // so it doesn't depend on render/camera state and won't flicker during flyTo.
-    const showPins = map.getZoom() > 13;
+    // 3D pins only render once you're zoomed in enough to avoid clutter.
+    // The 'jobs' source stops clustering at zoom 13 (clusterMaxZoom), but we wait
+    // until zoom 15 to show individual 3D pins so the map isn't flooded with markers
+    // the moment clustering ends. Between 13–15, jobs are still clickable via the
+    // invisible 'unclustered-point' circle layer — just without the pin decoration.
+    const showPins = map.getZoom() > 15;
     if (!showPins) {
       Object.keys(jobPinMarkers).forEach(key => {
         jobPinMarkers[key].remove();
