@@ -60,6 +60,14 @@
     #reset-filter-btn:hover { background: rgba(255,107,107,0.1); border-color: rgba(255,107,107,0.3); color: #ff6b6b; }
     #reset-filter-btn svg { width: 14px; height: 14px; }
     #reset-filter-btn:disabled { opacity: 0.3; pointer-events: none; }
+    #entry-level-toggle { flex-shrink: 0; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 9px 10px; color: rgba(255,255,255,0.45); font-size: 11px; font-weight: 600; font-family: inherit; cursor: pointer; white-space: nowrap; transition: all 0.15s; }
+    #entry-level-toggle:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
+    #entry-level-toggle.active { background: rgba(0,255,136,0.14); border-color: rgba(0,255,136,0.4); color: #00ff88; }
+    #share-filter-btn { flex-shrink: 0; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: rgba(255,255,255,0.4); cursor: pointer; transition: all 0.15s; position: relative; }
+    #share-filter-btn:hover { background: rgba(0,255,136,0.1); border-color: rgba(0,255,136,0.3); color: #00ff88; }
+    #share-filter-btn svg { width: 14px; height: 14px; }
+    #share-filter-btn.copied::after { content: 'Link copied'; position: absolute; top: 110%; right: 0; background: #00ff88; color: #0a0a0a; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 6px; white-space: nowrap; z-index: 30; }
+    .card-badge-entry { display: inline-flex; align-items: center; gap: 3px; font-size: 9px; font-weight: 700; color: #00ff88; background: rgba(0,255,136,0.12); border: 1px solid rgba(0,255,136,0.3); border-radius: 5px; padding: 2px 6px; margin-left: 6px; letter-spacing: 0.02em; }
     #cat-dot { position: absolute; left: 10px; width: 8px; height: 8px; border-radius: 50%; pointer-events: none; transition: background 0.2s; z-index: 1; }
     #filter-select-wrap::after { content: '▾'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.3); font-size: 11px; pointer-events: none; }
     #category-select { width: 100%; appearance: none; -webkit-appearance: none; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 9px 24px 9px 26px; color: #fff; font-size: 12px; font-weight: 600; cursor: pointer; outline: none; font-family: inherit; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; min-width: 0; }
@@ -190,6 +198,9 @@
         <span id="cat-dot"></span>
         <select id="category-select"></select>
       </div>
+      <button id="entry-level-toggle" title="Show only entry-level & apprenticeship jobs">
+        🎓 Entry-Level
+      </button>
       <button id="reset-filter-btn" title="Reset filters">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 2.6-6.4M3 4v5h5"/></svg>
       </button>
@@ -203,6 +214,9 @@
           Hot zones
         </button>
       </div>
+      <button id="share-filter-btn" title="Copy a shareable link to this view">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v14"/></svg>
+      </button>
     </div>
 
     <div id="commute-panel" style="position:relative">
@@ -360,6 +374,7 @@
 
   let allJobs = [], activeFilter = 'placeholder', activePopup = null, activeCard = null;
   let activeMapJobs = [];
+  let entryLevelOnly = false;
 
   const map = new mapboxgl.Map({
     container: 'map',
@@ -681,6 +696,7 @@
 
   const sel = document.getElementById('category-select');
   const dot = document.getElementById('cat-dot');
+  const entryBtn = document.getElementById('entry-level-toggle');
   CATEGORIES.forEach(cat => {
     const opt = document.createElement('option');
     opt.value = cat.tag; opt.textContent = cat.label;
@@ -693,20 +709,51 @@
     dot.style.background = cat.color;
   }
   syncDot();
-  sel.addEventListener('change', () => {
-    activeFilter = sel.value;
-    syncDot();
+
+  function showActiveListUI() {
     document.getElementById('pre-select').style.display = 'none';
     const ls = document.getElementById('list-section');
     ls.style.display = 'flex'; ls.style.flexDirection = 'column'; ls.style.overflow = 'hidden'; ls.style.flex = '1';
-    renderSidebar(); updateMapLayer();
     document.getElementById('reset-filter-btn').disabled = false;
-    trackEvent('filter_used', { category: activeFilter });
+  }
+
+  function syncFilterUrl() {
+    const params = new URLSearchParams();
+    if (activeFilter && activeFilter !== 'placeholder') params.set('category', activeFilter);
+    if (entryLevelOnly) params.set('entry', '1');
+    const qs = params.toString();
+    const newUrl = window.location.pathname + (qs ? `?${qs}` : '');
+    window.history.replaceState(null, '', newUrl);
+  }
+
+  sel.addEventListener('change', () => {
+    activeFilter = sel.value;
+    syncDot();
+    showActiveListUI();
+    renderSidebar(); updateMapLayer();
+    syncFilterUrl();
+    trackEvent('filter_used', { category: activeFilter, entry_level_only: entryLevelOnly });
+  });
+
+  entryBtn.addEventListener('click', () => {
+    entryLevelOnly = !entryLevelOnly;
+    entryBtn.classList.toggle('active', entryLevelOnly);
+    if (activeFilter === 'placeholder') {
+      sel.value = 'all';
+      activeFilter = 'all';
+      syncDot();
+      showActiveListUI();
+    }
+    renderSidebar(); updateMapLayer();
+    syncFilterUrl();
+    trackEvent('entry_level_toggle', { active: entryLevelOnly });
   });
 
   document.getElementById('reset-filter-btn').addEventListener('click', () => {
     sel.value = 'placeholder';
     activeFilter = 'placeholder';
+    entryLevelOnly = false;
+    entryBtn.classList.remove('active');
     syncDot();
     document.getElementById('list-section').style.display = 'none';
     document.getElementById('pre-select').style.display = 'flex';
@@ -714,8 +761,51 @@
     closeCommute();
     if (activeCard) { activeCard.classList.remove('active'); activeCard = null; }
     updateMapLayer();
+    syncFilterUrl();
   });
   document.getElementById('reset-filter-btn').disabled = true;
+
+  document.getElementById('share-filter-btn').addEventListener('click', async () => {
+    syncFilterUrl();
+    const btn = document.getElementById('share-filter-btn');
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+    } catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = window.location.href;
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); } catch (e2) {}
+      document.body.removeChild(ta);
+    }
+    btn.classList.add('copied');
+    setTimeout(() => btn.classList.remove('copied'), 1800);
+    trackEvent('share_link_copied', { category: activeFilter, entry_level_only: entryLevelOnly });
+  });
+
+  function applyFiltersFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const cat = params.get('category');
+    const entry = params.get('entry');
+    let applied = false;
+    if (cat && CATEGORIES.some(c => c.tag === cat && c.tag !== 'placeholder')) {
+      sel.value = cat;
+      activeFilter = cat;
+      syncDot();
+      applied = true;
+    }
+    if (entry === '1') {
+      entryLevelOnly = true;
+      entryBtn.classList.add('active');
+      applied = true;
+    }
+    if (applied) {
+      if (activeFilter === 'placeholder') { sel.value = 'all'; activeFilter = 'all'; syncDot(); }
+      showActiveListUI();
+    }
+    return applied;
+  }
+
+  let urlFiltersApplied = applyFiltersFromUrl();
 
   let viewMode = 'pins';
   const pinsBtn = document.getElementById('toggle-pins');
@@ -738,7 +828,9 @@
   heatBtn.addEventListener('click', () => setViewMode('heatmap'));
 
   function filteredJobs() {
-    return (activeFilter==='all'||activeFilter==='placeholder') ? allJobs : allJobs.filter(j=>j.category===activeFilter);
+    let jobs = (activeFilter==='all'||activeFilter==='placeholder') ? allJobs : allJobs.filter(j=>j.category===activeFilter);
+    if (entryLevelOnly) jobs = jobs.filter(j=>j.entryLevel);
+    return jobs;
   }
 
   function renderSidebar() {
@@ -753,7 +845,7 @@
       const cat = catInfo(job.category);
       const card = document.createElement('div');
       card.className='job-card'; card.dataset.index=i; card.style.borderLeftColor=cat.color;
-      card.innerHTML=`<div class="card-title">${job.title}</div><div class="card-company">${job.company}</div><div class="card-drivetime" id="drivetime-${i}"><span class="dt-dot clear"></span><span class="dt-text">…</span></div><div class="card-footer"><span class="card-cat" style="color:${cat.color}">${cat.label}</span><a class="card-apply" href="${job.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Apply →</a></div>`;
+      card.innerHTML=`<div class="card-title">${job.title}${job.entryLevel?'<span class="card-badge-entry">🎓 Entry-Level</span>':''}</div><div class="card-company">${job.company}</div><div class="card-drivetime" id="drivetime-${i}"><span class="dt-dot clear"></span><span class="dt-text">…</span></div><div class="card-footer"><span class="card-cat" style="color:${cat.color}">${cat.label}</span><a class="card-apply" href="${job.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Apply →</a></div>`;
       card.addEventListener('click',()=>focusJob(job,card));
       list.appendChild(card);
     });
@@ -917,10 +1009,25 @@
       jobPinMarkers[key] = marker;
   }
 
+  const ENTRY_LEVEL_KEYWORDS = [
+    'entry level','entry-level','no experience','no experience necessary','no experience required',
+    'apprentice','apprenticeship','trainee','traineeship','intern','internship',
+    'will train','training provided','paid training','on the job training','on-the-job training',
+    'recent grad','recent graduate','new grad','high school diploma','starting position',
+    'junior','beginner friendly'
+  ];
+  function detectEntryLevel(title, description) {
+    const text = `${title||''} ${description||''}`.toLowerCase();
+    return ENTRY_LEVEL_KEYWORDS.some(kw => text.includes(kw));
+  }
+
   async function fetchCategory(tag) {
     const catParam=(tag==='all')?'':`&category=${tag}`;
     const parseResults = (data) =>
-      (data.results||[]).filter(j=>j.latitude&&j.longitude).map(j=>({id:j.id,title:j.title,company:j.company?.display_name||'Unknown',url:j.redirect_url,lat:j.latitude,lng:j.longitude,category:tag==='all'?(j.category?.tag||'all'):tag}));
+      (data.results||[]).filter(j=>j.latitude&&j.longitude).map(j=>{
+        const description = j.description||'';
+        return {id:j.id,title:j.title,company:j.company?.display_name||'Unknown',url:j.redirect_url,lat:j.latitude,lng:j.longitude,category:tag==='all'?(j.category?.tag||'all'):tag,entryLevel:detectEntryLevel(j.title,description)};
+      });
 
     const fetchPage = async (page) => {
       try {
