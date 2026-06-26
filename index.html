@@ -33,46 +33,55 @@
     #sidebar-header { padding: 16px 14px 10px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
     .logo { font-size: 15px; font-weight: 800; color: #00ff88; letter-spacing: 0.05em; }
     .tagline { font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 1px; }
-    #zip-row { padding: 0 14px 12px; }
-    #zip-toggle-link { background: none; border: none; color: rgba(255,255,255,0.35); font-size: 11px; font-family: inherit; cursor: pointer; padding: 0; text-decoration: underline; text-decoration-color: rgba(255,255,255,0.2); }
-    #zip-toggle-link:hover { color: rgba(255,255,255,0.55); }
-    #zip-entry { display: flex; gap: 6px; align-items: center; }
-    #zip-input { flex: 1; min-width: 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); border-radius: 7px; padding: 7px 10px; color: #fff; font-size: 12px; font-family: inherit; outline: none; }
-    #zip-input:focus { border-color: rgba(0,255,136,0.4); }
-    #zip-go-btn { background: rgba(0,255,136,0.12); border: 1px solid rgba(0,255,136,0.3); color: #00ff88; font-size: 11px; font-weight: 700; font-family: inherit; border-radius: 7px; padding: 7px 12px; cursor: pointer; flex-shrink: 0; }
-    #zip-go-btn:hover { background: rgba(0,255,136,0.2); }
-    #zip-cancel-btn { background: none; border: none; color: rgba(255,255,255,0.3); font-size: 13px; cursor: pointer; padding: 4px 6px; flex-shrink: 0; }
-    #zip-status { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 6px; line-height: 1.4; }
+    #location-section { padding: 0 14px 14px; display: flex; flex-direction: column; gap: 8px; }
+    #location-label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.32); text-transform: uppercase; letter-spacing: 0.06em; }
+    #locate-btn { display: flex; align-items: center; justify-content: center; gap: 7px; font-size: 12px; font-weight: 600; color: #00ff88; background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.28); border-radius: 9px; padding: 10px 14px; cursor: pointer; transition: background 0.18s, border-color 0.18s, color 0.18s; white-space: nowrap; width: 100%; font-family: inherit; }
+    #locate-btn:hover { background: rgba(0,255,136,0.18); }
+    #locate-btn.located { color: #fff; border-color: rgba(255,255,255,0.16); background: rgba(255,255,255,0.05); }
+    #locate-btn.locating { color: rgba(255,255,255,0.55); border-color: rgba(255,255,255,0.12); background: rgba(255,255,255,0.03); pointer-events: none; }
+    #locate-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+    #locate-spinner { animation: locate-spin 0.9s linear infinite; }
+    @keyframes locate-spin { to { transform: rotate(360deg); } }
+    #zip-row { display: flex; flex-direction: column; }
+    #zip-toggle-link { display: flex; align-items: center; justify-content: center; gap: 6px; background: none; border: none; color: rgba(255,255,255,0.4); font-size: 11.5px; font-weight: 600; font-family: inherit; cursor: pointer; padding: 6px 0 2px; transition: color 0.15s; }
+    #zip-toggle-link svg { width: 13px; height: 13px; flex-shrink: 0; }
+    #zip-toggle-link:hover { color: rgba(255,255,255,0.65); }
+    #zip-entry { display: flex; gap: 6px; align-items: center; padding-top: 4px; }
+    #zip-input { flex: 1; min-width: 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.14); border-radius: 8px; padding: 9px 12px; color: #fff; font-size: 13px; font-family: inherit; outline: none; transition: border-color 0.15s; letter-spacing: 0.02em; }
+    #zip-input:hover { border-color: rgba(255,255,255,0.22); }
+    #zip-input:focus { border-color: rgba(0,255,136,0.45); }
+    #zip-go-btn { background: rgba(0,255,136,0.14); border: 1px solid rgba(0,255,136,0.35); color: #00ff88; font-size: 12px; font-weight: 700; font-family: inherit; border-radius: 8px; padding: 9px 14px; cursor: pointer; flex-shrink: 0; transition: background 0.15s; }
+    #zip-go-btn:hover { background: rgba(0,255,136,0.24); }
+    #zip-cancel-btn { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: rgba(255,255,255,0.4); cursor: pointer; flex-shrink: 0; transition: all 0.15s; }
+    #zip-cancel-btn:hover { background: rgba(255,107,107,0.1); border-color: rgba(255,107,107,0.3); color: #ff6b6b; }
+    #zip-cancel-btn svg { width: 13px; height: 13px; }
+    #zip-status { font-size: 11.5px; color: rgba(255,255,255,0.4); margin-top: 7px; line-height: 1.4; }
     #zip-status.error { color: #ff6b6b; }
     #zip-status.success { color: #00ff88; }
-    #locate-btn { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: #00ff88; background: rgba(0,255,136,0.08); border: 1px solid rgba(0,255,136,0.25); border-radius: 8px; padding: 6px 10px; cursor: pointer; transition: all 0.18s; white-space: nowrap; flex-shrink: 0; font-family: inherit; }
-    #locate-btn:hover { background: rgba(0,255,136,0.16); }
-    #locate-btn.located { color: #fff; border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.06); }
-    #locate-btn.locating { opacity: 0.5; pointer-events: none; }
-    #locate-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
-    #filter-wrap { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.06); flex-shrink: 0; display: flex; gap: 8px; align-items: center; }
-    #filter-select-wrap { flex: 1; position: relative; display: flex; align-items: center; }
+    #filter-wrap { padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.06); flex-shrink: 0; display: flex; flex-direction: column; gap: 10px; }
+    #filter-label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.32); text-transform: uppercase; letter-spacing: 0.06em; }
+    #filter-row { display: flex; gap: 8px; }
+    #filter-select-wrap, #exp-select-wrap { flex: 1; min-width: 0; position: relative; display: flex; align-items: center; }
+    #filter-divider { height: 1px; background: rgba(255,255,255,0.06); }
+    #controls-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    #controls-row-right { display: flex; gap: 6px; flex-shrink: 0; }
     #view-toggle { display: flex; flex-shrink: 0; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; overflow: hidden; }
-    #view-toggle button { border: none; background: transparent; color: rgba(255,255,255,0.4); font-size: 10px; font-weight: 600; padding: 9px 8px; cursor: pointer; font-family: inherit; transition: all 0.15s; display: flex; align-items: center; gap: 3px; white-space: nowrap; }
+    #view-toggle button { border: none; background: transparent; color: rgba(255,255,255,0.4); font-size: 10px; font-weight: 600; padding: 9px 10px; cursor: pointer; font-family: inherit; transition: all 0.15s; display: flex; align-items: center; gap: 3px; white-space: nowrap; }
     #view-toggle button.active { background: rgba(0,255,136,0.14); color: #00ff88; }
     #view-toggle button svg { width: 13px; height: 13px; }
-    #reset-filter-btn { flex-shrink: 0; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: rgba(255,255,255,0.4); cursor: pointer; transition: all 0.15s; }
+    #reset-filter-btn, #share-filter-btn { flex-shrink: 0; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: rgba(255,255,255,0.4); cursor: pointer; transition: all 0.15s; position: relative; }
     #reset-filter-btn:hover { background: rgba(255,107,107,0.1); border-color: rgba(255,107,107,0.3); color: #ff6b6b; }
-    #reset-filter-btn svg { width: 14px; height: 14px; }
+    #reset-filter-btn svg, #share-filter-btn svg { width: 14px; height: 14px; }
     #reset-filter-btn:disabled { opacity: 0.3; pointer-events: none; }
-    #entry-level-toggle { flex-shrink: 0; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 9px 10px; color: rgba(255,255,255,0.45); font-size: 11px; font-weight: 600; font-family: inherit; cursor: pointer; white-space: nowrap; transition: all 0.15s; }
-    #entry-level-toggle:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
-    #entry-level-toggle.active { background: rgba(0,255,136,0.14); border-color: rgba(0,255,136,0.4); color: #00ff88; }
-    #share-filter-btn { flex-shrink: 0; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: rgba(255,255,255,0.4); cursor: pointer; transition: all 0.15s; position: relative; }
     #share-filter-btn:hover { background: rgba(0,255,136,0.1); border-color: rgba(0,255,136,0.3); color: #00ff88; }
-    #share-filter-btn svg { width: 14px; height: 14px; }
-    #share-filter-btn.copied::after { content: 'Link copied'; position: absolute; top: 110%; right: 0; background: #00ff88; color: #0a0a0a; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 6px; white-space: nowrap; z-index: 30; }
-    .card-badge-entry { display: inline-flex; align-items: center; gap: 3px; font-size: 9px; font-weight: 700; color: #00ff88; background: rgba(0,255,136,0.12); border: 1px solid rgba(0,255,136,0.3); border-radius: 5px; padding: 2px 6px; margin-left: 6px; letter-spacing: 0.02em; }
-    #cat-dot { position: absolute; left: 10px; width: 8px; height: 8px; border-radius: 50%; pointer-events: none; transition: background 0.2s; z-index: 1; }
-    #filter-select-wrap::after { content: '▾'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.3); font-size: 11px; pointer-events: none; }
-    #category-select { width: 100%; appearance: none; -webkit-appearance: none; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 9px 24px 9px 26px; color: #fff; font-size: 12px; font-weight: 600; cursor: pointer; outline: none; font-family: inherit; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; min-width: 0; }
-    #category-select:focus { border-color: rgba(0,255,136,0.4); }
-    #category-select option { background: #1a1a1a; color: #fff; }
+    #share-filter-btn.copied::after { content: 'Link copied'; position: absolute; top: 120%; right: 0; background: #00ff88; color: #0a0a0a; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 6px; white-space: nowrap; z-index: 30; }
+    .card-badge-exp { display: inline-flex; align-items: center; font-size: 9px; font-weight: 700; background: rgba(255,255,255,0.06); border: 1px solid; border-radius: 5px; padding: 2px 6px; margin-left: 6px; letter-spacing: 0.02em; vertical-align: 1px; }
+    #cat-dot, #exp-dot { position: absolute; left: 12px; width: 8px; height: 8px; border-radius: 50%; pointer-events: none; transition: background 0.2s; z-index: 1; }
+    #filter-select-wrap::after, #exp-select-wrap::after { content: '▾'; position: absolute; right: 11px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.3); font-size: 11px; pointer-events: none; }
+    #category-select, #experience-select { width: 100%; appearance: none; -webkit-appearance: none; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); border-radius: 9px; padding: 11px 26px 11px 28px; color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; outline: none; font-family: inherit; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; min-width: 0; transition: border-color 0.15s; }
+    #category-select:hover, #experience-select:hover { border-color: rgba(255,255,255,0.2); }
+    #category-select:focus, #experience-select:focus { border-color: rgba(0,255,136,0.4); }
+    #category-select option, #experience-select option { background: #1a1a1a; color: #fff; }
     #commute-panel { flex-shrink: 0; border-bottom: 1px solid rgba(255,255,255,0.06); background: #0c0c0c; display: none; flex-direction: column; padding: 12px 14px; gap: 10px; }
     #commute-panel.visible { display: flex; }
     #commute-job-title { font-size: 12px; font-weight: 700; color: #fff; line-height: 1.3; }
@@ -95,14 +104,21 @@
     .commute-mode .mode-time.loading { color: rgba(255,255,255,0.3); font-size: 9px; }
     .commute-mode .mode-time.unrealistic { color: rgba(255,255,255,0.3); font-weight: 500; font-size: 10px; }
     .commute-mode .mode-time.dart-distance { font-size: 9px; font-weight: 600; white-space: normal; line-height: 1.25; word-break: break-word; }
-    #traffic-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; padding: 3px 9px; border-radius: 10px; font-weight: 600; align-self: flex-start; }
-    #traffic-badge .dot { width: 6px; height: 6px; border-radius: 50%; }
+    #traffic-badge { display: inline-flex; align-items: center; gap: 7px; font-size: 10px; padding: 4px 10px; border-radius: 10px; font-weight: 600; align-self: flex-start; transition: background 0.4s ease, color 0.4s ease; }
+    #traffic-badge .dot-wrap { position: relative; width: 7px; height: 7px; flex-shrink: 0; }
+    #traffic-badge .dot { position: absolute; inset: 0; width: 7px; height: 7px; border-radius: 50%; transition: background 0.4s ease; }
+    #traffic-badge .pulse-ring { position: absolute; inset: 0; width: 7px; height: 7px; border-radius: 50%; transition: background 0.4s ease; opacity: 0; }
+    #traffic-badge.live .pulse-ring { animation: traffic-pulse 2.2s ease-out infinite; }
+    #traffic-badge.heavy .pulse-ring { animation-duration: 1.1s; }
+    #traffic-badge.moderate .pulse-ring { animation-duration: 1.7s; }
+    @keyframes traffic-pulse { 0% { transform: scale(1); opacity: 0.55; } 100% { transform: scale(2.8); opacity: 0; } }
     #traffic-badge.clear { background: rgba(0,255,136,0.12); color: #00ff88; }
-    #traffic-badge.clear .dot { background: #00ff88; }
+    #traffic-badge.clear .dot, #traffic-badge.clear .pulse-ring { background: #00ff88; }
     #traffic-badge.moderate { background: rgba(255,193,7,0.15); color: #ffc107; }
-    #traffic-badge.moderate .dot { background: #ffc107; }
+    #traffic-badge.moderate .dot, #traffic-badge.moderate .pulse-ring { background: #ffc107; }
     #traffic-badge.heavy { background: rgba(255,107,107,0.15); color: #ff6b6b; }
-    #traffic-badge.heavy .dot { background: #ff6b6b; }
+    #traffic-badge.heavy .dot, #traffic-badge.heavy .pulse-ring { background: #ff6b6b; }
+    #traffic-badge.resolving .dot, #traffic-badge.resolving .pulse-ring { background: rgba(255,255,255,0.35); }
     #commute-close { position: absolute; right: 12px; top: 12px; background: none; border: none; color: rgba(255,255,255,0.3); cursor: pointer; font-size: 16px; padding: 2px; }
     #list-section { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
     #count-bar { padding: 8px 14px 6px; font-size: 11px; color: rgba(255,255,255,0.35); flex-shrink: 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
@@ -174,50 +190,68 @@
           <div class="logo">Labor Network</div>
           <div class="tagline">Hyperlocal jobs · DFW</div>
         </div>
+      </div>
+      <div id="location-section">
+        <div id="location-label">Your location</div>
         <button id="locate-btn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
             <circle cx="12" cy="12" r="8" stroke-opacity="0.35"/>
           </svg>
-          Share location
+          <span id="locate-btn-label">Use my location</span>
         </button>
-      </div>
-      <div id="zip-row">
-        <button id="zip-toggle-link">or search by ZIP code</button>
-        <div id="zip-entry" style="display:none">
-          <input id="zip-input" type="text" inputmode="numeric" maxlength="5" placeholder="75201" />
-          <button id="zip-go-btn">Go</button>
-          <button id="zip-cancel-btn" title="Cancel">✕</button>
+        <div id="zip-row">
+          <button id="zip-toggle-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.5-7-11a7 7 0 1114 0c0 4.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+            Search by ZIP code instead
+          </button>
+          <div id="zip-entry" style="display:none">
+            <input id="zip-input" type="text" inputmode="numeric" maxlength="5" placeholder="75201" />
+            <button id="zip-go-btn">Go</button>
+            <button id="zip-cancel-btn" title="Cancel">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+          <div id="zip-status"></div>
         </div>
-        <div id="zip-status"></div>
       </div>
     </div>
 
     <div id="filter-wrap">
-      <div id="filter-select-wrap">
-        <span id="cat-dot"></span>
-        <select id="category-select"></select>
+      <div id="filter-label">Filter jobs</div>
+      <div id="filter-row">
+        <div id="filter-select-wrap">
+          <span id="cat-dot"></span>
+          <select id="category-select"></select>
+        </div>
+        <div id="exp-select-wrap">
+          <span id="exp-dot"></span>
+          <select id="experience-select"></select>
+        </div>
       </div>
-      <button id="entry-level-toggle" title="Show only entry-level & apprenticeship jobs">
-        🎓 Entry-Level
-      </button>
-      <button id="reset-filter-btn" title="Reset filters">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 2.6-6.4M3 4v5h5"/></svg>
-      </button>
-      <div id="view-toggle">
-        <button id="toggle-pins" class="active" title="Pin view">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.5-7-11a7 7 0 1114 0c0 4.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
-          Pins
-        </button>
-        <button id="toggle-heatmap" title="Hot zones — where the most openings are clustered">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8 6 6 9 6 13a6 6 0 1012 0c0-4-2-7-6-11z"/></svg>
-          Hot zones
-        </button>
+      <div id="filter-divider"></div>
+      <div id="controls-row">
+        <div id="view-toggle">
+          <button id="toggle-pins" class="active" title="Pin view">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.5-7-11a7 7 0 1114 0c0 4.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+            Pins
+          </button>
+          <button id="toggle-heatmap" title="Hot zones — where the most openings are clustered">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8 6 6 9 6 13a6 6 0 1012 0c0-4-2-7-6-11z"/></svg>
+            Hot zones
+          </button>
+        </div>
+        <div id="controls-row-right">
+          <button id="reset-filter-btn" title="Reset filters">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 2.6-6.4M3 4v5h5"/></svg>
+          </button>
+          <button id="share-filter-btn" title="Copy a shareable link to this view">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v14"/></svg>
+          </button>
+        </div>
       </div>
-      <button id="share-filter-btn" title="Copy a shareable link to this view">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v14"/></svg>
-      </button>
     </div>
+
 
     <div id="commute-panel" style="position:relative">
       <button id="commute-close" onclick="closeCommute()">✕</button>
@@ -255,7 +289,7 @@
           <span class="lyft-icon">🚖</span> Lyft
         </a>
       </div>
-      <div id="traffic-badge" class="clear"><span class="dot"></span><span id="traffic-label">Checking traffic…</span></div>
+      <div id="traffic-badge" class="resolving"><span class="dot-wrap"><span class="pulse-ring"></span><span class="dot"></span></span><span id="traffic-label">Checking traffic…</span></div>
     </div>
 
     <div id="list-section" style="display:none">
@@ -372,9 +406,40 @@
   const colorMap = {};
   CATEGORIES.forEach(c => { colorMap[c.tag] = c.color; });
 
+  const EXPERIENCE_LEVELS = [
+    { tag:'all',          label:'All Levels',    color:'#888' },
+    { tag:'entry',        label:'Entry-Level',   color:'#00ff88' },
+    { tag:'intermediate', label:'Intermediate',  color:'#54a0ff' },
+    { tag:'senior',       label:'Senior',        color:'#c56cf0' },
+  ];
+  const expColorMap = {};
+  EXPERIENCE_LEVELS.forEach(e => { expColorMap[e.tag] = e.color; });
+
+  const ENTRY_LEVEL_KEYWORDS = [
+    'entry level','entry-level','no experience','no experience necessary','no experience required',
+    'apprentice','apprenticeship','trainee','traineeship','intern','internship',
+    'will train','training provided','paid training','on the job training','on-the-job training',
+    'recent grad','recent graduate','new grad','high school diploma','starting position',
+    'junior','beginner friendly'
+  ];
+  const SENIOR_KEYWORDS = [
+    'senior','sr.','sr ','lead ',' lead','principal','director','vp ','vice president',
+    'head of','manager','supervisor','superintendent','chief','executive',
+    '5+ years','6+ years','7+ years','8+ years','10+ years',
+    'minimum 5 years','minimum 7 years','extensive experience','proven track record'
+  ];
+  function classifyExperience(title, description) {
+    const text = `${title||''} ${description||''}`.toLowerCase();
+    const isEntry = ENTRY_LEVEL_KEYWORDS.some(kw => text.includes(kw));
+    const isSenior = SENIOR_KEYWORDS.some(kw => text.includes(kw));
+    if (isSenior && !isEntry) return 'senior';
+    if (isEntry && !isSenior) return 'entry';
+    return 'intermediate';
+  }
+
   let allJobs = [], activeFilter = 'placeholder', activePopup = null, activeCard = null;
   let activeMapJobs = [];
-  let entryLevelOnly = false;
+  let activeExperience = 'all';
 
   const map = new mapboxgl.Map({
     container: 'map',
@@ -418,12 +483,22 @@
     if (activeFilter !== 'placeholder') { renderSidebar(); updateMapLayer(); }
   }
 
+  const LOCATE_ICONS = {
+    idle: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8" stroke-opacity="0.35"/></svg>`,
+    locating: `<svg id="locate-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2a10 10 0 0 1 10 10" stroke-opacity="1"/><path d="M12 2a10 10 0 1 0 10 10" stroke-opacity="0.15"/></svg>`,
+    located: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>`,
+  };
+  function setLocateBtnState(state, label) {
+    const btn = document.getElementById('locate-btn');
+    btn.classList.remove('locating', 'located');
+    if (state !== 'idle') btn.classList.add(state);
+    btn.innerHTML = `${LOCATE_ICONS[state]}<span id="locate-btn-label">${label}</span>`;
+  }
+
   function requestLocation() {
     if (!navigator.geolocation) return;
-    const btn = document.getElementById('locate-btn');
     document.getElementById('location-banner').classList.remove('show');
-    btn.classList.add('locating');
-    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg> Locating…`;
+    setLocateBtnState('locating', 'Locating…');
     navigator.geolocation.getCurrentPosition(async pos => {
       CENTER = [pos.coords.longitude, pos.coords.latitude];
       const accuracy = Math.round(pos.coords.accuracy);
@@ -431,16 +506,13 @@
       map.flyTo({ center: CENTER, zoom: 13, pitch: 45, duration: 1400 });
       updateCircle();
       placeUserMarker(CENTER);
-      btn.classList.remove('locating');
-      btn.classList.add('located');
-      btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg> Located (±${accuracy}m)`;
+      setLocateBtnState('located', `Located (±${accuracy}m)`);
       console.log('Geolocation accuracy:', accuracy, 'meters | coords:', CENTER);
       trackEvent('location_set', { method: 'gps', accuracy_meters: accuracy });
       routeCache = {};
       await refetchJobsAroundCenter();
     }, (err) => {
-      btn.classList.remove('locating');
-      btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8" stroke-opacity="0.35"/></svg> Share location`;
+      setLocateBtnState('idle', 'Use my location');
       console.warn('Geolocation error:', err.message);
       alert('Location access was blocked or unavailable. You can still browse jobs in the default DFW area, or enable location permissions in your browser settings and try again.');
     }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
@@ -462,13 +534,13 @@
   zipToggleLink.addEventListener('click', () => {
     const opening = zipEntry.style.display === 'none';
     zipEntry.style.display = opening ? 'flex' : 'none';
-    zipToggleLink.style.display = opening ? 'none' : 'block';
+    zipToggleLink.style.display = opening ? 'none' : 'flex';
     if (opening) zipInput.focus();
   });
 
   document.getElementById('zip-cancel-btn').addEventListener('click', () => {
     zipEntry.style.display = 'none';
-    zipToggleLink.style.display = 'block';
+    zipToggleLink.style.display = 'flex';
     zipStatus.textContent = '';
     zipStatus.className = '';
     zipInput.value = '';
@@ -520,9 +592,7 @@
     map.flyTo({ center: CENTER, zoom: 12, pitch: 40, duration: 1400 });
     updateCircle();
 
-    const locateBtn = document.getElementById('locate-btn');
-    locateBtn.classList.remove('located');
-    locateBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8" stroke-opacity="0.35"/></svg> Share location`;
+    setLocateBtnState('idle', 'Use my location');
 
     zipStatus.textContent = `Showing jobs near ${zip}.`;
     zipStatus.className = 'success';
@@ -570,7 +640,7 @@
     return 'clear';
   }
 
-  const trafficLabels = { clear: '🟢 Traffic clear', moderate: '🟡 Moderate traffic', heavy: '🔴 Heavy traffic' };
+  const trafficLabels = { clear: 'Traffic clear', moderate: 'Moderate traffic', heavy: 'Heavy traffic' };
 
   async function loadCommute(job) {
     currentJob = job;
@@ -582,6 +652,7 @@
       const el = document.getElementById(`time-${m}`);
       el.textContent = '…'; el.className = 'mode-time loading';
     });
+    document.getElementById('traffic-badge').className = 'resolving';
     document.getElementById('traffic-label').textContent = 'Checking traffic…';
 
     const dest = [job.lng, job.lat];
@@ -633,7 +704,7 @@
 
       const trafficLevel = trafficFromCongestion(driveRoute.legs);
       const badge = document.getElementById('traffic-badge');
-      badge.className = `traffic-badge ${trafficLevel}`;
+      badge.className = `live ${trafficLevel}`;
       document.getElementById('traffic-label').textContent = trafficLabels[trafficLevel];
     }
     if (walkRoute) {
@@ -696,7 +767,8 @@
 
   const sel = document.getElementById('category-select');
   const dot = document.getElementById('cat-dot');
-  const entryBtn = document.getElementById('entry-level-toggle');
+  const expSel = document.getElementById('experience-select');
+  const expDot = document.getElementById('exp-dot');
   CATEGORIES.forEach(cat => {
     const opt = document.createElement('option');
     opt.value = cat.tag; opt.textContent = cat.label;
@@ -704,11 +776,22 @@
     sel.appendChild(opt);
   });
   sel.value = 'placeholder';
+  EXPERIENCE_LEVELS.forEach(exp => {
+    const opt = document.createElement('option');
+    opt.value = exp.tag; opt.textContent = exp.label;
+    expSel.appendChild(opt);
+  });
+  expSel.value = 'all';
   function syncDot() {
     const cat = CATEGORIES.find(c=>c.tag===sel.value)||CATEGORIES[0];
     dot.style.background = cat.color;
   }
+  function syncExpDot() {
+    const exp = EXPERIENCE_LEVELS.find(e=>e.tag===expSel.value)||EXPERIENCE_LEVELS[0];
+    expDot.style.background = exp.color;
+  }
   syncDot();
+  syncExpDot();
 
   function showActiveListUI() {
     document.getElementById('pre-select').style.display = 'none';
@@ -720,7 +803,7 @@
   function syncFilterUrl() {
     const params = new URLSearchParams();
     if (activeFilter && activeFilter !== 'placeholder') params.set('category', activeFilter);
-    if (entryLevelOnly) params.set('entry', '1');
+    if (activeExperience && activeExperience !== 'all') params.set('experience', activeExperience);
     const qs = params.toString();
     const newUrl = window.location.pathname + (qs ? `?${qs}` : '');
     window.history.replaceState(null, '', newUrl);
@@ -732,29 +815,30 @@
     showActiveListUI();
     renderSidebar(); updateMapLayer();
     syncFilterUrl();
-    trackEvent('filter_used', { category: activeFilter, entry_level_only: entryLevelOnly });
+    trackEvent('filter_used', { category: activeFilter, experience_level: activeExperience });
   });
 
-  entryBtn.addEventListener('click', () => {
-    entryLevelOnly = !entryLevelOnly;
-    entryBtn.classList.toggle('active', entryLevelOnly);
+  expSel.addEventListener('change', () => {
+    activeExperience = expSel.value;
+    syncExpDot();
     if (activeFilter === 'placeholder') {
       sel.value = 'all';
       activeFilter = 'all';
       syncDot();
-      showActiveListUI();
     }
+    showActiveListUI();
     renderSidebar(); updateMapLayer();
     syncFilterUrl();
-    trackEvent('entry_level_toggle', { active: entryLevelOnly });
+    trackEvent('experience_filter_used', { experience_level: activeExperience, category: activeFilter });
   });
 
   document.getElementById('reset-filter-btn').addEventListener('click', () => {
     sel.value = 'placeholder';
     activeFilter = 'placeholder';
-    entryLevelOnly = false;
-    entryBtn.classList.remove('active');
+    expSel.value = 'all';
+    activeExperience = 'all';
     syncDot();
+    syncExpDot();
     document.getElementById('list-section').style.display = 'none';
     document.getElementById('pre-select').style.display = 'flex';
     document.getElementById('reset-filter-btn').disabled = true;
@@ -779,13 +863,13 @@
     }
     btn.classList.add('copied');
     setTimeout(() => btn.classList.remove('copied'), 1800);
-    trackEvent('share_link_copied', { category: activeFilter, entry_level_only: entryLevelOnly });
+    trackEvent('share_link_copied', { category: activeFilter, experience_level: activeExperience });
   });
 
   function applyFiltersFromUrl() {
     const params = new URLSearchParams(window.location.search);
     const cat = params.get('category');
-    const entry = params.get('entry');
+    const exp = params.get('experience');
     let applied = false;
     if (cat && CATEGORIES.some(c => c.tag === cat && c.tag !== 'placeholder')) {
       sel.value = cat;
@@ -793,9 +877,10 @@
       syncDot();
       applied = true;
     }
-    if (entry === '1') {
-      entryLevelOnly = true;
-      entryBtn.classList.add('active');
+    if (exp && EXPERIENCE_LEVELS.some(e => e.tag === exp)) {
+      expSel.value = exp;
+      activeExperience = exp;
+      syncExpDot();
       applied = true;
     }
     if (applied) {
@@ -829,7 +914,7 @@
 
   function filteredJobs() {
     let jobs = (activeFilter==='all'||activeFilter==='placeholder') ? allJobs : allJobs.filter(j=>j.category===activeFilter);
-    if (entryLevelOnly) jobs = jobs.filter(j=>j.entryLevel);
+    if (activeExperience !== 'all') jobs = jobs.filter(j=>j.experienceLevel===activeExperience);
     return jobs;
   }
 
@@ -845,7 +930,9 @@
       const cat = catInfo(job.category);
       const card = document.createElement('div');
       card.className='job-card'; card.dataset.index=i; card.style.borderLeftColor=cat.color;
-      card.innerHTML=`<div class="card-title">${job.title}${job.entryLevel?'<span class="card-badge-entry">🎓 Entry-Level</span>':''}</div><div class="card-company">${job.company}</div><div class="card-drivetime" id="drivetime-${i}"><span class="dt-dot clear"></span><span class="dt-text">…</span></div><div class="card-footer"><span class="card-cat" style="color:${cat.color}">${cat.label}</span><a class="card-apply" href="${job.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Apply →</a></div>`;
+      const exp = EXPERIENCE_LEVELS.find(e=>e.tag===job.experienceLevel);
+      const expBadge = exp && exp.tag!=='intermediate' ? `<span class="card-badge-exp" style="color:${exp.color};border-color:${exp.color}66;">${exp.label}</span>` : '';
+      card.innerHTML=`<div class="card-title">${job.title}${expBadge}</div><div class="card-company">${job.company}</div><div class="card-drivetime" id="drivetime-${i}"><span class="dt-dot clear"></span><span class="dt-text">…</span></div><div class="card-footer"><span class="card-cat" style="color:${cat.color}">${cat.label}</span><a class="card-apply" href="${job.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Apply →</a></div>`;
       card.addEventListener('click',()=>focusJob(job,card));
       list.appendChild(card);
     });
@@ -1009,24 +1096,12 @@
       jobPinMarkers[key] = marker;
   }
 
-  const ENTRY_LEVEL_KEYWORDS = [
-    'entry level','entry-level','no experience','no experience necessary','no experience required',
-    'apprentice','apprenticeship','trainee','traineeship','intern','internship',
-    'will train','training provided','paid training','on the job training','on-the-job training',
-    'recent grad','recent graduate','new grad','high school diploma','starting position',
-    'junior','beginner friendly'
-  ];
-  function detectEntryLevel(title, description) {
-    const text = `${title||''} ${description||''}`.toLowerCase();
-    return ENTRY_LEVEL_KEYWORDS.some(kw => text.includes(kw));
-  }
-
   async function fetchCategory(tag) {
     const catParam=(tag==='all')?'':`&category=${tag}`;
     const parseResults = (data) =>
       (data.results||[]).filter(j=>j.latitude&&j.longitude).map(j=>{
         const description = j.description||'';
-        return {id:j.id,title:j.title,company:j.company?.display_name||'Unknown',url:j.redirect_url,lat:j.latitude,lng:j.longitude,category:tag==='all'?(j.category?.tag||'all'):tag,entryLevel:detectEntryLevel(j.title,description)};
+        return {id:j.id,title:j.title,company:j.company?.display_name||'Unknown',url:j.redirect_url,lat:j.latitude,lng:j.longitude,category:tag==='all'?(j.category?.tag||'all'):tag,experienceLevel:classifyExperience(j.title,description)};
       });
 
     const fetchPage = async (page) => {
