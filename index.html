@@ -150,8 +150,8 @@
     #ride-links { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
     #uber-link, #lyft-link {
       display: flex; align-items: center; justify-content: center; gap: 6px;
-      border-radius: 7px; padding: 7px; font-size: 11px; font-weight: 600;
-      color: #fff; text-decoration: none; transition: all 0.15s;
+      border-radius: 7px; padding: 7px; font-size: 12px; font-weight: 800;
+      letter-spacing: 0.04em; color: #fff; text-decoration: none; transition: all 0.15s;
     }
     #uber-link { background: #000; border: 1px solid rgba(255,255,255,0.15); }
     #uber-link:hover { background: #1a1a1a; border-color: rgba(255,255,255,0.3); }
@@ -166,7 +166,7 @@
     }
     .commute-mode:hover { background: rgba(255,255,255,0.08); }
     .commute-mode.active { border-color: rgba(0,255,136,0.5); background: rgba(0,255,136,0.08); }
-    .commute-mode .mode-icon { font-size: 14px; margin-bottom: 2px; }
+    .commute-mode .mode-icon { font-size: 14px; margin-bottom: 2px; line-height: 1; display: flex; align-items: center; justify-content: center; }
     .commute-mode .mode-label { font-size: 8px; color: rgba(255,255,255,0.4); letter-spacing: 0.03em; text-transform: uppercase; white-space: nowrap; }
     .commute-mode .mode-time { font-size: 11px; font-weight: 700; color: #fff; margin-top: 1px; white-space: nowrap; }
     .commute-mode .mode-time.loading { color: rgba(255,255,255,0.3); font-size: 9px; }
@@ -202,7 +202,6 @@
     #link-tracker-header {
       font-size: 11px; font-weight: 800; letter-spacing: 0.04em;
       text-transform: uppercase; color: #00ff88; flex-shrink: 0;
-      text-shadow: 1px 1px 0 rgba(0,255,136,0.25), 2px 2px 0 rgba(0,255,136,0.1);
     }
     #link-tile-stage {
       flex: 1; position: relative; overflow: hidden;
@@ -423,32 +422,75 @@
       </div>
       <div id="commute-modes">
         <div class="commute-mode active" id="mode-driving" onclick="selectMode('driving')">
-          <div class="mode-icon">🚗</div>
+          <div class="mode-icon">
+            <svg width="22" height="22" viewBox="0 0 22 22">
+              <rect x="4" y="9" width="15" height="8" rx="2.5" fill="rgba(99,179,237,0.25)"/>
+              <rect x="3" y="8" width="15" height="8" rx="2.5" fill="#63b3ed"/>
+              <line x1="3" y1="11.5" x2="18" y2="11.5" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
+              <circle cx="6" cy="16" r="1.5" fill="rgba(0,0,0,0.3)"/>
+              <circle cx="15" cy="16" r="1.5" fill="rgba(0,0,0,0.3)"/>
+              <line x1="6" y1="8" x2="6" y2="6.5" stroke="#63b3ed" stroke-width="1.3" stroke-linecap="round"/>
+              <line x1="15" y1="8" x2="15" y2="6.5" stroke="#63b3ed" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+          </div>
           <div class="mode-label">Drive</div>
           <div class="mode-time loading" id="time-driving">—</div>
         </div>
         <div class="commute-mode" id="mode-walking" onclick="selectMode('walking')">
-          <div class="mode-icon">🚶</div>
+          <div class="mode-icon">
+            <svg width="22" height="22" viewBox="0 0 22 22">
+              <circle cx="12" cy="5" r="2.2" fill="rgba(255,179,71,0.25)"/>
+              <circle cx="11" cy="4.5" r="2.2" fill="#ffb347"/>
+              <line x1="12" y1="7.5" x2="12" y2="12.5" stroke="rgba(255,179,71,0.25)" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="11" y1="6.5" x2="11" y2="12" stroke="#ffb347" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="9" y1="9.5" x2="14" y2="9.5" stroke="rgba(255,179,71,0.25)" stroke-width="1.4" stroke-linecap="round"/>
+              <line x1="8.5" y1="9" x2="13.5" y2="9" stroke="#ffb347" stroke-width="1.4" stroke-linecap="round"/>
+              <line x1="12" y1="12.5" x2="9.5" y2="18.5" stroke="rgba(255,179,71,0.25)" stroke-width="1.8" stroke-linecap="round"/>
+              <line x1="11" y1="12" x2="8.5" y2="18" stroke="#ffb347" stroke-width="1.8" stroke-linecap="round"/>
+              <line x1="12" y1="12.5" x2="14.5" y2="18.5" stroke="rgba(255,179,71,0.25)" stroke-width="1.8" stroke-linecap="round"/>
+              <line x1="11" y1="12" x2="13.5" y2="18" stroke="#ffb347" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </div>
           <div class="mode-label">Walk</div>
           <div class="mode-time loading" id="time-walking">—</div>
         </div>
         <div class="commute-mode" id="mode-cycling" onclick="selectMode('cycling')">
-          <div class="mode-icon">🚲</div>
+          <div class="mode-icon">
+            <svg width="22" height="22" viewBox="0 0 22 22">
+              <circle cx="6" cy="16.5" r="2.8" fill="rgba(104,211,145,0.25)"/>
+              <circle cx="5" cy="16" r="2.8" fill="none" stroke="#68d391" stroke-width="1.5"/>
+              <circle cx="5" cy="16" r="1" fill="#68d391"/>
+              <circle cx="18" cy="16.5" r="2.8" fill="rgba(104,211,145,0.25)"/>
+              <circle cx="17" cy="16" r="2.8" fill="none" stroke="#68d391" stroke-width="1.5"/>
+              <circle cx="17" cy="16" r="1" fill="#68d391"/>
+              <polyline points="6,13.5 6,9.5 11,7 13.5,11 17,11" fill="none" stroke="rgba(104,211,145,0.25)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <polyline points="5,13 5,9 10.5,6.5 13,11 17,11" fill="none" stroke="#68d391" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
           <div class="mode-label">Bike</div>
           <div class="mode-time loading" id="time-cycling">—</div>
         </div>
         <div class="commute-mode" id="mode-dart" onclick="openDartTripPlanner()" title="Nearest DART rail station">
-          <div class="mode-icon">🚈</div>
+          <div class="mode-icon">
+            <svg width="22" height="22" viewBox="0 0 22 22">
+              <rect x="4" y="6" width="16" height="10" rx="2" fill="rgba(183,148,246,0.25)"/>
+              <rect x="3" y="5" width="16" height="10" rx="2" fill="#b794f6"/>
+              <rect x="3" y="9.2" width="16" height="1" fill="rgba(0,0,0,0.2)"/>
+              <rect x="5.5" y="6.5" width="3.2" height="2.2" rx="0.5" fill="rgba(0,0,0,0.2)"/>
+              <rect x="11.5" y="6.5" width="3.2" height="2.2" rx="0.5" fill="rgba(0,0,0,0.2)"/>
+              <line x1="7.5" y1="15" x2="7.5" y2="17.5" stroke="#b794f6" stroke-width="1.4" stroke-linecap="round"/>
+              <line x1="13.5" y1="15" x2="13.5" y2="17.5" stroke="#b794f6" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+          </div>
           <div class="mode-label">DART</div>
           <div class="mode-time loading" id="time-dart">—</div>
         </div>
       </div>
       <div id="ride-links">
-        <a id="uber-link" href="#" target="_blank" rel="noopener">
-          <span class="uber-icon">🚕</span> Uber
+        <a id="uber-link" href="#" target="_blank" rel="noopener">Uber
         </a>
         <a id="lyft-link" href="#" target="_blank" rel="noopener">
-          <span class="lyft-icon">🚖</span> Lyft
+Lyft
         </a>
       </div>
 
