@@ -1097,9 +1097,9 @@ Lyft
   let ftSavedBearing = 0;
 
   const FT_MODE_CFG = {
-    driving: { color: '#63b3ed', label: 'Drive',  step: 4, zoom: 16.5 },
-    walking: { color: '#ffb347', label: 'Walk',   step: 2, zoom: 17   },
-    cycling: { color: '#68d391', label: 'Bike',   step: 3, zoom: 16.5 },
+    driving: { color: '#63b3ed', label: 'Drive',  step: 1, delay: 85,  zoom: 16.5 },
+    walking: { color: '#ffb347', label: 'Walk',   step: 1, delay: 220, zoom: 17   },
+    cycling: { color: '#68d391', label: 'Bike',   step: 1, delay: 130, zoom: 16.5 },
   };
 
   function _ftManeuverIcon(maneuver) {
@@ -1163,6 +1163,7 @@ Lyft
     const route = await fetchRoute(mode, dest);
     if (!route || !route.geometry?.coordinates?.length) return;
 
+    activeMode = mode; // ensure tick uses correct mode config
     ftActive   = true;
     ftCoords   = route.geometry.coordinates;
     ftCoordIdx = 0;
@@ -1216,10 +1217,14 @@ Lyft
 
     const cfg     = FT_MODE_CFG[activeMode] || FT_MODE_CFG.driving;
     const current = ftCoords[ftCoordIdx];
-    const ahead   = ftCoords[Math.min(ftCoordIdx + 3, ftCoords.length - 1)];
+    const ahead   = ftCoords[Math.min(ftCoordIdx + 4, ftCoords.length - 1)];
     const bearing = _ftBearing(current, ahead);
 
-    map.jumpTo({ center: current, bearing, pitch: 72, zoom: cfg.zoom });
+    // Smooth camera follow
+    map.easeTo({ center: current, bearing, pitch: 72, zoom: cfg.zoom, duration: cfg.delay * 0.9, easing: t => t });
+
+    // Move user location dot along the route so it tracks in real-time
+    placeUserMarker(current);
 
     // Progress
     const pct = Math.round((ftCoordIdx / (ftCoords.length - 1)) * 100);
@@ -1234,7 +1239,7 @@ Lyft
     }
 
     ftCoordIdx += cfg.step;
-    ftAnimId = setTimeout(_ftTick, 90);
+    ftAnimId = setTimeout(_ftTick, cfg.delay);
   }
 
   function stopFlythrough() {
