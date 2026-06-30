@@ -834,8 +834,8 @@ Lyft
       const coords = [pos.coords.longitude, pos.coords.latitude];
       const accuracy = Math.round(pos.coords.accuracy);
 
-      // Always update pin and circle live
-      placeUserMarker(coords);
+      // Update pin live — but not during flythrough (camera animates the route, not real movement)
+      if (!ftActive) placeUserMarker(coords);
 
       if (initialFix) {
         // First fix — fly to location, fetch jobs, update button
@@ -1223,8 +1223,8 @@ Lyft
     // Smooth camera follow
     map.easeTo({ center: current, bearing, pitch: 72, zoom: cfg.zoom, duration: cfg.delay * 0.9, easing: t => t });
 
-    // Move user location dot along the route so it tracks in real-time
-    placeUserMarker(current);
+    // Do NOT move user marker during flythrough — camera animates the route,
+    // but the GPS dot stays at the user's actual physical location.
 
     // Progress
     const pct = Math.round((ftCoordIdx / (ftCoords.length - 1)) * 100);
