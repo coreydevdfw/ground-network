@@ -38,6 +38,52 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', system-ui, sans-serif; background: #0a0a0a; overflow: hidden; padding-top: env(safe-area-inset-top); }
+
+    /* ── Light mode overrides ── */
+    body.light { background: #e0e0e0; }
+    body.light #sidebar { background: #e8e8e8 !important; border-color: rgba(0,0,0,0.1) !important; }
+    body.light #sidebar-header-wrap { background: #dcdcdc !important; border-color: rgba(0,110,60,0.2) !important; box-shadow: 0 2px 0 rgba(0,110,60,0.1), 0 4px 12px rgba(0,0,0,0.1) !important; }
+    body.light .logo { color: #006e3c !important; }
+    body.light #count-bar { color: rgba(0,0,0,0.4) !important; border-color: rgba(0,0,0,0.07) !important; }
+    body.light #count-bar strong { color: #111 !important; }
+    body.light .job-card { background: rgba(0,0,0,0.04) !important; border-color: rgba(0,0,0,0.08) !important; }
+    body.light .job-card:hover { background: rgba(0,0,0,0.08) !important; }
+    body.light .job-card.active { background: rgba(0,110,60,0.08) !important; }
+    body.light .job-title { color: #111 !important; }
+    body.light .job-company { color: rgba(0,0,0,0.5) !important; }
+    body.light .job-meta { color: rgba(0,0,0,0.35) !important; }
+    body.light #commute-panel { background: #dcdcdc !important; border-color: rgba(0,0,0,0.08) !important; }
+    body.light #commute-job-title { color: #111 !important; }
+    body.light #commute-job-company { color: #006e3c !important; }
+    body.light #commute-close { color: rgba(0,0,0,0.35) !important; }
+    body.light .commute-mode { background: rgba(0,0,0,0.05) !important; border-color: rgba(0,0,0,0.1) !important; }
+    body.light .commute-mode:hover { background: rgba(0,0,0,0.09) !important; }
+    body.light .commute-mode.active { border-color: rgba(0,110,60,0.5) !important; background: rgba(0,110,60,0.08) !important; }
+    body.light .commute-mode .mode-label { color: rgba(0,0,0,0.4) !important; }
+    body.light .commute-mode .mode-time { color: #111 !important; }
+    body.light .commute-mode .mode-time.loading { color: rgba(0,0,0,0.25) !important; }
+    body.light .commute-mode .mode-time.unrealistic { color: rgba(0,0,0,0.25) !important; }
+    body.light #traffic-strip { background: rgba(0,110,60,0.06) !important; border-color: rgba(0,110,60,0.18) !important; }
+    body.light #traffic-strip-header { color: #006e3c !important; }
+    body.light #traffic-gauge-label { color: #111 !important; }
+    body.light #traffic-strip-sub { color: rgba(0,0,0,0.35) !important; }
+    body.light #uber-link { background: #222 !important; }
+    body.light #pre-select .ps-title { color: rgba(0,0,0,0.55) !important; }
+    body.light #pre-select .ps-sub { color: rgba(0,0,0,0.3) !important; }
+    body.light #location-banner { background: #dcdcdc !important; border-color: rgba(0,0,0,0.1) !important; color: #111 !important; }
+    body.light #zoom-hint { color: rgba(0,0,0,0.35) !important; }
+    /* Popup on map */
+    body.light .mapboxgl-popup-content { background: #e8e8e8 !important; border-color: rgba(0,110,60,0.25) !important; box-shadow: 0 8px 32px rgba(0,0,0,0.15) !important; }
+    body.light .popup-title { color: #111 !important; }
+    body.light .popup-company { color: rgba(0,0,0,0.45) !important; }
+    body.light .popup-apply { background: #006e3c !important; color: #fff !important; }
+    body.light .mapboxgl-popup-close-button { color: rgba(0,0,0,0.35) !important; }
+    /* View toggle + controls */
+    body.light #view-toggle button { color: rgba(0,0,0,0.5) !important; background: rgba(0,0,0,0.05) !important; border-color: rgba(0,0,0,0.1) !important; }
+    body.light #view-toggle button.active { color: #006e3c !important; border-color: rgba(0,110,60,0.4) !important; background: rgba(0,110,60,0.08) !important; }
+    body.light #category-select { background: rgba(0,0,0,0.06) !important; border-color: rgba(0,0,0,0.1) !important; color: #111 !important; }
+    body.light #locate-btn { background: rgba(0,0,0,0.06) !important; border-color: rgba(0,0,0,0.1) !important; color: #111 !important; }
+    body.light #job-list::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12) !important; }
     #app { display: flex; height: 100dvh; width: 100vw; }
     /* ── Sidebar ── */
     #sidebar {
@@ -342,7 +388,7 @@
       border-radius: 14px;
       padding: 20px 36px;
       text-align: center;
-      animation: navFlash 1.5s cubic-bezier(0.22,1,0.36,1) forwards;
+      animation: navFlash 6s cubic-bezier(0.22,1,0.36,1) forwards;
     }
     #nav-launch-badge .nav-mode-label {
       font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
@@ -1294,17 +1340,17 @@ Lyft
     launchOverlay.classList.add('active');
     launchOverlay.style.opacity = '1';
 
-    // Slide sidebar out after a brief beat
+    // Slide sidebar out after badge has settled
     setTimeout(() => {
       document.getElementById('sidebar').classList.add('nav-hidden');
-    }, 200);
+    }, 800);
 
     // Show nav overlay and clear launch screen after animation completes
     setTimeout(() => {
       document.getElementById('flythrough-overlay').classList.add('active');
       launchOverlay.style.opacity = '0';
       setTimeout(() => launchOverlay.classList.remove('active'), 300);
-    }, 1400);
+    }, 6000);
 
     // Lock camera to user's current GPS position at nav pitch/zoom
     const userPos = userMarker ? userMarker.getLngLat().toArray() : CENTER;
@@ -1444,14 +1490,14 @@ Lyft
     },
     light: {
       mapStyle:   'mapbox://styles/mapbox/light-v11',
-      accent:     '#00c96a',
-      sidebarBg:  '#f5f5f5',
-      headerBg:   '#ffffff',
-      cardBg:     '#eeeeee',
+      accent:     '#006e3c',
+      sidebarBg:  '#e8e8e8',
+      headerBg:   '#dcdcdc',
+      cardBg:     '#d4d4d4',
       text:       '#111',
       subtext:    'rgba(0,0,0,0.45)',
       border:     'rgba(0,0,0,0.09)',
-      accentBorder:'rgba(0,201,106,0.18)',
+      accentBorder:'rgba(0,110,60,0.2)',
     }
   };
 
@@ -1484,6 +1530,7 @@ Lyft
     });
 
     applyTheme(t);
+    document.body.classList.toggle('light', isLight);
 
     // Update button
     const themeBtn = document.getElementById('toggle-theme');
@@ -1819,7 +1866,7 @@ Lyft
 
   // ── Map layer setup (called on initial load + after style swap) ──────────
   function setupMapLayers() {
-    const accent = isLight ? '#00c96a' : '#00ff88';
+    const accent = isLight ? '#006e3c' : '#00ff88';
 
     // Dark mode: tint base layers; light mode: leave Mapbox defaults
     if (!isLight) {
