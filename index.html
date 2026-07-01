@@ -116,6 +116,12 @@
       background: #0f0f0f; border-right: 1px solid rgba(255,255,255,0.07);
       display: flex; flex-direction: column; z-index: 20;
       box-shadow: 3px 0 0 rgba(0,255,136,0.07), 6px 0 22px rgba(0,0,0,0.45);
+      /* As nav-hidden animates width down to 0, children must clip with it —
+         without this, text/controls overflow the shrinking box instead of
+         shrinking away, and since #sidebar sits above the nav overlay
+         (z-index:20 vs 10) that overflow renders on top of the turn-by-turn
+         UI as bunched, overlapping text on desktop. */
+      overflow: hidden;
     }
     #map-wrap { flex: 1; position: relative; overflow: hidden; }
     #map { position: absolute; inset: 0; }
