@@ -41,6 +41,10 @@
 
     /* ── Light mode overrides ── */
     body.light { background: #e0e0e0; }
+    /* Mapbox's stock light-v11 style is very bright/high-contrast on its own —
+       a flat filter on just the GL canvas takes the edge off without touching
+       the base style, custom layers, or DOM markers drawn on top of it. */
+    body.light .mapboxgl-canvas { filter: brightness(0.92) saturate(0.88); }
     body.light #sidebar { background: #e8e8e8 !important; border-color: rgba(0,0,0,0.1) !important; }
     body.light #sidebar-header-wrap { background: #dcdcdc !important; border-color: rgba(0,110,60,0.2) !important; box-shadow: 0 2px 0 rgba(0,110,60,0.1), 0 4px 12px rgba(0,0,0,0.1) !important; }
     body.light .logo { color: #006e3c !important; }
@@ -352,6 +356,13 @@
     }
     #empty-state, #no-jobs-state { text-align:center; padding:32px 20px; color:rgba(255,255,255,0.25); font-size:12px; line-height:1.6; display:none; }
     #loading-state { text-align:center; padding:32px 20px; color:rgba(255,255,255,0.3); font-size:12px; display:none; }
+    #job-card-hint {
+      font-size: 9px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+      color: rgba(0,255,136,0.45); text-align: center; padding: 8px 0; display: none;
+      opacity: 1; transition: opacity 0.6s;
+    }
+    #job-card-hint.hidden { opacity: 0; pointer-events: none; }
+    body.light #job-card-hint { color: rgba(0,110,60,0.45); }
     .pulse { animation: pulse 1.5s infinite; }
     @keyframes pulse { 0%,100%{opacity:0.3}50%{opacity:0.8} }
     /* ── Map overlays ── */
@@ -395,7 +406,7 @@
       100% { transform: translateY(0) scale(1); }
     }
     /* ── User location marker — offset shadow badge style, green ── */
-    .user-location-marker { width: 28px; height: 28px; position: relative; display: block; }
+    .user-location-marker { width: 28px; height: 28px; position: relative; display: block; cursor: pointer; }
     .mapboxgl-popup-content { background:#111!important; border:1px solid rgba(0,255,136,0.25)!important; border-radius:10px!important; padding:14px 16px!important; box-shadow:0 8px 32px rgba(0,0,0,0.6)!important; min-width:200px; }
     .mapboxgl-popup-tip { display:none!important; }
     .mapboxgl-popup-close-button { color:rgba(255,255,255,0.4)!important; font-size:16px!important; top:6px!important; right:8px!important; }
@@ -633,7 +644,7 @@
         <div id="commute-job-title">—</div>
         <div id="commute-job-company"></div>
       </div>
-      <div id="double-tap-hint">Double-tap a mode to navigate</div>
+      <div id="double-tap-hint">Double-tap a mode or your pin to navigate</div>
       <div id="commute-modes">
         <div class="commute-mode active" id="mode-driving" onclick="selectMode('driving')" role="button" tabindex="0" aria-label="Drive commute mode. Double-tap or press twice quickly to start navigation.">
           <div class="mode-icon">
@@ -741,6 +752,7 @@ Lyft
         <div id="loading-state" class="pulse">Loading…</div>
         <div id="empty-state">No jobs in this category nearby.<br>Try another filter.</div>
         <div id="no-jobs-state">No jobs found near this location.<br>Try sharing your location or searching a different ZIP code.</div>
+        <div id="job-card-hint">Tap a job to see it on the map</div>
       </div>
     </div>
     <div id="pre-select">
@@ -898,6 +910,7 @@ Lyft
   let activeMapJobs = [];
   let joobleFailureCount = 0; // reset + counted each search batch; see showSourceWarningIfNeeded()
   let hasCompletedSearch = false; // false until the first job fetch finishes — distinguishes "still loading" from "genuinely zero jobs at this location"
+  let jobCardHintDismissed = false; // "Tap a job to see it on the map" — dismissed for the session once any card is clicked
 
   // Small non-blocking banner so a dropped job source (e.g. Jooble blocked by
   // CORS) doesn't just look like "fewer jobs than expected" with no explanation.
@@ -1125,6 +1138,8 @@ Lyft
 
   // ── Location ─────────────────────────────────────────────────────────────
   let userMarker = null;
+  let _lastPinTap = { time: 0 };
+
   function placeUserMarker(coords) {
     if (userMarker) { userMarker.setLngLat(coords); return; }
     const el = document.createElement('div');
@@ -1140,6 +1155,32 @@ Lyft
               fill="#00ff88" stroke="rgba(255,255,255,0.75)" stroke-width="1.5"
               transform="rotate(45 11 11)"/>
       </svg>`;
+    el.setAttribute('role', 'button');
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('aria-label', 'Your location. Double-tap or press twice quickly to start navigation to the selected job, in your last-used commute mode.');
+    // Second entry point into turn-by-turn nav, alongside double-tapping a
+    // commute-mode tile — double-tapping your own pin starts navigation in
+    // whichever mode (driving/walking/cycling/DART) was used last.
+    el.addEventListener('click', () => {
+      const now = Date.now();
+      if (now - _lastPinTap.time < 350) {
+        _lastPinTap = { time: 0 };
+        startNavigation(activeMode);
+      } else {
+        _lastPinTap = { time: now };
+      }
+    });
+    el.addEventListener('keydown', e => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      e.preventDefault();
+      const now = Date.now();
+      if (now - _lastPinTap.time < 350) {
+        _lastPinTap = { time: 0 };
+        startNavigation(activeMode);
+      } else {
+        _lastPinTap = { time: now };
+      }
+    });
     userMarker = new mapboxgl.Marker({ element: el, anchor: 'center' }).setLngLat(coords).addTo(map);
   }
 
@@ -1553,7 +1594,10 @@ Lyft
   }
 
   async function startNavigation(mode) {
-    if (!currentJob) return;
+    // Reachable from two gestures now (double-tap a commute-mode tile, or
+    // double-tap the user's own pin on the map) — the pin gesture has no
+    // job context of its own, so it's the one place this guard actually fires.
+    if (!currentJob) { await showAppAlert('Select a job first to start navigation.'); return; }
     const cfg = FT_MODE_CFG[mode];
     if (!cfg) return;
     if (!userLocated) { await showAppAlert('Share your location first to start navigation.'); return; }
@@ -1859,6 +1903,7 @@ Lyft
     document.getElementById('loading-state').style.display  = !hasCompletedSearch ? 'block' : 'none';
     document.getElementById('no-jobs-state').style.display  = hasCompletedSearch && allJobs.length === 0 ? 'block' : 'none';
     document.getElementById('empty-state').style.display    = hasCompletedSearch && allJobs.length > 0 && jobs.length === 0 ? 'block' : 'none';
+    document.getElementById('job-card-hint').style.display  = (!jobCardHintDismissed && jobs.length > 0) ? 'block' : 'none';
     document.getElementById('job-count').textContent = jobs.length;
     list.querySelectorAll('.job-card').forEach(el => el.remove());
 
@@ -1935,6 +1980,10 @@ Lyft
   }
 
   function focusJob(job, card) {
+    if (!jobCardHintDismissed) {
+      jobCardHintDismissed = true;
+      document.getElementById('job-card-hint').classList.add('hidden');
+    }
     if (activeCard) activeCard.classList.remove('active');
     card.classList.add('active'); activeCard = card;
     if (activePopup) activePopup.remove();
