@@ -935,7 +935,12 @@ Lyft
   const map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/dark-v11',
-    center: CENTER, zoom: 10, minZoom: 8, maxZoom: 19, pitch: 0
+    center: CENTER, zoom: 10, minZoom: 8, maxZoom: 19, pitch: 0,
+    // Mapbox GL's default maxPitch is 60 — every nav-mode easeTo() below asks
+    // for pitch:72 (a much steeper, closer-to-street-level camera) but was
+    // silently getting clamped to 60 the whole time. Raising the cap here is
+    // what actually lets that steep angle render.
+    maxPitch: 85
   });
   map.addControl(new mapboxgl.NavigationControl({ showCompass: true }), 'top-right');
 
@@ -1539,11 +1544,29 @@ Lyft
   // through the navigation/job-pin code — collected here so tuning any one
   // of them doesn't require hunting through unrelated functions.
   const NAV_CONFIG = {
-    ARRIVAL_RADIUS_MI:      0.02, // how close to the destination counts as "arrived" and auto-stops nav
-    STEP_ADVANCE_RADIUS_MI: 0.03, // how close to a turn's waypoint before advancing the turn-by-turn banner
-    STALE_JOB_DAYS:         30,   // postings older than this get the "stale" badge
-    MAX_VISIBLE_JOB_PINS:   5,    // job pins rendered on the map at once (nearest-first)
+    ARRIVAL_RADIUS_MI:      0.02,  // how close to the destination counts as "arrived" and auto-stops nav
+    STEP_ADVANCE_RADIUS_MI: 0.03,  // how close to a turn's waypoint before advancing the turn-by-turn banner
+    STALE_JOB_DAYS:         30,    // postings older than this get the "stale" badge
+    MAX_VISIBLE_JOB_PINS:   5,     // job pins rendered on the map at once (nearest-first)
+    BEARING_LOOKAHEAD_MI:   0.012, // how far ahead along the route the nav camera looks to compute its facing direction
   };
+
+  // Walking/DART routes pack route-geometry points much closer together than
+  // driving routes do, so a fixed "N points ahead" lookahead (the old
+  // approach) covered wildly different real-world distances per mode — for
+  // walking that meant the camera bearing was computed from a point just a
+  // few feet away, making it swing around on every small GPS jiggle instead
+  // of pointing steadily down the sidewalk. Walking forward by distance
+  // instead of by point-count fixes that regardless of route density.
+  function _ftLookaheadPoint(fromIdx, coords) {
+    if (fromIdx >= coords.length - 1) return coords[coords.length - 1];
+    let dist = 0;
+    for (let i = fromIdx; i < coords.length - 1; i++) {
+      dist += haversineMiles(coords[i][1], coords[i][0], coords[i + 1][1], coords[i + 1][0]);
+      if (dist >= NAV_CONFIG.BEARING_LOOKAHEAD_MI) return coords[i + 1];
+    }
+    return coords[coords.length - 1];
+  }
 
   function _ftManeuverIcon(maneuver) {
     const mod  = maneuver?.modifier || '';
@@ -1691,7 +1714,7 @@ Lyft
 
     // Lock camera to user's current GPS position at nav pitch/zoom
     const userPos = userMarker ? userMarker.getLngLat().toArray() : CENTER;
-    const ahead   = ftCoords[Math.min(4, ftCoords.length - 1)];
+    const ahead   = _ftLookaheadPoint(0, ftCoords);
     const bearing = _ftBearing(userPos, ahead);
     map.easeTo({ center: userPos, bearing, pitch: 72, zoom: cfg.zoom, duration: 900 });
   }
@@ -1713,7 +1736,7 @@ Lyft
     ftCoordIdx = closestIdx;
 
     // Camera follows real GPS position, bearing toward next route point
-    const ahead   = ftCoords[Math.min(ftCoordIdx + 4, ftCoords.length - 1)];
+    const ahead   = _ftLookaheadPoint(ftCoordIdx, ftCoords);
     const bearing = _ftBearing(coords, ahead);
     map.easeTo({ center: coords, bearing, pitch: 72, zoom: cfg.zoom, duration: 800 });
 
