@@ -490,6 +490,152 @@
     body.light #app-dialog-cancel { border-color: rgba(0,0,0,0.2); color: rgba(0,0,0,0.6); }
     #app-dialog-confirm { background: #00ff88; color: #0a0a0a; }
     body.light #app-dialog-confirm { background: #00a055; color: #fff; }
+    /* ── Employer entry point + auth modal ── */
+    #employer-row { padding: 0 14px 12px; }
+    #employer-toggle-link {
+      background: none; border: none; color: rgba(0,255,136,0.6);
+      font-size: 11px; font-family: inherit; cursor: pointer; padding: 0;
+      text-decoration: underline; text-decoration-color: rgba(0,255,136,0.3);
+      display: flex; align-items: center; gap: 5px;
+    }
+    #employer-toggle-link:hover { color: rgba(0,255,136,0.85); }
+    #employer-toggle-link svg { width: 12px; height: 12px; flex-shrink: 0; }
+    body.light #employer-toggle-link { color: rgba(0,110,60,0.7); }
+    #employer-modal-overlay {
+      position: fixed; inset: 0; z-index: 10000;
+      background: rgba(0,0,0,0.65);
+      display: none; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    #employer-modal-overlay.show { display: flex; }
+    #employer-modal-box {
+      position: relative;
+      background: #0f0f0f; border: 2px solid #00ff88;
+      box-shadow: 0 0 0 6px rgba(0,255,136,0.08), 4px 6px 0 rgba(0,255,136,0.28);
+      border-radius: 14px; padding: 26px 26px 22px; max-width: 360px; width: 100%;
+    }
+    body.light #employer-modal-box { background: #fff; border-color: #00a055; box-shadow: 0 0 0 6px rgba(0,160,85,0.08), 4px 6px 0 rgba(0,160,85,0.22); }
+    #employer-modal-close {
+      position: absolute; right: 14px; top: 14px; background: none; border: none;
+      color: rgba(255,255,255,0.35); cursor: pointer; font-size: 16px; padding: 2px;
+    }
+    body.light #employer-modal-close { color: rgba(0,0,0,0.35); }
+    #employer-modal-title { font-size: 17px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+    body.light #employer-modal-title { color: #111; }
+    #employer-modal-sub { font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 18px; line-height: 1.5; }
+    body.light #employer-modal-sub { color: rgba(0,0,0,0.45); }
+    .employer-field { margin-bottom: 12px; }
+    .employer-field label { display: block; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 5px; }
+    body.light .employer-field label { color: rgba(0,0,0,0.4); }
+    .employer-field input {
+      width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 7px; padding: 9px 11px; color: #fff; font-size: 13px; font-family: inherit; outline: none;
+    }
+    .employer-field input:focus { border-color: rgba(0,255,136,0.4); }
+    body.light .employer-field input { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.12); color: #111; }
+    #employer-modal-error {
+      font-size: 11px; color: #ff6b6b; margin-bottom: 10px; line-height: 1.4; display: none;
+    }
+    #employer-modal-error.show { display: block; }
+    #employer-modal-submit {
+      width: 100%; font-size: 13px; font-weight: 700; color: #0a0a0a; background: #00ff88;
+      border: none; border-radius: 8px; padding: 10px; cursor: pointer; font-family: inherit; margin-top: 4px;
+    }
+    #employer-modal-submit:hover { background: #33ffa3; }
+    #employer-modal-submit:disabled { opacity: 0.5; pointer-events: none; }
+    #employer-modal-switch { text-align: center; margin-top: 14px; font-size: 11px; color: rgba(255,255,255,0.4); }
+    body.light #employer-modal-switch { color: rgba(0,0,0,0.4); }
+    #employer-modal-switch button {
+      background: none; border: none; color: #00ff88; font-family: inherit; font-size: 11px;
+      cursor: pointer; text-decoration: underline; padding: 0;
+    }
+    #employer-status-row {
+      padding: 0 14px 12px; display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; font-size: 11px; color: rgba(255,255,255,0.5);
+    }
+    #employer-status-row strong { color: #00ff88; font-weight: 700; }
+    body.light #employer-status-row strong { color: #006e3c; }
+    #employer-logout-btn {
+      background: none; border: none; color: rgba(255,255,255,0.35); font-family: inherit;
+      font-size: 10px; cursor: pointer; text-decoration: underline; padding: 0; flex-shrink: 0;
+    }
+    body.light #employer-status-row { color: rgba(0,0,0,0.5); }
+    #employer-dashboard-btn {
+      background: rgba(0,255,136,0.12); border: 1px solid rgba(0,255,136,0.3); color: #00ff88;
+      font-family: inherit; font-size: 10px; font-weight: 700; cursor: pointer;
+      padding: 4px 9px; border-radius: 6px; flex-shrink: 0;
+    }
+    #employer-dashboard-btn:hover { background: rgba(0,255,136,0.2); }
+    body.light #employer-dashboard-btn { background: rgba(0,160,85,0.1); border-color: rgba(0,160,85,0.3); color: #006e3c; }
+    #employer-dashboard-overlay {
+      position: fixed; inset: 0; z-index: 10000;
+      background: rgba(0,0,0,0.65);
+      display: none; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    #employer-dashboard-overlay.show { display: flex; }
+    #employer-dashboard-box {
+      position: relative;
+      background: #0f0f0f; border: 2px solid #00ff88;
+      box-shadow: 0 0 0 6px rgba(0,255,136,0.08), 4px 6px 0 rgba(0,255,136,0.28);
+      border-radius: 14px; padding: 26px 26px 22px; max-width: 420px; width: 100%;
+      max-height: 86vh; overflow-y: auto;
+    }
+    body.light #employer-dashboard-box { background: #fff; border-color: #00a055; box-shadow: 0 0 0 6px rgba(0,160,85,0.08), 4px 6px 0 rgba(0,160,85,0.22); }
+    #employer-dashboard-close {
+      position: absolute; right: 14px; top: 14px; background: none; border: none;
+      color: rgba(255,255,255,0.35); cursor: pointer; font-size: 16px; padding: 2px;
+    }
+    body.light #employer-dashboard-close { color: rgba(0,0,0,0.35); }
+    #employer-dashboard-title { font-size: 17px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+    body.light #employer-dashboard-title { color: #111; }
+    #employer-dashboard-sub { font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 18px; line-height: 1.5; }
+    body.light #employer-dashboard-sub { color: rgba(0,0,0,0.45); }
+    .employer-field select, .employer-field textarea {
+      width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 7px; padding: 9px 11px; color: #fff; font-size: 13px; font-family: inherit; outline: none; resize: vertical;
+    }
+    .employer-field select:focus, .employer-field textarea:focus { border-color: rgba(0,255,136,0.4); }
+    body.light .employer-field select, body.light .employer-field textarea { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.12); color: #111; }
+    #employer-post-error {
+      font-size: 11px; color: #ff6b6b; margin-bottom: 10px; line-height: 1.4; display: none;
+    }
+    #employer-post-error.show { display: block; }
+    #employer-post-submit {
+      width: 100%; font-size: 13px; font-weight: 700; color: #0a0a0a; background: #00ff88;
+      border: none; border-radius: 8px; padding: 10px; cursor: pointer; font-family: inherit; margin-top: 4px;
+    }
+    #employer-post-submit:hover { background: #33ffa3; }
+    #employer-post-submit:disabled { opacity: 0.5; pointer-events: none; }
+    #employer-postings-section { margin-top: 22px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.1); }
+    body.light #employer-postings-section { border-top-color: rgba(0,0,0,0.1); }
+    #employer-postings-title { font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 10px; }
+    body.light #employer-postings-title { color: rgba(0,0,0,0.4); }
+    #employer-postings-empty { font-size: 12px; color: rgba(255,255,255,0.3); }
+    body.light #employer-postings-empty { color: rgba(0,0,0,0.3); }
+    .employer-posting-card {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 12px;
+    }
+    body.light .employer-posting-card { border-bottom-color: rgba(0,0,0,0.06); }
+    .employer-posting-card:last-child { border-bottom: none; }
+    .employer-posting-info { color: rgba(255,255,255,0.75); min-width: 0; }
+    body.light .employer-posting-info { color: rgba(0,0,0,0.75); }
+    .employer-posting-info .ep-title { font-weight: 700; color: #fff; }
+    body.light .employer-posting-info .ep-title { color: #111; }
+    .employer-posting-info .ep-meta { font-size: 10px; color: rgba(255,255,255,0.35); margin-top: 1px; }
+    body.light .employer-posting-info .ep-meta { color: rgba(0,0,0,0.4); }
+    .employer-posting-status-closed { color: rgba(255,255,255,0.3); font-size: 10px; flex-shrink: 0; }
+    .employer-posting-close-btn {
+      background: none; border: 1px solid rgba(255,107,107,0.35); color: #ff6b6b; font-family: inherit;
+      font-size: 10px; cursor: pointer; padding: 4px 8px; border-radius: 6px; flex-shrink: 0;
+    }
+    .employer-posting-close-btn:hover { background: rgba(255,107,107,0.1); }
+    .card-apply-soon {
+      font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.3); background: none;
+      border: none; font-family: inherit; cursor: pointer; padding: 0;
+    }
+    body.light .card-apply-soon { color: rgba(0,0,0,0.3) !important; }
     /* Sidebar slides out during navigation.
        Must collapse width/min-width (not just transform) — #app is a flex
        row and #sidebar has a fixed width:320px/min-width:320px. A transform
@@ -614,6 +760,17 @@
           <button id="zip-cancel-btn" title="Cancel" aria-label="Cancel ZIP search">✕</button>
         </div>
         <div id="zip-status"></div>
+      </div>
+      <div id="employer-row">
+        <button id="employer-toggle-link">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1M9 13h1M9 17h1M14 9h1M14 13h1M14 17h1"/></svg>
+          For employers — post a job free
+        </button>
+      </div>
+      <div id="employer-status-row" style="display:none">
+        <span>Signed in as <strong id="employer-status-name">—</strong></span>
+        <button id="employer-dashboard-btn">Post a job</button>
+        <button id="employer-logout-btn">Log out</button>
       </div>
     </div>
     <div id="filter-wrap">
@@ -835,6 +992,71 @@ Lyft
   </div>
 </div>
 
+<!-- Employer sign up / sign in modal -->
+<div id="employer-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="employer-modal-title">
+  <div id="employer-modal-box">
+    <button id="employer-modal-close" type="button" aria-label="Close">✕</button>
+    <div id="employer-modal-title">Post jobs on Labor Network</div>
+    <div id="employer-modal-sub">Free to post. Free to browse applicants. You only pay a placement fee if you hire someone through the app.</div>
+    <div id="employer-modal-error"></div>
+    <form id="employer-modal-form">
+      <div class="employer-field" id="employer-field-company">
+        <label for="employer-company-input">Company name</label>
+        <input id="employer-company-input" type="text" autocomplete="organization" />
+      </div>
+      <div class="employer-field">
+        <label for="employer-email-input">Email</label>
+        <input id="employer-email-input" type="email" autocomplete="email" required />
+      </div>
+      <div class="employer-field">
+        <label for="employer-password-input">Password</label>
+        <input id="employer-password-input" type="password" autocomplete="current-password" required minlength="6" />
+      </div>
+      <button id="employer-modal-submit" type="submit">Create account</button>
+    </form>
+    <div id="employer-modal-switch">
+      Already have an account? <button id="employer-modal-switch-btn" type="button">Sign in</button>
+    </div>
+  </div>
+</div>
+
+<!-- Employer dashboard: post a job + manage existing postings -->
+<div id="employer-dashboard-overlay" role="dialog" aria-modal="true" aria-labelledby="employer-dashboard-title">
+  <div id="employer-dashboard-box">
+    <button id="employer-dashboard-close" type="button" aria-label="Close">✕</button>
+    <div id="employer-dashboard-title">Post a job</div>
+    <div id="employer-dashboard-sub">Free to post. You only pay a placement fee if you hire someone through the app.</div>
+    <div id="employer-post-error"></div>
+    <form id="employer-post-form">
+      <div class="employer-field">
+        <label for="post-title-input">Job title</label>
+        <input id="post-title-input" type="text" required />
+      </div>
+      <div class="employer-field">
+        <label for="post-category-select">Category</label>
+        <select id="post-category-select" required></select>
+      </div>
+      <div class="employer-field">
+        <label for="post-location-input">Job location (address, city, or ZIP)</label>
+        <input id="post-location-input" type="text" required placeholder="e.g. Plano, TX or 75024" />
+      </div>
+      <div class="employer-field">
+        <label for="post-pay-input">Pay (optional)</label>
+        <input id="post-pay-input" type="text" placeholder="e.g. $18–22/hr" />
+      </div>
+      <div class="employer-field">
+        <label for="post-desc-input">Description (optional)</label>
+        <textarea id="post-desc-input" rows="3" placeholder="Brief description, shift, requirements…"></textarea>
+      </div>
+      <button id="employer-post-submit" type="submit">Post job — free</button>
+    </form>
+    <div id="employer-postings-section">
+      <div id="employer-postings-title">Your postings</div>
+      <div id="employer-postings-list"><div id="employer-postings-empty">No postings yet.</div></div>
+    </div>
+  </div>
+</div>
+
 <script>
   /*
     ── BACKLOG / NEXT ITERATION NOTES ──────────────────────────────────────
@@ -1048,6 +1270,267 @@ Lyft
     return _showAppDialog({ message, cancelText, confirmText });
   }
 
+  // ── Employer auth UI ─────────────────────────────────────────────────────
+  // Firebase itself is loaded/wired in a <script type="module"> at the end of
+  // <body> (module execution is deferred until after this classic script has
+  // run, so window.onEmployerAuthChanged below is guaranteed to already exist
+  // by the time Firebase's onAuthStateChanged callback fires).
+  let employerModalMode = 'signup'; // 'signup' | 'signin'
+
+  function setEmployerModalMode(mode) {
+    employerModalMode = mode;
+    const companyField = document.getElementById('employer-field-company');
+    const companyInput = document.getElementById('employer-company-input');
+    const title    = document.getElementById('employer-modal-title');
+    const submit   = document.getElementById('employer-modal-submit');
+    const switchEl = document.getElementById('employer-modal-switch');
+    const errorEl  = document.getElementById('employer-modal-error');
+    errorEl.classList.remove('show');
+    if (mode === 'signup') {
+      companyField.style.display = '';
+      companyInput.required = true;
+      title.textContent = 'Post jobs on Labor Network';
+      submit.textContent = 'Create account';
+      switchEl.innerHTML = `Already have an account? <button id="employer-modal-switch-btn" type="button">Sign in</button>`;
+    } else {
+      companyField.style.display = 'none';
+      companyInput.required = false;
+      title.textContent = 'Sign in';
+      submit.textContent = 'Sign in';
+      switchEl.innerHTML = `Need an account? <button id="employer-modal-switch-btn" type="button">Create one</button>`;
+    }
+    // Re-bind since innerHTML replaced the button
+    document.getElementById('employer-modal-switch-btn').addEventListener('click', () => {
+      setEmployerModalMode(employerModalMode === 'signup' ? 'signin' : 'signup');
+    });
+  }
+
+  function openEmployerModal() {
+    setEmployerModalMode('signup');
+    document.getElementById('employer-modal-form').reset();
+    document.getElementById('employer-modal-overlay').classList.add('show');
+  }
+  function closeEmployerModal() {
+    document.getElementById('employer-modal-overlay').classList.remove('show');
+  }
+
+  function showEmployerModalError(msg) {
+    const errorEl = document.getElementById('employer-modal-error');
+    errorEl.textContent = msg;
+    errorEl.classList.add('show');
+  }
+
+  // Friendlier text for the Firebase Auth error codes we're most likely to hit.
+  function friendlyAuthError(err) {
+    const code = err && err.code || '';
+    if (code === 'auth/email-already-in-use') return 'That email already has an account — try signing in instead.';
+    if (code === 'auth/invalid-email')         return 'That email address looks invalid.';
+    if (code === 'auth/weak-password')         return 'Password should be at least 6 characters.';
+    if (code === 'auth/user-not-found' || code === 'auth/wrong-password' || code === 'auth/invalid-credential')
+      return 'Email or password is incorrect.';
+    return err && err.message ? err.message : 'Something went wrong — try again.';
+  }
+
+  window.onEmployerAuthChanged = function(user) {
+    const signedOutRow = document.getElementById('employer-row');
+    const signedInRow  = document.getElementById('employer-status-row');
+    const nameEl       = document.getElementById('employer-status-name');
+    if (user) {
+      signedOutRow.style.display = 'none';
+      signedInRow.style.display  = '';
+      nameEl.textContent = user.email || 'Employer';
+      closeEmployerModal();
+    } else {
+      signedOutRow.style.display = '';
+      signedInRow.style.display  = 'none';
+    }
+  };
+
+  document.getElementById('employer-toggle-link').addEventListener('click', openEmployerModal);
+  document.getElementById('employer-modal-close').addEventListener('click', closeEmployerModal);
+  document.getElementById('employer-modal-overlay').addEventListener('click', (e) => {
+    if (e.target.id === 'employer-modal-overlay') closeEmployerModal();
+  });
+  document.getElementById('employer-modal-switch-btn').addEventListener('click', () => {
+    setEmployerModalMode(employerModalMode === 'signup' ? 'signin' : 'signup');
+  });
+  document.getElementById('employer-modal-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const submitBtn = document.getElementById('employer-modal-submit');
+    const email    = document.getElementById('employer-email-input').value.trim();
+    const password = document.getElementById('employer-password-input').value;
+    const company  = document.getElementById('employer-company-input').value.trim();
+    submitBtn.disabled = true;
+    const prevText = submitBtn.textContent;
+    submitBtn.textContent = employerModalMode === 'signup' ? 'Creating account…' : 'Signing in…';
+    try {
+      if (employerModalMode === 'signup') {
+        await window.employerSignUp(company, email, password);
+        trackEvent('employer_signup');
+      } else {
+        await window.employerSignIn(email, password);
+        trackEvent('employer_signin');
+      }
+      // onAuthStateChanged → window.onEmployerAuthChanged closes the modal.
+    } catch (err) {
+      showEmployerModalError(friendlyAuthError(err));
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = prevText;
+    }
+  });
+  document.getElementById('employer-logout-btn').addEventListener('click', async () => {
+    try { await window.employerSignOut(); trackEvent('employer_signout'); }
+    catch (err) { console.warn('Sign out failed:', err); }
+  });
+
+  // ── Employer dashboard: job posting ──────────────────────────────────────
+  // CATEGORIES is defined further down this file; function declarations are
+  // hoisted so referencing it here (only inside functions, never at top
+  // level) is safe regardless of source order.
+  function populatePostCategorySelect() {
+    const sel = document.getElementById('post-category-select');
+    if (sel.options.length) return; // already populated, skip re-render
+    CATEGORIES.filter(c => c.tag !== 'placeholder' && c.tag !== 'all').forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.tag; opt.textContent = c.label;
+      sel.appendChild(opt);
+    });
+  }
+
+  const postCatLabel = tag => (CATEGORIES.find(c => c.tag === tag) || {}).label || tag;
+
+  // General-purpose geocode for the "job location" field — same Mapbox
+  // endpoint the Jooble location lookups use, but with no `types` filter so
+  // it accepts a full address, a city, or a ZIP.
+  async function geocodeLocationText(text) {
+    try {
+      const res = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(text)}.json` +
+        `?country=US&proximity=${CENTER[0]},${CENTER[1]}&access_token=${mapboxgl.accessToken}`
+      );
+      const data = await res.json();
+      if (data.features?.length) return data.features[0].center; // [lng, lat]
+    } catch (e) { console.warn('Geocode failed:', e); }
+    return null;
+  }
+
+  function showEmployerPostError(msg) {
+    const el = document.getElementById('employer-post-error');
+    el.textContent = msg;
+    el.classList.add('show');
+  }
+
+  async function renderEmployerPostings() {
+    const list = document.getElementById('employer-postings-list');
+    const user = window.currentEmployerUser;
+    if (!user) { list.innerHTML = '<div id="employer-postings-empty">No postings yet.</div>'; return; }
+    list.innerHTML = '<div id="employer-postings-empty">Loading…</div>';
+    let postings = [];
+    try { postings = await window.fetchEmployerPostings(user.uid); }
+    catch (e) { console.warn('Failed to load postings:', e); }
+    if (!postings.length) { list.innerHTML = '<div id="employer-postings-empty">No postings yet.</div>'; return; }
+    postings.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+    list.innerHTML = '';
+    postings.forEach(p => {
+      const row = document.createElement('div');
+      row.className = 'employer-posting-card';
+      row.innerHTML = `
+        <div class="employer-posting-info">
+          <div class="ep-title">${p.title}</div>
+          <div class="ep-meta">${postCatLabel(p.category)} · ${p.locationText || ''}</div>
+        </div>
+        ${p.status === 'active'
+          ? `<button class="employer-posting-close-btn" data-id="${p.id}">Close</button>`
+          : `<span class="employer-posting-status-closed">Closed</span>`}
+      `;
+      list.appendChild(row);
+    });
+    list.querySelectorAll('.employer-posting-close-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        btn.disabled = true; btn.textContent = '…';
+        try {
+          await window.closeJobPosting(btn.dataset.id);
+          trackEvent('employer_job_closed');
+          await renderEmployerPostings();
+          await refreshDirectPostings();
+        } catch (e) {
+          console.warn('Failed to close posting:', e);
+          btn.disabled = false; btn.textContent = 'Close';
+        }
+      });
+    });
+  }
+
+  function openEmployerDashboard() {
+    populatePostCategorySelect();
+    document.getElementById('employer-post-error').classList.remove('show');
+    document.getElementById('employer-dashboard-overlay').classList.add('show');
+    renderEmployerPostings();
+  }
+  function closeEmployerDashboard() {
+    document.getElementById('employer-dashboard-overlay').classList.remove('show');
+  }
+
+  document.getElementById('employer-dashboard-btn').addEventListener('click', openEmployerDashboard);
+  document.getElementById('employer-dashboard-close').addEventListener('click', closeEmployerDashboard);
+  document.getElementById('employer-dashboard-overlay').addEventListener('click', (e) => {
+    if (e.target.id === 'employer-dashboard-overlay') closeEmployerDashboard();
+  });
+  document.getElementById('employer-post-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const submitBtn = document.getElementById('employer-post-submit');
+    const title    = document.getElementById('post-title-input').value.trim();
+    const category = document.getElementById('post-category-select').value;
+    const locText  = document.getElementById('post-location-input').value.trim();
+    const pay      = document.getElementById('post-pay-input').value.trim();
+    const desc     = document.getElementById('post-desc-input').value.trim();
+    document.getElementById('employer-post-error').classList.remove('show');
+    submitBtn.disabled = true;
+    const prevText = submitBtn.textContent;
+    submitBtn.textContent = 'Posting…';
+    try {
+      const coords = await geocodeLocationText(locText);
+      if (!coords) {
+        showEmployerPostError("Couldn't find that location — try a more specific city, address, or ZIP.");
+        return;
+      }
+      await window.postJobPosting({
+        title, category, locationText: locText,
+        lat: coords[1], lng: coords[0], pay, description: desc
+      });
+      trackEvent('employer_job_posted', { category });
+      document.getElementById('employer-post-form').reset();
+      await renderEmployerPostings();
+      await refreshDirectPostings();
+    } catch (err) {
+      showEmployerPostError(err && err.message ? err.message : 'Failed to post job — try again.');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = prevText;
+    }
+  });
+
+  // ── Direct (employer-posted) jobs ────────────────────────────────────────
+  // Merged into the same allJobs pipeline as Adzuna/Jooble so employer
+  // postings render on the map and sidebar exactly like aggregated listings.
+  // Public read (no login required) — job seekers see these whether or not
+  // an employer is signed in on their device.
+  async function fetchDirectPostings() {
+    if (typeof window.fetchActiveDirectPostings !== 'function') return [];
+    try { return await window.fetchActiveDirectPostings(); }
+    catch (e) { console.warn('Failed to load direct postings:', e); return []; }
+  }
+
+  // Lightweight refresh used right after posting/closing a job — swaps just
+  // the 'direct' slice of allJobs instead of re-running the full Adzuna/
+  // Jooble search.
+  async function refreshDirectPostings() {
+    const direct = await fetchDirectPostings();
+    allJobs = [...allJobs.filter(j => j.source !== 'direct'), ...direct];
+    if (activeFilter !== 'placeholder') { renderSidebar(); updateMapLayer(); }
+  }
+
   // ── Circle ───────────────────────────────────────────────────────────────
   function makeCircle(center, radiusMiles, steps=64) {
     const coords=[], R=3958.8, lat=center[1]*Math.PI/180;
@@ -1196,12 +1679,13 @@ Lyft
     document.getElementById('job-count').textContent = '…';
     const tags = CATEGORIES.filter(c => c.tag !== 'all' && c.tag !== 'placeholder').map(c => c.tag);
     joobleFailureCount = 0;
-    const [adzunaRes, joobleRes] = await Promise.all([
+    const [adzunaRes, joobleRes, directRes] = await Promise.all([
       mapWithConcurrency(tags, 3, fetchCategory),
-      mapWithConcurrency(tags, 3, fetchJooble)
+      mapWithConcurrency(tags, 3, fetchJooble),
+      fetchDirectPostings()
     ]);
     showSourceWarningIfNeeded(tags.length);
-    allJobs = dedupeJobs([...adzunaRes.flat(), ...joobleRes.flat()]);
+    allJobs = dedupeJobs([...adzunaRes.flat(), ...joobleRes.flat(), ...directRes]);
     hasCompletedSearch = true;
     if (activeFilter !== 'placeholder') { renderSidebar(); updateMapLayer(); }
   }
@@ -1947,15 +2431,24 @@ Lyft
       card.setAttribute('tabindex', '0');
       card.setAttribute('aria-label', `${job.title} at ${job.company}`);
 
-      // Source badge (Jooble vs Adzuna)
+      // Source badge (Jooble vs Adzuna vs direct employer posting)
       const sourceBadge = job.source === 'jooble'
         ? '<span class="card-source">Jooble</span>'
+        : job.source === 'direct'
+        ? '<span class="card-source">Labor Network</span>'
         : '';
 
       // Stale listing warning
       const staleBadge = isStale(job.created)
         ? '<span class="card-stale">⚠️ Posted 30+ days ago</span>'
         : '';
+
+      // Direct (employer-posted) jobs don't have an outbound apply URL yet —
+      // the in-app application flow is a separate build phase — so show a
+      // disabled-looking "coming soon" label instead of a broken link.
+      const applyMarkup = job.url
+        ? `<a class="card-apply" href="${job.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Apply →</a>`
+        : `<span class="card-apply-soon" onclick="event.stopPropagation()">Apply — coming soon</span>`;
 
       card.innerHTML = `
         <div class="card-title">${job.title}</div>
@@ -1966,7 +2459,7 @@ Lyft
         ${staleBadge}
         <div class="card-footer">
           <span class="card-cat" style="color:${cat.color}">${cat.label}</span>
-          <a class="card-apply" href="${job.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Apply →</a>
+          ${applyMarkup}
         </div>`;
       card.addEventListener('click', () => focusJob(job, card));
       card.addEventListener('keydown', e => {
@@ -2002,7 +2495,10 @@ Lyft
   // click, 3D pin click, unclustered-point click); any future styling tweak
   // now only needs to happen here.
   function jobPopupHTML({ title, company, url }) {
-    return `<div class="popup-title">${title}</div><div class="popup-company">${company}</div><a class="popup-apply" href="${url}" target="_blank" rel="noopener">View & Apply →</a>`;
+    const applyMarkup = url
+      ? `<a class="popup-apply" href="${url}" target="_blank" rel="noopener">View & Apply →</a>`
+      : `<span class="popup-apply" style="opacity:0.5;cursor:default;pointer-events:none;">Apply — coming soon</span>`;
+    return `<div class="popup-title">${title}</div><div class="popup-company">${company}</div>${applyMarkup}`;
   }
 
   function focusJob(job, card) {
@@ -2421,17 +2917,134 @@ Lyft
     map.on('moveend',    syncJobPinMarkers);
     map.on('sourcedata', e => { if (e.sourceId === 'jobs' && e.isSourceLoaded) syncJobPinMarkers(); });
 
-    // ── Initial data load: Adzuna (4 pages) + Jooble in parallel ──────────
+    // ── Initial data load: Adzuna (4 pages) + Jooble + direct postings ────
     const tags = CATEGORIES.filter(c => c.tag !== 'all' && c.tag !== 'placeholder').map(c => c.tag);
     joobleFailureCount = 0;
-    const [adzunaRes, joobleRes] = await Promise.all([
+    const [adzunaRes, joobleRes, directRes] = await Promise.all([
       mapWithConcurrency(tags, 3, fetchCategory),
-      mapWithConcurrency(tags, 3, fetchJooble)
+      mapWithConcurrency(tags, 3, fetchJooble),
+      fetchDirectPostings()
     ]);
     showSourceWarningIfNeeded(tags.length);
-    allJobs.push(...dedupeJobs([...adzunaRes.flat(), ...joobleRes.flat()]));
+    allJobs.push(...dedupeJobs([...adzunaRes.flat(), ...joobleRes.flat(), ...directRes]));
     hasCompletedSearch = true;
     if (activeFilter !== 'placeholder') { renderSidebar(); updateMapLayer(); }
+  });
+</script>
+
+<!-- Firebase: employer auth + Firestore, for job posting / application tracking.
+     Loaded as a module (deferred execution) so the classic script above has
+     already run and window.onEmployerAuthChanged is defined before
+     onAuthStateChanged can fire. Config is safe to embed client-side (same
+     pattern as the Mapbox token) — security comes from Firestore rules. -->
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js';
+  import {
+    getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+    signOut, onAuthStateChanged
+  } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js';
+  import {
+    getFirestore, doc, setDoc, getDoc, serverTimestamp,
+    collection, addDoc, getDocs, query, where, updateDoc
+  } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js';
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBgWkoOv606XtWL0c4j3HWH8344vXKQvts",
+    authDomain: "labor-network.firebaseapp.com",
+    projectId: "labor-network",
+    storageBucket: "labor-network.firebasestorage.app",
+    messagingSenderId: "95623267973",
+    appId: "1:95623267973:web:420edfa9709d4529e48bec",
+    measurementId: "G-YBH8GJE7C9"
+  };
+
+  const fbApp  = initializeApp(firebaseConfig);
+  const fbAuth = getAuth(fbApp);
+  const fbDb   = getFirestore(fbApp);
+
+  window.fbDb             = fbDb;
+  window.fbDoc             = doc;
+  window.fbSetDoc          = setDoc;
+  window.fbGetDoc          = getDoc;
+  window.fbServerTimestamp = serverTimestamp;
+
+  window.employerSignUp = async function(companyName, email, password) {
+    const cred = await createUserWithEmailAndPassword(fbAuth, email, password);
+    await setDoc(doc(fbDb, 'employers', cred.user.uid), {
+      companyName: companyName || '',
+      email,
+      createdAt: serverTimestamp()
+    });
+    return cred.user;
+  };
+
+  window.employerSignIn = async function(email, password) {
+    const cred = await signInWithEmailAndPassword(fbAuth, email, password);
+    return cred.user;
+  };
+
+  window.employerSignOut = function() {
+    return signOut(fbAuth);
+  };
+
+  // ── Job postings (jobPostings collection) ─────────────────────────────
+  window.postJobPosting = async function(posting) {
+    const user = fbAuth.currentUser;
+    if (!user) throw new Error('You need to be signed in to post a job.');
+    const employerSnap = await getDoc(doc(fbDb, 'employers', user.uid));
+    const companyName = employerSnap.exists() ? (employerSnap.data().companyName || '') : '';
+    const ref = await addDoc(collection(fbDb, 'jobPostings'), {
+      employerId:   user.uid,
+      companyName,
+      title:        posting.title,
+      category:     posting.category,
+      lat:          posting.lat,
+      lng:          posting.lng,
+      locationText: posting.locationText || '',
+      pay:          posting.pay || '',
+      description:  posting.description || '',
+      status:       'active',
+      createdAt:    serverTimestamp()
+    });
+    return ref.id;
+  };
+
+  window.fetchEmployerPostings = async function(employerId) {
+    const q = query(collection(fbDb, 'jobPostings'), where('employerId', '==', employerId));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  };
+
+  window.closeJobPosting = async function(postingId) {
+    await updateDoc(doc(fbDb, 'jobPostings', postingId), { status: 'closed' });
+  };
+
+  // Public read — no auth required, matches Firestore rules. Job seekers
+  // (who never sign in) see these mixed in with Adzuna/Jooble results.
+  window.fetchActiveDirectPostings = async function() {
+    const q = query(collection(fbDb, 'jobPostings'), where('status', '==', 'active'));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => {
+      const data = d.data();
+      return {
+        id:       `direct-${d.id}`,
+        title:    data.title,
+        company:  data.companyName || 'Employer',
+        url:      null, // in-app application flow is a later phase; see card/popup "coming soon" handling
+        lat:      data.lat,
+        lng:      data.lng,
+        category: data.category,
+        created:  data.createdAt ? data.createdAt.toDate().toISOString() : null,
+        source:   'direct'
+      };
+    });
+  };
+
+  onAuthStateChanged(fbAuth, (user) => {
+    window.currentEmployerUser = user || null;
+    if (typeof window.onEmployerAuthChanged === 'function') {
+      window.onEmployerAuthChanged(user);
+    }
   });
 </script>
 </body>
