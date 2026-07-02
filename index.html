@@ -838,17 +838,20 @@ Lyft
 <script>
   /*
     ── BACKLOG / NEXT ITERATION NOTES ──────────────────────────────────────
-    - Jooble fetch: requires CORS support from Jooble's server. If blocked,
-      results fall back to 0 silently — no breakage. A lightweight proxy
-      (e.g. Cloudflare Worker) can unlock this fully if needed.
+    - Adzuna/Jooble requests now route through a Cloudflare Worker proxy
+      (see worker.js, deployed at labor-network-proxy.coreydevdfw.workers.dev)
+      so neither API key ships in this file anymore. Fixes the old CORS
+      dependency on Jooble's server too, since the proxy's own CORS headers
+      govern the browser-facing response.
     - USPTO TESS check still pending on any shortlisted brand name before
       committing to wordmark/logo direction.
   ──────────────────────────────────────────────────────────────────────── */
 
   mapboxgl.accessToken = 'pk.eyJ1IjoiY29yZXlkZXZkZnciLCJhIjoiY21xaHVvanM2MDE3bDJ0cHB4NTF4andpdiJ9.7zXPq8gI54J5-OEEh69E5w';
-  const APP_ID   = 'b7919541';
-  const APP_KEY  = '3f2d6edcdeb9e34e2532ad7e64f6f7b2';
-  const JOOBLE_KEY = '793b9078-aa0b-4215-bb1a-0cd3d05d245f';
+  // Adzuna/Jooble keys now live server-side in a Cloudflare Worker proxy —
+  // see worker.js. The client no longer holds either key; it calls the
+  // proxy, which attaches the real credentials before forwarding upstream.
+  const PROXY_BASE = 'https://labor-network-proxy.coreydevdfw.workers.dev';
 
   // ── Analytics helper ────────────────────────────────────────────────────
   function trackEvent(name, params = {}) {
@@ -935,7 +938,7 @@ Lyft
   const map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/dark-v11',
-    center: CENTER, zoom: 10, minZoom: 8, maxZoom: 19, pitch: 0,
+    center: CENTER, zoom: 10, minZoom: 8, maxZoom: 20, pitch: 0,
     // Mapbox GL's default maxPitch is 60 — every nav-mode easeTo() below asks
     // for pitch:72 (a much steeper, closer-to-street-level camera) but was
     // silently getting clamped to 60 the whole time. Raising the cap here is
@@ -1534,10 +1537,10 @@ Lyft
   let ftSavedBearing = 0;
 
   const FT_MODE_CFG = {
-    driving: { color: '#63b3ed', label: 'Drive',  zoom: 16.5 },
-    walking: { color: '#ffb347', label: 'Walk',   zoom: 18.5 },
-    cycling: { color: '#68d391', label: 'Bike',   zoom: 16.5 },
-    dart:    { color: '#b794f6', label: 'DART',   zoom: 16   },
+    driving: { color: '#63b3ed', label: 'Drive',  zoom: 19.5 },
+    walking: { color: '#ffb347', label: 'Walk',   zoom: 19.5 },
+    cycling: { color: '#68d391', label: 'Bike',   zoom: 19.5 },
+    dart:    { color: '#b794f6', label: 'DART',   zoom: 19.5 },
   };
 
   // Named thresholds that used to be scattered as unlabeled magic numbers
@@ -2185,9 +2188,8 @@ Lyft
     const fetchPage = async (page) => {
       try {
         const res = await fetch(
-          `https://api.adzuna.com/v1/api/jobs/us/search/${page}` +
-          `?app_id=${APP_ID}&app_key=${APP_KEY}` +
-          `&where=Dallas,TX&results_per_page=50&distance=${RADIUS}${catParam}`
+          `${PROXY_BASE}/adzuna/${page}` +
+          `?where=Dallas,TX&results_per_page=50&distance=${RADIUS}${catParam}`
         );
         if (!res.ok) return [];
         return parseResults(await res.json());
@@ -2205,8 +2207,9 @@ Lyft
   // Jooble aggregates sources Adzuna doesn't cover (ZipRecruiter, Snagajob,
   // CareerBuilder, etc.). Their API doesn't return coordinates, so we geocode
   // unique location strings via Mapbox (max 12 unique locations per request).
-  // NOTE: Jooble's API may require a server-side proxy if CORS headers are not
-  // set on their endpoint — results fall back to [] silently if blocked.
+  // Routed through the Cloudflare Worker proxy (PROXY_BASE) rather than
+  // hitting jooble.org directly — sidesteps their CORS requirements and
+  // keeps JOOBLE_KEY off the client entirely.
   const joobleKeywordMap = {
     'logistics-warehouse-jobs': 'warehouse logistics forklift',
     'manufacturing-jobs':       'manufacturing production assembly',
@@ -2222,7 +2225,7 @@ Lyft
   async function fetchJooble(tag) {
     const keywords = joobleKeywordMap[tag] || tag.replace(/-jobs$/, '').replace(/-/g, ' ');
     try {
-      const res = await fetch(`https://jooble.org/api/${JOOBLE_KEY}`, {
+      const res = await fetch(`${PROXY_BASE}/jooble`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
