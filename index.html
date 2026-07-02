@@ -555,17 +555,17 @@
       cursor: pointer; text-decoration: underline; padding: 0;
     }
     #employer-status-row {
-      padding: 8px 14px 12px; display: flex; align-items: center; justify-content: space-between;
-      gap: 10px; font-size: 11px; color: rgba(255,255,255,0.5);
+      padding: 8px 14px 12px; display: flex; flex-direction: column; gap: 6px;
+      font-size: 11px; color: rgba(255,255,255,0.5);
       border-top: 1px solid rgba(255,255,255,0.06);
     }
     body.light #employer-status-row { border-top-color: rgba(0,0,0,0.07); }
     #employer-status-row > span {
-      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1 1 auto;
+      display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
     #employer-status-row strong { color: #00ff88; font-weight: 700; }
     body.light #employer-status-row strong { color: #006e3c; }
-    #employer-status-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    #employer-status-actions { display: flex; align-items: center; gap: 14px; }
     #employer-logout-btn {
       background: none; border: none; color: rgba(255,255,255,0.35); font-family: inherit;
       font-size: 10px; cursor: pointer; text-decoration: underline; padding: 0; flex-shrink: 0;
