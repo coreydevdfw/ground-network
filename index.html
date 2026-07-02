@@ -146,16 +146,20 @@
       box-shadow: 0 2px 0 rgba(0,255,136,0.09), 0 4px 12px rgba(0,0,0,0.3);
     }
     #sidebar-header {
-      padding: 20px 16px 12px;
-      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 22px 16px 14px;
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
     }
     .logo {
-      font-size: 22px; font-weight: 800; color: #00ff88; letter-spacing: 0.04em;
+      font-size: 30px; font-weight: 800; color: #00ff88; letter-spacing: 0.01em;
       text-shadow: 2px 2px 0 rgba(0,255,136,0.25), 4px 4px 0 rgba(0,255,136,0.1);
-      line-height: 1.1;
+      line-height: 1.02;
     }
-    .tagline { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 3px; letter-spacing: 0.02em; }
-    #zip-row { padding: 0 14px 12px; }
+    .tagline { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 5px; letter-spacing: 0.02em; }
+    #zip-row {
+      padding: 10px 14px 10px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    body.light #zip-row { border-top-color: rgba(0,0,0,0.07); }
     #zip-toggle-link {
       background: none; border: none; color: rgba(255,255,255,0.35);
       font-size: 11px; font-family: inherit; cursor: pointer; padding: 0;
@@ -445,7 +449,7 @@
       border-radius: 14px;
       padding: 20px 36px;
       text-align: center;
-      animation: navFlash 6s cubic-bezier(0.22,1,0.36,1) forwards;
+      animation: navFlash 5s cubic-bezier(0.22,1,0.36,1) forwards;
     }
     #nav-launch-badge .nav-mode-label {
       font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
@@ -491,7 +495,8 @@
     #app-dialog-confirm { background: #00ff88; color: #0a0a0a; }
     body.light #app-dialog-confirm { background: #00a055; color: #fff; }
     /* ── Employer entry point + auth modal ── */
-    #employer-row { padding: 0 14px 12px; }
+    #employer-row { padding: 8px 14px 12px; border-top: 1px solid rgba(255,255,255,0.06); }
+    body.light #employer-row { border-top-color: rgba(0,0,0,0.07); }
     #employer-toggle-link {
       background: none; border: none; color: rgba(0,255,136,0.6);
       font-size: 11px; font-family: inherit; cursor: pointer; padding: 0;
@@ -550,11 +555,17 @@
       cursor: pointer; text-decoration: underline; padding: 0;
     }
     #employer-status-row {
-      padding: 0 14px 12px; display: flex; align-items: center; justify-content: space-between;
-      gap: 8px; font-size: 11px; color: rgba(255,255,255,0.5);
+      padding: 8px 14px 12px; display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; font-size: 11px; color: rgba(255,255,255,0.5);
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    body.light #employer-status-row { border-top-color: rgba(0,0,0,0.07); }
+    #employer-status-row > span {
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1 1 auto;
     }
     #employer-status-row strong { color: #00ff88; font-weight: 700; }
     body.light #employer-status-row strong { color: #006e3c; }
+    #employer-status-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
     #employer-logout-btn {
       background: none; border: none; color: rgba(255,255,255,0.35); font-family: inherit;
       font-size: 10px; cursor: pointer; text-decoration: underline; padding: 0; flex-shrink: 0;
@@ -769,8 +780,10 @@
       </div>
       <div id="employer-status-row" style="display:none">
         <span>Signed in as <strong id="employer-status-name">—</strong></span>
-        <button id="employer-dashboard-btn">Post a job</button>
-        <button id="employer-logout-btn">Log out</button>
+        <div id="employer-status-actions">
+          <button id="employer-dashboard-btn">Post a job</button>
+          <button id="employer-logout-btn">Log out</button>
+        </div>
       </div>
     </div>
     <div id="filter-wrap">
@@ -2193,11 +2206,12 @@ Lyft
     }, 800);
 
     // Show nav overlay and clear launch screen after animation completes
+    // (kept in sync with the navFlash CSS animation duration above — 5s)
     setTimeout(() => {
       document.getElementById('flythrough-overlay').classList.add('active');
       launchOverlay.style.opacity = '0';
       setTimeout(() => launchOverlay.classList.remove('active'), 300);
-    }, 6000);
+    }, 5000);
 
     // Lock camera to user's current GPS position at nav pitch/zoom
     const userPos = userMarker ? userMarker.getLngLat().toArray() : CENTER;
