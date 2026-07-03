@@ -647,6 +647,63 @@
       border: none; font-family: inherit; cursor: pointer; padding: 0;
     }
     body.light .card-apply-soon { color: rgba(0,0,0,0.3) !important; }
+    /* Direct (employer-posted) job apply button + applied state — Phase 2 */
+    .card-apply-btn {
+      font-size: 10px; font-weight: 700; color: #00ff88; background: none;
+      border: none; font-family: inherit; cursor: pointer; padding: 0; text-decoration: none;
+    }
+    .card-apply-btn:hover { text-decoration: underline; }
+    body.light .card-apply-btn { color: #005a30 !important; }
+    .card-applied { font-size: 10px; font-weight: 700; color: rgba(0,255,136,0.55); }
+    body.light .card-applied { color: rgba(0,110,60,0.6) !important; }
+    .popup-apply-btn { border: none; cursor: pointer; font-family: inherit; }
+    .popup-applied { background: rgba(0,255,136,0.15) !important; color: #00ff88 !important; }
+    body.light .popup-applied { background: rgba(0,110,60,0.12) !important; color: #006e3c !important; }
+    /* ── Job application modal (job-seeker apply flow) ── */
+    #apply-modal-overlay {
+      position: fixed; inset: 0; z-index: 10000;
+      background: rgba(0,0,0,0.65);
+      display: none; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    #apply-modal-overlay.show { display: flex; }
+    #apply-modal-box {
+      position: relative;
+      background: #0f0f0f; border: 2px solid #00ff88;
+      box-shadow: 0 0 0 6px rgba(0,255,136,0.08), 4px 6px 0 rgba(0,255,136,0.28);
+      border-radius: 14px; padding: 26px 26px 22px; max-width: 360px; width: 100%;
+    }
+    body.light #apply-modal-box { background: #fff; border-color: #00a055; box-shadow: 0 0 0 6px rgba(0,160,85,0.08), 4px 6px 0 rgba(0,160,85,0.22); }
+    #apply-modal-close {
+      position: absolute; right: 14px; top: 14px; background: none; border: none;
+      color: rgba(255,255,255,0.35); cursor: pointer; font-size: 16px; padding: 2px;
+    }
+    body.light #apply-modal-close { color: rgba(0,0,0,0.35); }
+    #apply-modal-title { font-size: 17px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+    body.light #apply-modal-title { color: #111; }
+    #apply-modal-sub { font-size: 12px; color: rgba(0,255,136,0.6); margin-bottom: 18px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+    body.light #apply-modal-sub { color: #006e3c; }
+    #apply-modal-error {
+      font-size: 11px; color: #ff6b6b; margin-bottom: 10px; line-height: 1.4; display: none;
+    }
+    #apply-modal-error.show { display: block; }
+    #apply-submit-btn {
+      width: 100%; font-size: 13px; font-weight: 700; color: #0a0a0a; background: #00ff88;
+      border: none; border-radius: 8px; padding: 10px; cursor: pointer; font-family: inherit; margin-top: 4px;
+    }
+    #apply-submit-btn:hover { background: #33ffa3; }
+    #apply-submit-btn:disabled { opacity: 0.5; pointer-events: none; }
+    #apply-success { display: none; text-align: center; padding: 10px 0 4px; }
+    #apply-success-icon { font-size: 30px; margin-bottom: 10px; }
+    #apply-success-title { font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+    body.light #apply-success-title { color: #111; }
+    #apply-success-sub { font-size: 12px; color: rgba(255,255,255,0.45); line-height: 1.5; margin-bottom: 18px; }
+    body.light #apply-success-sub { color: rgba(0,0,0,0.5); }
+    #apply-success-close {
+      width: 100%; font-size: 13px; font-weight: 700; color: #0a0a0a; background: #00ff88;
+      border: none; border-radius: 8px; padding: 10px; cursor: pointer; font-family: inherit;
+    }
+    #apply-success-close:hover { background: #33ffa3; }
     /* Sidebar slides out during navigation.
        Must collapse width/min-width (not just transform) — #app is a flex
        row and #sidebar has a fixed width:320px/min-width:320px. A transform
@@ -1070,6 +1127,37 @@ Lyft
   </div>
 </div>
 
+<!-- Job seeker application form (direct/employer-posted jobs only) -->
+<div id="apply-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="apply-modal-title">
+  <div id="apply-modal-box">
+    <button id="apply-modal-close" type="button" aria-label="Close">✕</button>
+    <div id="apply-modal-title">Apply</div>
+    <div id="apply-modal-sub">Labor Network</div>
+    <div id="apply-modal-error"></div>
+    <form id="apply-form">
+      <div class="employer-field">
+        <label for="apply-name-input">Full name</label>
+        <input id="apply-name-input" type="text" autocomplete="name" required />
+      </div>
+      <div class="employer-field">
+        <label for="apply-email-input">Email</label>
+        <input id="apply-email-input" type="email" autocomplete="email" required />
+      </div>
+      <div class="employer-field">
+        <label for="apply-phone-input">Phone (optional)</label>
+        <input id="apply-phone-input" type="tel" autocomplete="tel" />
+      </div>
+      <button id="apply-submit-btn" type="submit">Submit application</button>
+    </form>
+    <div id="apply-success">
+      <div id="apply-success-icon">✅</div>
+      <div id="apply-success-title">Application submitted</div>
+      <div id="apply-success-sub">The employer can see your application in their dashboard. They'll reach out directly if it's a match.</div>
+      <button id="apply-success-close" type="button">Done</button>
+    </div>
+  </div>
+</div>
+
 <script>
   /*
     ── BACKLOG / NEXT ITERATION NOTES ──────────────────────────────────────
@@ -1145,6 +1233,19 @@ Lyft
   CATEGORIES.forEach(c => { colorMap[c.tag] = c.color; });
 
   let allJobs = [], activeFilter = 'placeholder', activePopup = null, activeCard = null;
+
+  // ── Applied-job tracking (client-side only — job seekers have no login) ──
+  const APPLIED_JOBS_KEY = 'laborNetworkAppliedJobs';
+  function getAppliedJobIds() {
+    try { return new Set(JSON.parse(localStorage.getItem(APPLIED_JOBS_KEY) || '[]')); }
+    catch (e) { return new Set(); }
+  }
+  function markJobApplied(postingId) {
+    const ids = getAppliedJobIds();
+    ids.add(postingId);
+    try { localStorage.setItem(APPLIED_JOBS_KEY, JSON.stringify([...ids])); }
+    catch (e) { console.warn('Failed to persist applied-job state:', e); }
+  }
   let activeMapJobs = [];
   let joobleFailureCount = 0; // reset + counted each search batch; see showSourceWarningIfNeeded()
   let hasCompletedSearch = false; // false until the first job fetch finishes — distinguishes "still loading" from "genuinely zero jobs at this location"
@@ -1543,6 +1644,78 @@ Lyft
     allJobs = [...allJobs.filter(j => j.source !== 'direct'), ...direct];
     if (activeFilter !== 'placeholder') { renderSidebar(); updateMapLayer(); }
   }
+
+  // ── Job application flow (Phase 2) ───────────────────────────────────────
+  // Direct (employer-posted) jobs use this in-app form instead of an outbound
+  // link. Job seekers never sign in, so the form just captures name/email/
+  // phone; "already applied" state lives in localStorage on their device.
+  let applyModalJob = null;
+
+  // Popup HTML (map pins/unclustered points) is injected as a raw string, so
+  // its Apply button can't hold a closure — it calls this global by
+  // postingId instead, looking the job up out of the in-memory allJobs list.
+  window.handleApplyClick = function(postingId) {
+    const job = allJobs.find(j => j.source === 'direct' && j.postingId === postingId);
+    if (job) openApplyModal(job);
+  };
+
+  function openApplyModal(job) {
+    applyModalJob = job;
+    document.getElementById('apply-modal-title').textContent = `Apply — ${job.title}`;
+    document.getElementById('apply-modal-sub').textContent = job.company || 'Labor Network';
+    document.getElementById('apply-modal-error').classList.remove('show');
+    document.getElementById('apply-form').reset();
+    document.getElementById('apply-form').style.display = '';
+    document.getElementById('apply-success').style.display = 'none';
+    document.getElementById('apply-modal-overlay').classList.add('show');
+  }
+  function closeApplyModal() {
+    document.getElementById('apply-modal-overlay').classList.remove('show');
+    applyModalJob = null;
+  }
+  function showApplyModalError(msg) {
+    const el = document.getElementById('apply-modal-error');
+    el.textContent = msg;
+    el.classList.add('show');
+  }
+
+  document.getElementById('apply-modal-close').addEventListener('click', closeApplyModal);
+  document.getElementById('apply-modal-overlay').addEventListener('click', (e) => {
+    if (e.target.id === 'apply-modal-overlay') closeApplyModal();
+  });
+  document.getElementById('apply-success-close').addEventListener('click', closeApplyModal);
+  document.getElementById('apply-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!applyModalJob) return;
+    const submitBtn = document.getElementById('apply-submit-btn');
+    const name  = document.getElementById('apply-name-input').value.trim();
+    const email = document.getElementById('apply-email-input').value.trim();
+    const phone = document.getElementById('apply-phone-input').value.trim();
+    document.getElementById('apply-modal-error').classList.remove('show');
+    submitBtn.disabled = true;
+    const prevText = submitBtn.textContent;
+    submitBtn.textContent = 'Submitting…';
+    try {
+      await window.submitApplication({
+        postingId:      applyModalJob.postingId,
+        employerId:     applyModalJob.employerId,
+        applicantName:  name,
+        applicantEmail: email,
+        applicantPhone: phone
+      });
+      trackEvent('job_application_submitted', { category: applyModalJob.category });
+      markJobApplied(applyModalJob.postingId);
+      document.getElementById('apply-form').style.display = 'none';
+      document.getElementById('apply-success').style.display = '';
+      renderSidebar();
+      if (activePopup) activePopup.remove();
+    } catch (err) {
+      showApplyModalError(err && err.message ? err.message : 'Something went wrong — try again.');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = prevText;
+    }
+  });
 
   // ── Circle ───────────────────────────────────────────────────────────────
   function makeCircle(center, radiusMiles, steps=64) {
@@ -2457,11 +2630,16 @@ Lyft
         ? '<span class="card-stale">⚠️ Posted 30+ days ago</span>'
         : '';
 
-      // Direct (employer-posted) jobs don't have an outbound apply URL yet —
-      // the in-app application flow is a separate build phase — so show a
-      // disabled-looking "coming soon" label instead of a broken link.
+      // Direct (employer-posted) jobs use the in-app application form instead
+      // of an outbound link. Aggregated (Adzuna/Jooble) jobs still route out
+      // via job.url. A job already applied to (tracked client-side, since
+      // seekers have no login) shows "Applied ✓" instead of the button.
       const applyMarkup = job.url
         ? `<a class="card-apply" href="${job.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Apply →</a>`
+        : job.source === 'direct' && job.postingId
+        ? (getAppliedJobIds().has(job.postingId)
+            ? `<span class="card-applied">Applied ✓</span>`
+            : `<button type="button" class="card-apply-btn" onclick="event.stopPropagation(); window.handleApplyClick('${job.postingId}')">Apply →</button>`)
         : `<span class="card-apply-soon" onclick="event.stopPropagation()">Apply — coming soon</span>`;
 
       card.innerHTML = `
@@ -2508,10 +2686,17 @@ Lyft
   // Shared job-popup markup — was copy-pasted at 3 call sites (sidebar card
   // click, 3D pin click, unclustered-point click); any future styling tweak
   // now only needs to happen here.
-  function jobPopupHTML({ title, company, url }) {
-    const applyMarkup = url
-      ? `<a class="popup-apply" href="${url}" target="_blank" rel="noopener">View & Apply →</a>`
-      : `<span class="popup-apply" style="opacity:0.5;cursor:default;pointer-events:none;">Apply — coming soon</span>`;
+  function jobPopupHTML({ title, company, url, source, postingId }) {
+    let applyMarkup;
+    if (url) {
+      applyMarkup = `<a class="popup-apply" href="${url}" target="_blank" rel="noopener">View & Apply →</a>`;
+    } else if (source === 'direct' && postingId) {
+      applyMarkup = getAppliedJobIds().has(postingId)
+        ? `<span class="popup-apply popup-applied">Applied ✓</span>`
+        : `<button type="button" class="popup-apply popup-apply-btn" onclick="window.handleApplyClick('${postingId}')">Apply →</button>`;
+    } else {
+      applyMarkup = `<span class="popup-apply" style="opacity:0.5;cursor:default;pointer-events:none;">Apply — coming soon</span>`;
+    }
     return `<div class="popup-title">${title}</div><div class="popup-company">${company}</div>${applyMarkup}`;
   }
 
@@ -2540,7 +2725,7 @@ Lyft
       features: jobs.map(job => ({
         type:'Feature',
         geometry:{ type:'Point', coordinates:[job.lng, job.lat] },
-        properties:{ title:job.title, company:job.company, url:job.url, category:job.category, color:colorMap[job.category]||'#00ff88' }
+        properties:{ title:job.title, company:job.company, url:job.url, category:job.category, color:colorMap[job.category]||'#00ff88', source:job.source||null, postingId:job.postingId||null }
       }))
     };
     if (map.getSource('jobs')) map.getSource('jobs').setData(geojson);
@@ -2622,7 +2807,8 @@ Lyft
       if (jobPinMarkers[key]) return;
       addJobPinMarker(job.lng, job.lat, {
         title:job.title, company:job.company, url:job.url,
-        category:job.category, color:colorMap[job.category]||'#00ff88'
+        category:job.category, color:colorMap[job.category]||'#00ff88',
+        source:job.source, postingId:job.postingId
       }, key);
     });
 
@@ -2633,7 +2819,8 @@ Lyft
         addJobPinMarker(currentJob.lng, currentJob.lat, {
           title:currentJob.title, company:currentJob.company,
           url:currentJob.url, category:currentJob.category,
-          color:colorMap[currentJob.category]||'#00ff88'
+          color:colorMap[currentJob.category]||'#00ff88',
+          source:currentJob.source, postingId:currentJob.postingId
         }, fkey);
       }
     }
@@ -2894,12 +3081,12 @@ Lyft
 
     // Unclustered point click → popup + commute
     map.on('click', 'unclustered-point', e => {
-      const { title, company, url } = e.features[0].properties;
+      const { title, company, url, source, postingId } = e.features[0].properties;
       const coords = e.features[0].geometry.coordinates.slice();
       if (activePopup) activePopup.remove();
       activePopup = new mapboxgl.Popup({ closeButton:true, maxWidth:'260px' })
         .setLngLat(coords)
-        .setHTML(jobPopupHTML({ title, company, url }))
+        .setHTML(jobPopupHTML({ title, company, url, source, postingId }))
         .addTo(map);
       map.flyTo({ center:coords, zoom:Math.max(map.getZoom(),15), pitch:50, duration:700 });
       const jobs = filteredJobs();
@@ -3041,17 +3228,38 @@ Lyft
     return snap.docs.map(d => {
       const data = d.data();
       return {
-        id:       `direct-${d.id}`,
-        title:    data.title,
-        company:  data.companyName || 'Employer',
-        url:      null, // in-app application flow is a later phase; see card/popup "coming soon" handling
-        lat:      data.lat,
-        lng:      data.lng,
-        category: data.category,
-        created:  data.createdAt ? data.createdAt.toDate().toISOString() : null,
-        source:   'direct'
+        id:         `direct-${d.id}`,
+        postingId:  d.id,             // raw jobPostings doc ID — needed to file an application
+        employerId: data.employerId,  // required by the applications collection's security rules
+        title:      data.title,
+        company:    data.companyName || 'Employer',
+        url:        null, // job seekers apply in-app instead of an outbound link (Phase 2)
+        lat:        data.lat,
+        lng:        data.lng,
+        category:   data.category,
+        created:    data.createdAt ? data.createdAt.toDate().toISOString() : null,
+        source:     'direct'
       };
     });
+  };
+
+  // ── Applications (applications collection) ─────────────────────────────
+  // Public create — job seekers never sign in. Firestore rules require
+  // postingId/employerId/applicantName/applicantEmail and status:'applied'.
+  // The auto-generated doc ID doubles as an unguessable no-login status-check
+  // token for a later phase (Phase 3 — status-check-by-link).
+  window.submitApplication = async function({ postingId, employerId, applicantName, applicantEmail, applicantPhone }) {
+    if (!postingId || !employerId) throw new Error('This job posting is missing required data — try refreshing the page.');
+    const ref = await addDoc(collection(fbDb, 'applications'), {
+      postingId,
+      employerId,
+      applicantName:  applicantName || '',
+      applicantEmail: applicantEmail || '',
+      applicantPhone: applicantPhone || '',
+      status:         'applied',
+      createdAt:      serverTimestamp()
+    });
+    return ref.id;
   };
 
   onAuthStateChanged(fbAuth, (user) => {
