@@ -642,6 +642,39 @@
       font-size: 10px; cursor: pointer; padding: 4px 8px; border-radius: 6px; flex-shrink: 0;
     }
     .employer-posting-close-btn:hover { background: rgba(255,107,107,0.1); }
+    /* ── Applicant roster (Phase 3) ── */
+    .employer-posting-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .employer-applicants-toggle {
+      background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.25); color: #00ff88;
+      font-family: inherit; font-size: 10px; font-weight: 700; cursor: pointer;
+      padding: 4px 8px; border-radius: 6px;
+    }
+    .employer-applicants-toggle:hover { background: rgba(0,255,136,0.18); }
+    body.light .employer-applicants-toggle { background: rgba(0,160,85,0.08); border-color: rgba(0,160,85,0.3); color: #006e3c; }
+    .employer-applicants-list {
+      display: none; padding: 4px 0 12px 4px; margin-bottom: 4px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    body.light .employer-applicants-list { border-bottom-color: rgba(0,0,0,0.06); }
+    .employer-applicants-list.show { display: block; }
+    .employer-applicants-empty { font-size: 11px; color: rgba(255,255,255,0.3); padding: 6px 0; }
+    body.light .employer-applicants-empty { color: rgba(0,0,0,0.3); }
+    .applicant-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 7px 0; font-size: 11px;
+    }
+    .applicant-info { min-width: 0; color: rgba(255,255,255,0.7); }
+    body.light .applicant-info { color: rgba(0,0,0,0.7); }
+    .applicant-info .ap-name { font-weight: 700; color: #fff; }
+    body.light .applicant-info .ap-name { color: #111; }
+    .applicant-info .ap-contact { font-size: 10px; color: rgba(255,255,255,0.35); margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    body.light .applicant-info .ap-contact { color: rgba(0,0,0,0.4); }
+    .applicant-status-select {
+      flex-shrink: 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 6px; padding: 4px 6px; color: #fff; font-size: 10px; font-family: inherit; outline: none;
+    }
+    body.light .applicant-status-select { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.12); color: #111; }
+    .applicant-status-select:disabled { opacity: 0.5; }
     .card-apply-soon {
       font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.3); background: none;
       border: none; font-family: inherit; cursor: pointer; padding: 0;
@@ -704,6 +737,65 @@
       border: none; border-radius: 8px; padding: 10px; cursor: pointer; font-family: inherit;
     }
     #apply-success-close:hover { background: #33ffa3; }
+    /* ── Status-check link (Phase 3) — shown on the apply-success screen ── */
+    #apply-status-link-row { margin-bottom: 16px; text-align: left; }
+    #apply-status-link-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.03em; color: rgba(255,255,255,0.4);
+      margin-bottom: 6px; line-height: 1.4;
+    }
+    body.light #apply-status-link-label { color: rgba(0,0,0,0.45); }
+    #apply-status-link-wrap { display: flex; gap: 6px; }
+    #apply-status-link-input {
+      flex: 1; min-width: 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 7px; padding: 8px 10px; color: rgba(255,255,255,0.6); font-size: 11px; font-family: inherit; outline: none;
+    }
+    body.light #apply-status-link-input { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.12); color: rgba(0,0,0,0.6); }
+    #apply-status-copy-btn {
+      flex-shrink: 0; background: rgba(0,255,136,0.12); border: 1px solid rgba(0,255,136,0.3); color: #00ff88;
+      font-family: inherit; font-size: 11px; font-weight: 700; cursor: pointer; padding: 8px 12px; border-radius: 7px;
+    }
+    #apply-status-copy-btn:hover { background: rgba(0,255,136,0.2); }
+    body.light #apply-status-copy-btn { background: rgba(0,160,85,0.1); border-color: rgba(0,160,85,0.3); color: #006e3c; }
+    /* ── Seeker status-check overlay (arrived via ?application=<id> link) ── */
+    #status-check-overlay {
+      position: fixed; inset: 0; z-index: 10001;
+      background: rgba(0,0,0,0.75);
+      display: none; align-items: center; justify-content: center; padding: 20px;
+    }
+    #status-check-overlay.show { display: flex; }
+    #status-check-box {
+      position: relative;
+      background: #0f0f0f; border: 2px solid #00ff88;
+      box-shadow: 0 0 0 6px rgba(0,255,136,0.08), 4px 6px 0 rgba(0,255,136,0.28);
+      border-radius: 14px; padding: 28px 26px 24px; max-width: 360px; width: 100%; text-align: center;
+    }
+    body.light #status-check-box { background: #fff; border-color: #00a055; box-shadow: 0 0 0 6px rgba(0,160,85,0.08), 4px 6px 0 rgba(0,160,85,0.22); }
+    #status-check-title { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(0,255,136,0.6); margin-bottom: 16px; }
+    body.light #status-check-title { color: #006e3c; }
+    #status-check-loading, #status-check-error { font-size: 13px; color: rgba(255,255,255,0.5); padding: 10px 0; }
+    body.light #status-check-loading, body.light #status-check-error { color: rgba(0,0,0,0.5); }
+    #status-check-content { display: none; }
+    #status-check-job { font-size: 17px; font-weight: 800; color: #fff; margin-bottom: 3px; }
+    body.light #status-check-job { color: #111; }
+    #status-check-company { font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 6px; }
+    body.light #status-check-company { color: rgba(0,0,0,0.45); }
+    #status-check-applicant { font-size: 11px; color: rgba(255,255,255,0.3); margin-bottom: 18px; }
+    body.light #status-check-applicant { color: rgba(0,0,0,0.35); }
+    .status-badge {
+      display: inline-block; font-size: 13px; font-weight: 800; padding: 8px 18px;
+      border-radius: 20px; letter-spacing: 0.02em;
+    }
+    .status-badge.status-applied      { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.8); }
+    .status-badge.status-contacted    { background: rgba(0,255,136,0.12); color: #00ff88; }
+    .status-badge.status-interviewing { background: rgba(255,193,7,0.15); color: #ffc107; }
+    .status-badge.status-hired        { background: #00ff88; color: #0a0a0a; }
+    .status-badge.status-rejected     { background: rgba(255,107,107,0.15); color: #ff6b6b; }
+    body.light .status-badge.status-applied { background: rgba(0,0,0,0.06); color: rgba(0,0,0,0.7); }
+    #status-check-back {
+      display: block; margin-top: 20px; font-size: 12px; color: rgba(255,255,255,0.4);
+      text-decoration: underline;
+    }
+    body.light #status-check-back { color: rgba(0,0,0,0.45); }
     /* Sidebar slides out during navigation.
        Must collapse width/min-width (not just transform) — #app is a flex
        row and #sidebar has a fixed width:320px/min-width:320px. A transform
@@ -1153,8 +1245,32 @@ Lyft
       <div id="apply-success-icon">✅</div>
       <div id="apply-success-title">Application submitted</div>
       <div id="apply-success-sub">The employer can see your application in their dashboard. They'll reach out directly if it's a match.</div>
+      <div id="apply-status-link-row">
+        <div id="apply-status-link-label">Save this link to check your status anytime — no login needed</div>
+        <div id="apply-status-link-wrap">
+          <input id="apply-status-link-input" type="text" readonly />
+          <button id="apply-status-copy-btn" type="button">Copy</button>
+        </div>
+      </div>
       <button id="apply-success-close" type="button">Done</button>
     </div>
+  </div>
+</div>
+
+<!-- Seeker status-check overlay (shown when the page is opened with
+     ?application=<id> from the status-check link above) -->
+<div id="status-check-overlay" role="dialog" aria-modal="true" aria-labelledby="status-check-title">
+  <div id="status-check-box">
+    <div id="status-check-title">Application status</div>
+    <div id="status-check-loading">Loading…</div>
+    <div id="status-check-content">
+      <div id="status-check-job"></div>
+      <div id="status-check-company"></div>
+      <div id="status-check-applicant"></div>
+      <span id="status-check-badge" class="status-badge"></span>
+    </div>
+    <div id="status-check-error" style="display:none">Couldn't find that application. The link may be incorrect or the application may have been removed.</div>
+    <a id="status-check-back" href="./">← Back to Labor Network</a>
   </div>
 </div>
 
@@ -1535,18 +1651,52 @@ Lyft
     el.classList.add('show');
   }
 
+  // Status taxonomy for the employer applicant dashboard (Phase 3). 'applied'
+  // is the only value the create rule allows on write; the rest are set by
+  // the employer via updateApplicationStatus (rules restrict updates to the
+  // owning employer and to the status/updatedAt fields).
+  const APPLICATION_STATUSES = [
+    { value: 'applied',      label: 'Applied' },
+    { value: 'contacted',    label: 'Contacted' },
+    { value: 'interviewing', label: 'Interviewing' },
+    { value: 'hired',        label: 'Hired' },
+    { value: 'rejected',     label: 'Not a fit' }
+  ];
+
+  function applicantRowHTML(a) {
+    const contact = [a.applicantEmail, a.applicantPhone].filter(Boolean).join(' · ');
+    const options = APPLICATION_STATUSES.map(s =>
+      `<option value="${s.value}"${a.status === s.value ? ' selected' : ''}>${s.label}</option>`
+    ).join('');
+    return `
+      <div class="applicant-row" data-app-id="${a.id}">
+        <div class="applicant-info">
+          <div class="ap-name">${a.applicantName || 'Applicant'}</div>
+          <div class="ap-contact">${contact}</div>
+        </div>
+        <select class="applicant-status-select" data-app-id="${a.id}">${options}</select>
+      </div>`;
+  }
+
   async function renderEmployerPostings() {
     const list = document.getElementById('employer-postings-list');
     const user = window.currentEmployerUser;
     if (!user) { list.innerHTML = '<div id="employer-postings-empty">No postings yet.</div>'; return; }
     list.innerHTML = '<div id="employer-postings-empty">Loading…</div>';
-    let postings = [];
-    try { postings = await window.fetchEmployerPostings(user.uid); }
-    catch (e) { console.warn('Failed to load postings:', e); }
+    let postings = [], applications = [];
+    try {
+      [postings, applications] = await Promise.all([
+        window.fetchEmployerPostings(user.uid),
+        window.fetchApplicantsForEmployer(user.uid)
+      ]);
+    } catch (e) { console.warn('Failed to load postings/applicants:', e); }
     if (!postings.length) { list.innerHTML = '<div id="employer-postings-empty">No postings yet.</div>'; return; }
     postings.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+    const appsByPosting = {};
+    applications.forEach(a => { (appsByPosting[a.postingId] = appsByPosting[a.postingId] || []).push(a); });
     list.innerHTML = '';
     postings.forEach(p => {
+      const apps = appsByPosting[p.id] || [];
       const row = document.createElement('div');
       row.className = 'employer-posting-card';
       row.innerHTML = `
@@ -1554,11 +1704,27 @@ Lyft
           <div class="ep-title">${p.title}</div>
           <div class="ep-meta">${postCatLabel(p.category)} · ${p.locationText || ''}</div>
         </div>
-        ${p.status === 'active'
-          ? `<button class="employer-posting-close-btn" data-id="${p.id}">Close</button>`
-          : `<span class="employer-posting-status-closed">Closed</span>`}
+        <div class="employer-posting-actions">
+          <button type="button" class="employer-applicants-toggle" data-id="${p.id}">Applicants (${apps.length})</button>
+          ${p.status === 'active'
+            ? `<button type="button" class="employer-posting-close-btn" data-id="${p.id}">Close</button>`
+            : `<span class="employer-posting-status-closed">Closed</span>`}
+        </div>
       `;
       list.appendChild(row);
+      const appsList = document.createElement('div');
+      appsList.className = 'employer-applicants-list';
+      appsList.id = `applicants-${p.id}`;
+      appsList.innerHTML = apps.length
+        ? apps.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)).map(applicantRowHTML).join('')
+        : '<div class="employer-applicants-empty">No applicants yet.</div>';
+      list.appendChild(appsList);
+    });
+    list.querySelectorAll('.employer-applicants-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const panel = document.getElementById(`applicants-${btn.dataset.id}`);
+        if (panel) panel.classList.toggle('show');
+      });
     });
     list.querySelectorAll('.employer-posting-close-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
@@ -1571,6 +1737,23 @@ Lyft
         } catch (e) {
           console.warn('Failed to close posting:', e);
           btn.disabled = false; btn.textContent = 'Close';
+        }
+      });
+    });
+    list.querySelectorAll('.applicant-status-select').forEach(sel => {
+      sel.addEventListener('change', async () => {
+        const prevValue = sel.dataset.prevValue || sel.value;
+        sel.disabled = true;
+        try {
+          await window.updateApplicationStatus(sel.dataset.appId, sel.value);
+          trackEvent('employer_applicant_status_updated', { status: sel.value });
+          sel.dataset.prevValue = sel.value;
+        } catch (e) {
+          console.warn('Failed to update applicant status:', e);
+          sel.value = prevValue;
+          showAppAlert("Couldn't update that applicant's status — try again.");
+        } finally {
+          sel.disabled = false;
         }
       });
     });
@@ -1696,7 +1879,7 @@ Lyft
     const prevText = submitBtn.textContent;
     submitBtn.textContent = 'Submitting…';
     try {
-      await window.submitApplication({
+      const applicationId = await window.submitApplication({
         postingId:      applyModalJob.postingId,
         employerId:     applyModalJob.employerId,
         applicantName:  name,
@@ -1705,6 +1888,8 @@ Lyft
       });
       trackEvent('job_application_submitted', { category: applyModalJob.category });
       markJobApplied(applyModalJob.postingId);
+      const statusUrl = `${location.origin}${location.pathname}?application=${applicationId}`;
+      document.getElementById('apply-status-link-input').value = statusUrl;
       document.getElementById('apply-form').style.display = 'none';
       document.getElementById('apply-success').style.display = '';
       renderSidebar();
@@ -1716,6 +1901,52 @@ Lyft
       submitBtn.textContent = prevText;
     }
   });
+
+  document.getElementById('apply-status-copy-btn').addEventListener('click', async () => {
+    const input = document.getElementById('apply-status-link-input');
+    const btn   = document.getElementById('apply-status-copy-btn');
+    try {
+      await navigator.clipboard.writeText(input.value);
+    } catch (e) {
+      // Clipboard API can be blocked in some contexts — fall back to a
+      // manual select so the user can still Ctrl/Cmd+C it themselves.
+      input.select();
+    }
+    const prevText = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = prevText; }, 1800);
+  });
+
+  // ── Seeker status-check view (Phase 3) ───────────────────────────────────
+  // Called by the Firebase module script (after window.fetchApplicationStatus
+  // is defined) when the page is opened via ?application=<id>.
+  const STATUS_LABELS = {
+    applied: 'Applied', contacted: 'Contacted', interviewing: 'Interviewing',
+    hired: 'Hired', rejected: 'Not a fit this time'
+  };
+  function showStatusCheckError() {
+    document.getElementById('status-check-loading').style.display = 'none';
+    document.getElementById('status-check-error').style.display = '';
+  }
+  window.renderStatusCheck = async function(applicationId) {
+    document.getElementById('status-check-overlay').classList.add('show');
+    try {
+      const app = await window.fetchApplicationStatus(applicationId);
+      if (!app) { showStatusCheckError(); return; }
+      document.getElementById('status-check-loading').style.display = 'none';
+      document.getElementById('status-check-content').style.display = 'block';
+      document.getElementById('status-check-job').textContent = app.jobTitle || 'Job posting';
+      document.getElementById('status-check-company').textContent = app.companyName || '';
+      document.getElementById('status-check-applicant').textContent = `Applied as ${app.applicantName || 'you'}`;
+      const badge = document.getElementById('status-check-badge');
+      const status = app.status || 'applied';
+      badge.textContent = STATUS_LABELS[status] || status;
+      badge.className = `status-badge status-${status}`;
+    } catch (e) {
+      console.warn('Status check failed:', e);
+      showStatusCheckError();
+    }
+  };
 
   // ── Circle ───────────────────────────────────────────────────────────────
   function makeCircle(center, radiusMiles, steps=64) {
@@ -3262,12 +3493,56 @@ Lyft
     return ref.id;
   };
 
+  // Employer-only: full applicant roster across all of an employer's
+  // postings. Scoped by employerId (not postingId) to match the Firestore
+  // rule, which restricts `list` to the owning employer — the dashboard
+  // groups these client-side by postingId.
+  window.fetchApplicantsForEmployer = async function(employerId) {
+    const q = query(collection(fbDb, 'applications'), where('employerId', '==', employerId));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  };
+
+  // Employer-only: update an applicant's status. Rules restrict this to the
+  // owning employer and to the status/updatedAt fields only.
+  window.updateApplicationStatus = async function(applicationId, status) {
+    await updateDoc(doc(fbDb, 'applications', applicationId), { status, updatedAt: serverTimestamp() });
+  };
+
+  // Public, no-login lookup for the seeker-facing status-check link — the
+  // application doc's own auto-ID is the unguessable token (see Firestore
+  // rules: single-doc `get` is public). Applications don't store job title/
+  // company themselves, so this also does a second public read against the
+  // jobPostings doc to fill those in for display.
+  window.fetchApplicationStatus = async function(applicationId) {
+    const snap = await getDoc(doc(fbDb, 'applications', applicationId));
+    if (!snap.exists()) return null;
+    const data = snap.data();
+    let jobTitle = null, companyName = null;
+    try {
+      const pSnap = await getDoc(doc(fbDb, 'jobPostings', data.postingId));
+      if (pSnap.exists()) { jobTitle = pSnap.data().title; companyName = pSnap.data().companyName; }
+    } catch (e) { console.warn('Could not load posting details for status check:', e); }
+    return { id: snap.id, ...data, jobTitle, companyName };
+  };
+
   onAuthStateChanged(fbAuth, (user) => {
     window.currentEmployerUser = user || null;
     if (typeof window.onEmployerAuthChanged === 'function') {
       window.onEmployerAuthChanged(user);
     }
   });
+
+  // If this page was opened via a seeker's no-login status-check link
+  // (?application=<id>), kick off the status view now. The classic script
+  // above (parsed earlier, during document parsing) already defined
+  // window.renderStatusCheck; this module script — deferred like all
+  // type="module" scripts — always runs after that, so both are guaranteed
+  // to exist by this point.
+  const _statusCheckId = new URLSearchParams(location.search).get('application');
+  if (_statusCheckId && typeof window.renderStatusCheck === 'function') {
+    window.renderStatusCheck(_statusCheckId);
+  }
 </script>
 </body>
 </html>
