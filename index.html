@@ -1334,15 +1334,22 @@ Lyft
   let activeMode = 'driving';
 
   const CATEGORIES = [
-    { tag:'placeholder',              label:'Select a category…',   color:'#555' },
-    { tag:'all',                      label:'All Jobs',              color:'#00ff88' },
-    { tag:'logistics-warehouse-jobs', label:'Warehouse & Logistics', color:'#ff9f43' },
-    { tag:'manufacturing-jobs',       label:'Manufacturing',         color:'#54a0ff' },
-    { tag:'trade-construction-jobs',  label:'Trades & Construction', color:'#ffd32a' },
-    { tag:'retail-jobs',              label:'Retail',                color:'#c56cf0' },
-    { tag:'customer-services-jobs',   label:'Customer Service',      color:'#ff6b81' },
-    { tag:'engineering-jobs',         label:'Engineering',           color:'#0be881' },
-    { tag:'admin-jobs',               label:'Admin & Office',        color:'#67e8f9' },
+    { tag:'placeholder',                  label:'Select a category…',    color:'#555' },
+    { tag:'all',                          label:'All Jobs',               color:'#00ff88' },
+    { tag:'logistics-warehouse-jobs',     label:'Warehouse & Logistics',  color:'#ff9f43' },
+    { tag:'manufacturing-jobs',           label:'Manufacturing',          color:'#54a0ff' },
+    { tag:'trade-construction-jobs',      label:'Trades & Construction',  color:'#ffd32a' },
+    { tag:'retail-jobs',                  label:'Retail',                 color:'#c56cf0' },
+    { tag:'customer-services-jobs',       label:'Customer Service',       color:'#ff6b81' },
+    { tag:'engineering-jobs',             label:'Engineering',            color:'#0be881' },
+    { tag:'admin-jobs',                   label:'Admin & Office',         color:'#67e8f9' },
+    // Added 2026-07-03 — real Adzuna category tags (verified against Adzuna's
+    // published taxonomy), chosen to widen coverage into hourly/blue-collar
+    // industries the board didn't reach before.
+    { tag:'healthcare-nursing-jobs',      label:'Healthcare & Nursing',   color:'#ff4757' },
+    { tag:'hospitality-catering-jobs',    label:'Hospitality & Catering', color:'#eccc68' },
+    { tag:'domestic-help-cleaning-jobs',  label:'Cleaning & Domestic',    color:'#7bed9f' },
+    { tag:'maintenance-jobs',             label:'Maintenance',           color:'#a4b0be' },
   ];
 
   const colorMap = {};
@@ -3139,13 +3146,17 @@ Lyft
   // hitting jooble.org directly — sidesteps their CORS requirements and
   // keeps JOOBLE_KEY off the client entirely.
   const joobleKeywordMap = {
-    'logistics-warehouse-jobs': 'warehouse logistics forklift',
-    'manufacturing-jobs':       'manufacturing production assembly',
-    'trade-construction-jobs':  'construction electrician plumber HVAC',
-    'retail-jobs':              'retail sales cashier',
-    'customer-services-jobs':   'customer service call center support',
-    'engineering-jobs':         'engineer engineering technical',
-    'admin-jobs':               'administrative office coordinator'
+    'logistics-warehouse-jobs':      'warehouse logistics forklift',
+    'manufacturing-jobs':            'manufacturing production assembly',
+    'trade-construction-jobs':       'construction electrician plumber HVAC',
+    'retail-jobs':                   'retail sales cashier',
+    'customer-services-jobs':        'customer service call center support',
+    'engineering-jobs':              'engineer engineering technical',
+    'admin-jobs':                    'administrative office coordinator',
+    'healthcare-nursing-jobs':       'healthcare nursing CNA home health aide',
+    'hospitality-catering-jobs':     'hospitality restaurant food service catering',
+    'domestic-help-cleaning-jobs':   'cleaning janitorial housekeeping',
+    'maintenance-jobs':              'maintenance facilities technician repair'
   };
 
   const joobleLocCache = {}; // shared across calls within a session
