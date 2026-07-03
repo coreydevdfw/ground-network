@@ -1891,7 +1891,7 @@ Lyft
       const statusUrl = `${location.origin}${location.pathname}?application=${applicationId}`;
       document.getElementById('apply-status-link-input').value = statusUrl;
       document.getElementById('apply-form').style.display = 'none';
-      document.getElementById('apply-success').style.display = '';
+      document.getElementById('apply-success').style.display = 'block';
       renderSidebar();
       if (activePopup) activePopup.remove();
     } catch (err) {
