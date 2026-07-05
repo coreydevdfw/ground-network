@@ -35,15 +35,16 @@
   </script>
   <script src='https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js'></script>
   <link href='https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css' rel='stylesheet' />
+  <!-- Retro splash font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=block" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', system-ui, sans-serif; background: #0a0a0a; overflow: hidden; padding-top: env(safe-area-inset-top); }
 
     /* ── Light mode overrides ── */
     body.light { background: #e0e0e0; }
-    /* Mapbox's stock light-v11 style is very bright/high-contrast on its own —
-       a flat filter on just the GL canvas takes the edge off without touching
-       the base style, custom layers, or DOM markers drawn on top of it. */
     body.light .mapboxgl-canvas { filter: brightness(0.92) saturate(0.88); }
     body.light #sidebar { background: #e8e8e8 !important; border-color: rgba(0,0,0,0.1) !important; }
     body.light #sidebar-header-wrap { background: #dcdcdc !important; border-color: rgba(0,110,60,0.2) !important; box-shadow: 0 2px 0 rgba(0,110,60,0.1), 0 4px 12px rgba(0,0,0,0.1) !important; }
@@ -76,19 +77,16 @@
     body.light #pre-select .ps-sub { color: rgba(0,0,0,0.3) !important; }
     body.light #location-banner { background: #dcdcdc !important; border-color: rgba(0,0,0,0.1) !important; color: #111 !important; }
     body.light #zoom-hint { color: rgba(0,0,0,0.35) !important; }
-    /* Popup on map */
     body.light .mapboxgl-popup-content { background: #e8e8e8 !important; border-color: rgba(0,110,60,0.25) !important; box-shadow: 0 8px 32px rgba(0,0,0,0.15) !important; }
     body.light .popup-title { color: #111 !important; }
     body.light .popup-company { color: rgba(0,0,0,0.45) !important; }
     body.light .popup-apply { background: #006e3c !important; color: #fff !important; }
     body.light .mapboxgl-popup-close-button { color: rgba(0,0,0,0.35) !important; }
-    /* View toggle + controls */
     body.light #view-toggle button { color: rgba(0,0,0,0.5) !important; background: rgba(0,0,0,0.05) !important; border-color: rgba(0,0,0,0.1) !important; }
     body.light #view-toggle button.active { color: #006e3c !important; border-color: rgba(0,110,60,0.4) !important; background: rgba(0,110,60,0.08) !important; }
     body.light #category-select { background: rgba(0,0,0,0.06) !important; border-color: rgba(0,0,0,0.1) !important; color: #111 !important; }
     body.light #locate-btn { background: rgba(0,0,0,0.06) !important; border-color: rgba(0,0,0,0.1) !important; color: #111 !important; }
     body.light #job-list::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12) !important; }
-    /* Job card text */
     body.light .card-title { color: #111 !important; }
     body.light .card-company { color: #005a30 !important; opacity: 1 !important; }
     body.light .card-drivetime { color: rgba(0,0,0,0.5) !important; }
@@ -98,10 +96,8 @@
     body.light .card-stale { color: rgba(140,90,0,0.8) !important; }
     body.light #empty-state, body.light #no-jobs-state { color: rgba(0,0,0,0.3) !important; }
     body.light #loading-state { color: rgba(0,0,0,0.3) !important; }
-    /* Nav overlay drawer — keep dark since it overlays the map */
     body.light #ft-drawer { background: linear-gradient(to top, rgba(20,20,20,0.97) 0%, rgba(20,20,20,0.88) 78%, transparent 100%) !important; }
     body.light #zoom-hint { background: rgba(220,220,220,0.85) !important; border-color: rgba(0,0,0,0.1) !important; color: rgba(0,0,0,0.4) !important; }
-    /* Filter/toggle bar */
     body.light #filter-wrap { background: #dcdcdc !important; border-color: rgba(0,110,60,0.12) !important; box-shadow: 0 2px 0 rgba(0,110,60,0.07), 0 4px 10px rgba(0,0,0,0.08) !important; }
     body.light #view-toggle { background: rgba(0,0,0,0.06) !important; border-color: rgba(0,0,0,0.1) !important; }
     body.light #view-toggle button { color: rgba(0,0,0,0.4) !important; }
@@ -109,27 +105,19 @@
     body.light #reset-filter-btn { background: rgba(0,0,0,0.05) !important; border-color: rgba(0,0,0,0.1) !important; color: rgba(0,0,0,0.4) !important; }
     body.light #category-select { background: rgba(0,0,0,0.05) !important; border-color: rgba(0,0,0,0.1) !important; color: #111 !important; }
     body.light #filter-select-wrap::after { color: rgba(0,0,0,0.3) !important; }
-    /* Header text */
     body.light .tagline { color: rgba(0,0,0,0.4) !important; }
     body.light #zip-row button { color: rgba(0,0,0,0.4) !important; }
     body.light #locate-btn { color: #111 !important; background: rgba(0,0,0,0.06) !important; border-color: rgba(0,0,0,0.12) !important; }
     #app { display: flex; height: 100dvh; width: 100vw; }
-    /* ── Sidebar ── */
     #sidebar {
       width: 320px; min-width: 320px; height: 100dvh;
       background: #0f0f0f; border-right: 1px solid rgba(255,255,255,0.07);
       display: flex; flex-direction: column; z-index: 20;
       box-shadow: 3px 0 0 rgba(0,255,136,0.07), 6px 0 22px rgba(0,0,0,0.45);
-      /* As nav-hidden animates width down to 0, children must clip with it —
-         without this, text/controls overflow the shrinking box instead of
-         shrinking away, and since #sidebar sits above the nav overlay
-         (z-index:20 vs 10) that overflow renders on top of the turn-by-turn
-         UI as bunched, overlapping text on desktop. */
       overflow: hidden;
     }
     #map-wrap { flex: 1; position: relative; overflow: hidden; }
     #map { position: absolute; inset: 0; }
-    /* ── Vignette ── */
     #vignette {
       position: absolute; inset: 0; z-index: 2; pointer-events: none;
       background: radial-gradient(
@@ -138,7 +126,6 @@
         rgba(5,5,5,0.35) 70%, rgba(5,5,5,0.75) 88%, rgba(5,5,5,0.92) 100%
       );
     }
-    /* ── Sidebar header ── */
     #sidebar-header-wrap {
       flex-shrink: 0;
       border-bottom: 1px solid rgba(0,255,136,0.12);
@@ -196,7 +183,6 @@
     #locate-btn.located { color: #fff; border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.06); box-shadow: 2px 2px 0 rgba(255,255,255,0.08); }
     #locate-btn.locating { opacity: 0.5; pointer-events: none; }
     #locate-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
-    /* ── Filter / nav bar ── */
     #filter-wrap {
       padding: 10px 12px;
       border-bottom: 1px solid rgba(0,255,136,0.1);
@@ -237,7 +223,6 @@
     }
     #category-select:focus { border-color: rgba(0,255,136,0.4); }
     #category-select option { background: #1a1a1a; color: #fff; }
-    /* ── Commute panel ── */
     #commute-panel {
       flex-shrink: 0; border-bottom: 1px solid rgba(255,255,255,0.06);
       background: #0c0c0c; display: none; flex-direction: column; padding: 12px 14px; gap: 10px;
@@ -280,11 +265,9 @@
     #double-tap-hint.hidden { opacity: 0; pointer-events: none; }
     body.light #double-tap-hint { color: rgba(0,110,60,0.5); }
     #commute-close { position: absolute; right: 12px; top: 12px; background: none; border: none; color: rgba(255,255,255,0.3); cursor: pointer; font-size: 16px; padding: 2px; }
-    /* ── Traffic gauge + posting-age row ── */
     #commute-bottom-row {
       display: flex; flex-direction: column; gap: 0;
     }
-    /* Full-width traffic strip */
     #traffic-strip {
       background: rgba(0,255,136,0.05); border: 1px solid rgba(0,255,136,0.15);
       border-radius: 9px; padding: 8px 11px;
@@ -310,16 +293,13 @@
     #gauge-needle-g {
       transition: transform 0.75s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-    /* ── Posting age ── */
     @keyframes tilePulse { 0%,100%{opacity:0.3} 50%{opacity:1} }
-    /* ── List section ── */
     #list-section { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
     #count-bar { padding: 8px 14px 6px; font-size: 11px; color: rgba(255,255,255,0.35); flex-shrink: 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
     #count-bar strong { color: #fff; font-weight: 700; }
     #job-list { flex: 1; overflow-y: auto; padding: 8px; }
     #job-list::-webkit-scrollbar { width: 3px; }
     #job-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
-    /* ── Pre-select prompt ── */
     #pre-select { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; text-align: center; gap: 12px; }
     .ps-icon { font-size: 28px; opacity: 0.4; }
     .ps-title { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.6); }
@@ -348,7 +328,6 @@
     .card-cat { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 10px; background: rgba(255,255,255,0.06); }
     .card-apply { font-size: 10px; font-weight: 700; color: #00ff88; text-decoration: none; }
     .card-apply:hover { text-decoration: underline; }
-    /* ── Stale listing & source badges ── */
     .card-stale {
       display: inline-block; font-size: 10px; color: rgba(255,193,7,0.7);
       margin-bottom: 5px;
@@ -369,7 +348,6 @@
     body.light #job-card-hint { color: rgba(0,110,60,0.45); }
     .pulse { animation: pulse 1.5s infinite; }
     @keyframes pulse { 0%,100%{opacity:0.3}50%{opacity:0.8} }
-    /* ── Map overlays ── */
     #zoom-hint { position:absolute; bottom:28px; right:12px; z-index:6; background:rgba(10,10,10,0.7); border:1px solid rgba(255,255,255,0.07); border-radius:8px; padding:5px 10px; color:rgba(255,255,255,0.3); font-size:11px; transition:opacity 0.4s; pointer-events:none; }
     #heatmap-caption {
       position:absolute; bottom:28px; left:12px; z-index:6;
@@ -383,21 +361,17 @@
     #location-banner { position:absolute; bottom:56px; left:50%; transform:translateX(-50%); z-index:8; background:rgba(15,15,15,0.95); border:1px solid rgba(0,255,136,0.3); border-radius:10px; padding:10px 14px; display:flex; align-items:center; gap:10px; font-size:12px; color:rgba(255,255,255,0.7); box-shadow:0 4px 20px rgba(0,0,0,0.5); opacity:0; pointer-events:none; transition:opacity 0.4s; max-width: calc(100vw - 24px); width: max-content; }
     #location-banner.show { opacity:1; pointer-events:auto; }
     #location-banner button { font-size:11px; font-weight:700; color:#0a0a0a; background:#00ff88; border:none; border-radius:6px; padding:6px 12px; cursor:pointer; font-family:inherit; flex-shrink: 0; }
-    /* Shown when a job source (currently just Jooble) fails to load, so
-       "fewer results than expected" doesn't silently read as a bug. */
     #source-warning-banner { position:absolute; bottom:104px; left:50%; transform:translateX(-50%); z-index:8; background:rgba(15,15,15,0.95); border:1px solid rgba(255,193,7,0.35); border-radius:10px; padding:9px 14px; display:flex; align-items:center; gap:8px; font-size:12px; color:rgba(255,255,255,0.75); box-shadow:0 4px 20px rgba(0,0,0,0.5); opacity:0; pointer-events:none; transition:opacity 0.4s; max-width: calc(100vw - 24px); width: max-content; }
     #source-warning-banner.show { opacity:1; }
     @media (max-width: 640px) {
       #location-banner { bottom: 12px; left: 12px; right: 12px; transform: none; width: auto; max-width: none; font-size: 11px; }
       #source-warning-banner { bottom: 60px; left: 12px; right: 12px; transform: none; width: auto; max-width: none; font-size: 11px; }
     }
-    /* ── Mapbox attribution ── */
     .mapboxgl-ctrl-logo { opacity: 0.35; filter: grayscale(1) brightness(1.8); }
     .mapboxgl-ctrl-attrib { background: rgba(10,10,10,0.55) !important; border-radius: 6px 0 0 0; }
     .mapboxgl-ctrl-attrib a { color: rgba(255,255,255,0.4) !important; font-size: 10px !important; }
     .mapboxgl-ctrl-attrib-button { filter: invert(1) brightness(0.7); }
     .mapboxgl-ctrl-bottom-left { z-index: 3; }
-    /* ── Job pin marker — offset shadow badge style ── */
     .job-pin-badge {
       width: 28px; height: 28px; cursor: pointer;
       transition: transform 0.15s ease;
@@ -409,7 +383,6 @@
       70%  { transform: translateY(2px) scale(1.08); opacity: 1; }
       100% { transform: translateY(0) scale(1); }
     }
-    /* ── User location marker — offset shadow badge style, green ── */
     .user-location-marker { width: 28px; height: 28px; position: relative; display: block; cursor: pointer; }
     .mapboxgl-popup-content { background:#111!important; border:1px solid rgba(0,255,136,0.25)!important; border-radius:10px!important; padding:14px 16px!important; box-shadow:0 8px 32px rgba(0,0,0,0.6)!important; min-width:200px; }
     .mapboxgl-popup-tip { display:none!important; }
@@ -417,14 +390,12 @@
     .popup-title { font-size:13px; font-weight:700; color:#fff; margin-bottom:4px; line-height:1.3; padding-right:16px; }
     .popup-company { font-size:12px; color:rgba(255,255,255,0.5); margin-bottom:10px; }
     .popup-apply { display:inline-block; font-size:12px; font-weight:600; color:#0a0a0a; background:#00ff88; border-radius:6px; padding:5px 12px; text-decoration:none; }
-    /* ── Flythrough overlay ── */
     #flythrough-overlay {
       display: none; position: absolute; inset: 0; z-index: 10;
       pointer-events: none;
     }
     #flythrough-overlay.active { display: block; }
 
-    /* ── Navigation launch transition ── */
     #nav-launch-overlay {
       position: fixed; inset: 0; z-index: 9999;
       display: flex; align-items: center; justify-content: center;
@@ -468,7 +439,6 @@
       animation: navPulseRing 0.9s ease-out forwards;
     }
     .nav-pulse-ring:nth-child(2) { animation-delay: 0.22s; }
-    /* ── Custom alert/confirm dialog ── */
     #app-dialog-overlay {
       position: fixed; inset: 0; z-index: 10000;
       background: rgba(0,0,0,0.6);
@@ -494,7 +464,6 @@
     body.light #app-dialog-cancel { border-color: rgba(0,0,0,0.2); color: rgba(0,0,0,0.6); }
     #app-dialog-confirm { background: #00ff88; color: #0a0a0a; }
     body.light #app-dialog-confirm { background: #00a055; color: #fff; }
-    /* ── Employer entry point + auth modal ── */
     #employer-row { padding: 8px 14px 12px; border-top: 1px solid rgba(255,255,255,0.06); }
     body.light #employer-row { border-top-color: rgba(0,0,0,0.07); }
     #employer-toggle-link {
@@ -642,7 +611,6 @@
       font-size: 10px; cursor: pointer; padding: 4px 8px; border-radius: 6px; flex-shrink: 0;
     }
     .employer-posting-close-btn:hover { background: rgba(255,107,107,0.1); }
-    /* ── Applicant roster (Phase 3) ── */
     .employer-posting-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
     .employer-applicants-toggle {
       background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.25); color: #00ff88;
@@ -680,7 +648,6 @@
       border: none; font-family: inherit; cursor: pointer; padding: 0;
     }
     body.light .card-apply-soon { color: rgba(0,0,0,0.3) !important; }
-    /* Direct (employer-posted) job apply button + applied state — Phase 2 */
     .card-apply-btn {
       font-size: 10px; font-weight: 700; color: #00ff88; background: none;
       border: none; font-family: inherit; cursor: pointer; padding: 0; text-decoration: none;
@@ -692,7 +659,6 @@
     .popup-apply-btn { border: none; cursor: pointer; font-family: inherit; }
     .popup-applied { background: rgba(0,255,136,0.15) !important; color: #00ff88 !important; }
     body.light .popup-applied { background: rgba(0,110,60,0.12) !important; color: #006e3c !important; }
-    /* ── Job application modal (job-seeker apply flow) ── */
     #apply-modal-overlay {
       position: fixed; inset: 0; z-index: 10000;
       background: rgba(0,0,0,0.65);
@@ -737,7 +703,6 @@
       border: none; border-radius: 8px; padding: 10px; cursor: pointer; font-family: inherit;
     }
     #apply-success-close:hover { background: #33ffa3; }
-    /* ── Status-check link (Phase 3) — shown on the apply-success screen ── */
     #apply-status-link-row { margin-bottom: 16px; text-align: left; }
     #apply-status-link-label {
       font-size: 10px; font-weight: 700; letter-spacing: 0.03em; color: rgba(255,255,255,0.4);
@@ -756,7 +721,6 @@
     }
     #apply-status-copy-btn:hover { background: rgba(0,255,136,0.2); }
     body.light #apply-status-copy-btn { background: rgba(0,160,85,0.1); border-color: rgba(0,160,85,0.3); color: #006e3c; }
-    /* ── Seeker status-check overlay (arrived via ?application=<id> link) ── */
     #status-check-overlay {
       position: fixed; inset: 0; z-index: 10001;
       background: rgba(0,0,0,0.75);
@@ -796,15 +760,6 @@
       text-decoration: underline;
     }
     body.light #status-check-back { color: rgba(0,0,0,0.45); }
-    /* Sidebar slides out during navigation.
-       Must collapse width/min-width (not just transform) — #app is a flex
-       row and #sidebar has a fixed width:320px/min-width:320px. A transform
-       alone moves the sidebar off-screen but still reserves its 320px in
-       the flex layout, so #map-wrap (flex:1) never actually grows to fill
-       that space. That leaves a permanent blank/black 320px column on the
-       left during navigation, with the map + nav overlay (both absolutely
-       positioned inside #map-wrap) confined to the remaining width instead
-       of spanning the full screen. */
     #sidebar.nav-hidden {
       transform: translateX(-100%);
       width: 0; min-width: 0;
@@ -880,22 +835,128 @@
     #ft-progress-fill { height: 100%; width: 0%; background: #00ff88; border-radius: 2px; transition: width 0.4s ease; }
     #ft-progress-row { display: flex; justify-content: space-between; font-size: 8px; color: rgba(255,255,255,0.25); }
 
-    @media (max-width:640px) {
-      #app { flex-direction:column; }
-      #sidebar { width:100%; min-width:unset; height:auto; max-height:50dvh; border-right:none; border-bottom:1px solid rgba(255,255,255,0.07);
-        transition: transform 0.45s cubic-bezier(0.4,0,0.2,1), max-height 0.45s cubic-bezier(0.4,0,0.2,1); }
-      /* In the column layout it's HEIGHT, not width, that #sidebar reserves —
-         same bug as desktop, different axis. Collapse max-height too so
-         #map-wrap (flex:1) actually grows to fill the freed vertical space
-         instead of leaving a blank reserved band where the sidebar used to
-         sit stacked above the map. */
-      #sidebar.nav-hidden { max-height: 0; width:100%; min-width:unset;
-        transition: transform 0.55s cubic-bezier(0.4,0,0.2,1), max-height 0.55s cubic-bezier(0.4,0,0.2,1); }
-      #map-wrap { flex:1; min-height:0; height:50dvh; }
+    /* ── Retro splash screen ── */
+    #splash-overlay {
+      position: fixed; inset: 0; z-index: 99999;
+      display: flex; align-items: center; justify-content: center;
+      background: #0a0a0a; overflow: hidden;
     }
+    #splash-overlay.splash-exit {
+      animation: splashSwoopAway 0.6s cubic-bezier(0.6,0,0.85,1) forwards;
+    }
+    #splash-checker {
+      position: absolute; inset: 0;
+      background-image: repeating-conic-gradient(#00ff88 0% 25%, #0a0a0a 0% 50%);
+      background-size: 64px 64px;
+      animation: splashChecker 0.32s steps(1) 10 alternate;
+    }
+    @media (min-width: 700px) {
+      #splash-checker { background-size: 96px 96px; }
+    }
+    @keyframes splashChecker {
+      0%   { background-position: 0 0; }
+      100% { background-position: 32px 32px; }
+    }
+    #splash-ring {
+      position: absolute; z-index: 1;
+      top: 50%; left: 50%;
+      width: 46vw; height: 46vw; max-width: 320px; max-height: 320px;
+      border-radius: 50%;
+      border: 3px solid #00ff88;
+      box-shadow: 0 0 0 8px rgba(0,255,136,0.15), 0 0 40px rgba(0,255,136,0.25);
+      opacity: 0;
+      transform: translate(-50%,-50%) scale(0.2) rotate(0deg);
+      animation: splashRing 3.4s cubic-bezier(0.16,1,0.3,1) 0.55s forwards;
+    }
+    @keyframes splashRing {
+      0%   { opacity: 0; transform: translate(-50%,-50%) scale(0.2) rotate(0deg); }
+      12%  { opacity: 1; transform: translate(-50%,-50%) scale(1.15) rotate(90deg); }
+      20%  { transform: translate(-50%,-50%) scale(1) rotate(140deg); }
+      85%  { opacity: 0.9; transform: translate(-50%,-50%) scale(1) rotate(400deg); }
+      100% { opacity: 0; transform: translate(-50%,-50%) scale(1.3) rotate(430deg); }
+    }
+    #splash-name {
+      position: relative; z-index: 2;
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(20px, 6vw, 40px);
+      color: #0a0a0a;
+      -webkit-text-stroke: 0.075em #0a0a0a;
+      letter-spacing: 0.04em;
+      text-align: center;
+      line-height: 1.6;
+      text-shadow:
+        3px 3px 0 #fff, -3px -3px 0 #fff, 3px -3px 0 #fff, -3px 3px 0 #fff,
+        3px 0 0 #fff, -3px 0 0 #fff, 0 3px 0 #fff, 0 -3px 0 #fff;
+      transform: translateX(-140vw) skewX(-8deg);
+      animation: splashSwoopIn 0.65s cubic-bezier(0.16,1,0.3,1) 0.05s forwards,
+                 splashIdleBounce 0.55s ease-in-out 0.7s 3;
+    }
+    #splash-name .splash-sub {
+      display: block; margin-top: 14px;
+      font-size: clamp(9px, 2.2vw, 13px);
+      color: #0a0a0a;
+      -webkit-text-stroke: 0.11em #0a0a0a;
+      text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff;
+      letter-spacing: 0.15em;
+    }
+    @keyframes splashSwoopIn {
+      0%   { transform: translateX(-140vw) skewX(-8deg); }
+      65%  { transform: translateX(3vw) skewX(3deg) scale(1.08); }
+      82%  { transform: translateX(-1vw) skewX(-1deg) scale(0.98); }
+      100% { transform: translateX(0) skewX(0deg) scale(1); }
+    }
+    @keyframes splashIdleBounce {
+      0%, 100% { transform: translateX(0) skewX(0deg) scale(1); }
+      50%      { transform: translateX(0) skewX(0deg) scale(1.04); }
+    }
+    @keyframes splashSwoopAway {
+      0%   { transform: translateX(0) skewX(0deg); opacity: 1; }
+      100% { transform: translateX(140vw) skewX(-8deg); opacity: 1; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #splash-checker { animation: none; }
+      #splash-ring { animation: none; opacity: 0; }
+      #splash-name { animation: none; transform: none; }
+      #splash-overlay.splash-exit { animation: none; opacity: 0; transition: opacity 0.3s; }
+    }
+
+    /* ── Full-screen browse view (job list before map/nav) ── */
+    #list-section.browse-active {
+      position: fixed; inset: 0; z-index: 40;
+      background: #0a0a0a; width: 100vw; height: 100dvh;
+    }
+    body.light #list-section.browse-active { background: #e0e0e0; }
+    #browse-header {
+      display: none; flex-shrink: 0; align-items: center; justify-content: space-between;
+      padding: 16px 14px 10px; border-bottom: 1px solid rgba(0,255,136,0.12);
+      background: #111;
+    }
+    body.light #browse-header { background: #dcdcdc; border-bottom-color: rgba(0,110,60,0.2); }
+    #list-section.browse-active #browse-header { display: flex; }
+    #browse-back-btn {
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #fff;
+      font-family: inherit; font-size: 11px; font-weight: 700; cursor: pointer;
+      border-radius: 8px; padding: 8px 12px; display: flex; align-items: center; gap: 6px;
+    }
+    body.light #browse-back-btn { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); color: #111; }
+    #browse-header-title { font-size: 13px; font-weight: 800; color: #00ff88; letter-spacing: 0.02em; }
+    body.light #browse-header-title { color: #006e3c; }
+    #map-return-btn {
+      position: absolute; top: 14px; left: 14px; z-index: 7;
+      background: rgba(15,15,15,0.9); border: 1px solid rgba(0,255,136,0.3); color: #00ff88;
+      font-family: inherit; font-size: 11px; font-weight: 700; cursor: pointer;
+      border-radius: 8px; padding: 8px 12px; display: none; align-items: center; gap: 6px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    }
+    #map-return-btn.show { display: flex; }
   </style>
 </head>
 <body>
+<div id="splash-overlay">
+  <div id="splash-checker"></div>
+  <div id="splash-ring"></div>
+  <div id="splash-name">LABOR NETWORK<span class="splash-sub">HYPERLOCAL JOBS · DFW</span></div>
+</div>
 <div id="app">
   <div id="sidebar">
     <div id="sidebar-header-wrap">
@@ -1066,6 +1127,14 @@ Lyft
     </div>
 
     <div id="list-section" style="display:none">
+      <div id="browse-header">
+        <button id="browse-back-btn" onclick="exitBrowseMode()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          Map
+        </button>
+        <div id="browse-header-title">Browsing jobs</div>
+        <div style="width:52px"></div>
+      </div>
       <div id="count-bar"><strong id="job-count">—</strong> jobs found</div>
       <div id="job-list">
         <div id="loading-state" class="pulse">Loading…</div>
@@ -1084,6 +1153,10 @@ Lyft
   <div id="map-wrap">
     <div id="map"></div>
     <div id="vignette"></div>
+    <button id="map-return-btn" onclick="enterBrowseMode()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      Browse jobs
+    </button>
     <div id="zoom-hint">Zoom in to explore your neighborhood →</div>
     <div id="location-banner">
       📍 Share your location for a tighter radius
@@ -1286,6 +1359,23 @@ Lyft
       committing to wordmark/logo direction.
   ──────────────────────────────────────────────────────────────────────── */
 
+  // ── Retro splash screen ──────────────────────────────────────────────────
+  // Runs once on load: checkerboard flash (~1.44s) + name swoop-in, then
+  // swoops off-screen to reveal the app. Respects prefers-reduced-motion by
+  // simply fading out instead (handled in CSS).
+  (function runSplash() {
+    const splash = document.getElementById('splash-overlay');
+    if (!splash) return;
+    const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const totalMs = reduceMotion ? 300 : 3400;
+    setTimeout(() => {
+      splash.classList.add('splash-exit');
+      splash.addEventListener('animationend', () => splash.remove(), { once: true });
+      // Fallback removal in case animationend doesn't fire (e.g. reduced motion path)
+      setTimeout(() => { if (splash.parentNode) splash.remove(); }, 900);
+    }, totalMs);
+  })();
+
   mapboxgl.accessToken = 'pk.eyJ1IjoiY29yZXlkZXZkZnciLCJhIjoiY21xaHVvanM2MDE3bDJ0cHB4NTF4andpdiJ9.7zXPq8gI54J5-OEEh69E5w';
   // Adzuna/Jooble keys now live server-side in a Cloudflare Worker proxy —
   // see worker.js. The client no longer holds either key; it calls the
@@ -1374,6 +1464,24 @@ Lyft
   let hasCompletedSearch = false; // false until the first job fetch finishes — distinguishes "still loading" from "genuinely zero jobs at this location"
   let jobCardHintDismissed = false; // "Tap a job to see it on the map" — dismissed for the session once any card is clicked
 
+  // ── Browse mode (full-screen job list before map/nav) ───────────────────
+  // Lets job seekers scan the whole list at a glance before committing to
+  // the map + commute experience. Entered automatically right after a
+  // category is chosen; exited by tapping a job (which also opens the map
+  // + commute panel for that job) or the explicit "Map" back button.
+  let browseModeActive = false;
+
+  function enterBrowseMode() {
+    browseModeActive = true;
+    document.getElementById('list-section').classList.add('browse-active');
+    document.getElementById('map-return-btn').classList.remove('show');
+  }
+  function exitBrowseMode() {
+    browseModeActive = false;
+    document.getElementById('list-section').classList.remove('browse-active');
+    document.getElementById('map-return-btn').classList.add('show');
+  }
+
   // Small non-blocking banner so a dropped job source (e.g. Jooble blocked by
   // CORS) doesn't just look like "fewer jobs than expected" with no explanation.
   let _sourceWarningTimer = null;
@@ -1407,13 +1515,6 @@ Lyft
   map.addControl(new mapboxgl.NavigationControl({ showCompass: true }), 'top-right');
 
   // ── Sky/fog for steep-pitch navigation view ─────────────────────────────────
-  // Turn-by-turn nav (startNavigation/flythrough) tilts the camera to pitch:72,
-  // which points it up above the terrain horizon. Without a fog/sky config,
-  // Mapbox GL renders that empty space as solid black — this is the "black bar"
-  // that appears in navigation mode, on desktop and mobile alike (it's a
-  // rendering config issue, not a container-size issue). setFog() gives that
-  // space a sky gradient instead of a flat black void. Must be re-applied after
-  // every setStyle() call, since a style swap resets fog.
   function applyMapFog() {
     map.setFog(isLight ? {
       range: [0.5, 10], color: '#e8eef5', 'horizon-blend': 0.2,
@@ -1424,12 +1525,6 @@ Lyft
     });
   }
 
-  // ── Keep map canvas in sync with container size ────────────────────────────
-  // The canvas is only sized correctly at the moment `map.resize()` runs. On
-  // mobile, `#map-wrap`'s height (50dvh) changes whenever the browser's
-  // address bar collapses/expands or on orientation change, without the
-  // canvas being told to resize — leaving stale/black regions. Re-resize on
-  // any signal that the layout may have changed.
   let _mapResizeTimer = null;
   function scheduleMapResize() {
     clearTimeout(_mapResizeTimer);
@@ -1441,28 +1536,16 @@ Lyft
     window.visualViewport.addEventListener('resize', scheduleMapResize);
   }
 
-  // Sidebar show/hide (nav mode) animates #sidebar's width via CSS transition,
-  // which grows/shrinks #map-wrap (flex:1) but does NOT fire a window resize
-  // event — so the Mapbox canvas needs an explicit nudge once that transition
-  // finishes, or it keeps rendering at the old, narrower size.
   function resizeMapAfterSidebarTransition() {
     const sidebar = document.getElementById('sidebar');
     let done = false;
     const finish = () => { if (done) return; done = true; map.resize(); };
     sidebar.addEventListener('transitionend', e => {
-      // 'width' collapses on desktop (row layout); 'max-height' collapses
-      // on mobile (column layout, @media max-width:640px) — either signals
-      // the sidebar's reserved space has actually finished changing.
       if (e.target === sidebar && (e.propertyName === 'width' || e.propertyName === 'max-height')) finish();
     }, { once: true });
-    setTimeout(finish, 650); // fallback in case transitionend doesn't fire
+    setTimeout(finish, 650);
   }
 
-  // ── Custom alert/confirm ─────────────────────────────────────────────────
-  // Swaps native alert()/confirm() (which look jarring against the app's
-  // custom UI) for a small in-app dialog. Both resolve a Promise so call
-  // sites can just `await` them; showAppAlert always resolves true,
-  // showAppConfirm resolves true/false depending on which button was pressed.
   function _showAppDialog({ message, cancelText, confirmText }) {
     return new Promise(resolve => {
       const overlay    = document.getElementById('app-dialog-overlay');
@@ -1507,12 +1590,7 @@ Lyft
     return _showAppDialog({ message, cancelText, confirmText });
   }
 
-  // ── Employer auth UI ─────────────────────────────────────────────────────
-  // Firebase itself is loaded/wired in a <script type="module"> at the end of
-  // <body> (module execution is deferred until after this classic script has
-  // run, so window.onEmployerAuthChanged below is guaranteed to already exist
-  // by the time Firebase's onAuthStateChanged callback fires).
-  let employerModalMode = 'signup'; // 'signup' | 'signin'
+  let employerModalMode = 'signup';
 
   function setEmployerModalMode(mode) {
     employerModalMode = mode;
@@ -1536,7 +1614,6 @@ Lyft
       submit.textContent = 'Sign in';
       switchEl.innerHTML = `Need an account? <button id="employer-modal-switch-btn" type="button">Create one</button>`;
     }
-    // Re-bind since innerHTML replaced the button
     document.getElementById('employer-modal-switch-btn').addEventListener('click', () => {
       setEmployerModalMode(employerModalMode === 'signup' ? 'signin' : 'signup');
     });
@@ -1557,7 +1634,6 @@ Lyft
     errorEl.classList.add('show');
   }
 
-  // Friendlier text for the Firebase Auth error codes we're most likely to hit.
   function friendlyAuthError(err) {
     const code = err && err.code || '';
     if (code === 'auth/email-already-in-use') return 'That email already has an account — try signing in instead.';
@@ -1621,13 +1697,9 @@ Lyft
     catch (err) { console.warn('Sign out failed:', err); }
   });
 
-  // ── Employer dashboard: job posting ──────────────────────────────────────
-  // CATEGORIES is defined further down this file; function declarations are
-  // hoisted so referencing it here (only inside functions, never at top
-  // level) is safe regardless of source order.
   function populatePostCategorySelect() {
     const sel = document.getElementById('post-category-select');
-    if (sel.options.length) return; // already populated, skip re-render
+    if (sel.options.length) return;
     CATEGORIES.filter(c => c.tag !== 'placeholder' && c.tag !== 'all').forEach(c => {
       const opt = document.createElement('option');
       opt.value = c.tag; opt.textContent = c.label;
@@ -1637,9 +1709,6 @@ Lyft
 
   const postCatLabel = tag => (CATEGORIES.find(c => c.tag === tag) || {}).label || tag;
 
-  // General-purpose geocode for the "job location" field — same Mapbox
-  // endpoint the Jooble location lookups use, but with no `types` filter so
-  // it accepts a full address, a city, or a ZIP.
   async function geocodeLocationText(text) {
     try {
       const res = await fetch(
@@ -1647,7 +1716,7 @@ Lyft
         `?country=US&proximity=${CENTER[0]},${CENTER[1]}&access_token=${mapboxgl.accessToken}`
       );
       const data = await res.json();
-      if (data.features?.length) return data.features[0].center; // [lng, lat]
+      if (data.features?.length) return data.features[0].center;
     } catch (e) { console.warn('Geocode failed:', e); }
     return null;
   }
@@ -1658,10 +1727,6 @@ Lyft
     el.classList.add('show');
   }
 
-  // Status taxonomy for the employer applicant dashboard (Phase 3). 'applied'
-  // is the only value the create rule allows on write; the rest are set by
-  // the employer via updateApplicationStatus (rules restrict updates to the
-  // owning employer and to the status/updatedAt fields).
   const APPLICATION_STATUSES = [
     { value: 'applied',      label: 'Applied' },
     { value: 'contacted',    label: 'Contacted' },
@@ -1815,35 +1880,20 @@ Lyft
     }
   });
 
-  // ── Direct (employer-posted) jobs ────────────────────────────────────────
-  // Merged into the same allJobs pipeline as Adzuna/Jooble so employer
-  // postings render on the map and sidebar exactly like aggregated listings.
-  // Public read (no login required) — job seekers see these whether or not
-  // an employer is signed in on their device.
   async function fetchDirectPostings() {
     if (typeof window.fetchActiveDirectPostings !== 'function') return [];
     try { return await window.fetchActiveDirectPostings(); }
     catch (e) { console.warn('Failed to load direct postings:', e); return []; }
   }
 
-  // Lightweight refresh used right after posting/closing a job — swaps just
-  // the 'direct' slice of allJobs instead of re-running the full Adzuna/
-  // Jooble search.
   async function refreshDirectPostings() {
     const direct = await fetchDirectPostings();
     allJobs = [...allJobs.filter(j => j.source !== 'direct'), ...direct];
     if (activeFilter !== 'placeholder') { renderSidebar(); updateMapLayer(); }
   }
 
-  // ── Job application flow (Phase 2) ───────────────────────────────────────
-  // Direct (employer-posted) jobs use this in-app form instead of an outbound
-  // link. Job seekers never sign in, so the form just captures name/email/
-  // phone; "already applied" state lives in localStorage on their device.
   let applyModalJob = null;
 
-  // Popup HTML (map pins/unclustered points) is injected as a raw string, so
-  // its Apply button can't hold a closure — it calls this global by
-  // postingId instead, looking the job up out of the in-memory allJobs list.
   window.handleApplyClick = function(postingId) {
     const job = allJobs.find(j => j.source === 'direct' && j.postingId === postingId);
     if (job) openApplyModal(job);
@@ -1915,8 +1965,6 @@ Lyft
     try {
       await navigator.clipboard.writeText(input.value);
     } catch (e) {
-      // Clipboard API can be blocked in some contexts — fall back to a
-      // manual select so the user can still Ctrl/Cmd+C it themselves.
       input.select();
     }
     const prevText = btn.textContent;
@@ -1924,9 +1972,6 @@ Lyft
     setTimeout(() => { btn.textContent = prevText; }, 1800);
   });
 
-  // ── Seeker status-check view (Phase 3) ───────────────────────────────────
-  // Called by the Firebase module script (after window.fetchApplicationStatus
-  // is defined) when the page is opened via ?application=<id>.
   const STATUS_LABELS = {
     applied: 'Applied', contacted: 'Contacted', interviewing: 'Interviewing',
     hired: 'Hired', rejected: 'Not a fit this time'
@@ -1955,7 +2000,6 @@ Lyft
     }
   };
 
-  // ── Circle ───────────────────────────────────────────────────────────────
   function makeCircle(center, radiusMiles, steps=64) {
     const coords=[], R=3958.8, lat=center[1]*Math.PI/180;
     for(let i=0;i<=steps;i++){
@@ -1968,13 +2012,6 @@ Lyft
     if(map.getSource('radius-circle')) map.getSource('radius-circle').setData(makeCircle(CENTER,RADIUS));
   }
 
-  // ── Traffic gauge ────────────────────────────────────────────────────────
-  // Gauge arc paths: semi-circle, center (40,44), radius 32.
-  //   Green zone  → 180°–120° → M 8 44   A 32 32 0 0 1 24 16.3
-  //   Yellow zone → 120°– 60° → M 24 16.3 A 32 32 0 0 1 56 16.3
-  //   Red zone    →  60°–  0° → M 56 16.3 A 32 32 0 0 1 72 44
-  // Needle rotates around hub (40,44); default points straight up (0°).
-  //   clear=−60°, moderate=0°, heavy=+60°
   const GAUGE_CFG = {
     clear:    { rotate: -60, color: '#00ff88', arcD: 'M 8 44 A 32 32 0 0 1 24 16.3',   label: 'Traffic clear'    },
     moderate: { rotate:   0, color: '#ffc107', arcD: 'M 8 44 A 32 32 0 0 1 56 16.3',   label: 'Moderate traffic' },
@@ -1996,7 +2033,6 @@ Lyft
     hub.setAttribute('fill', cfg.color);
     label.textContent  = cfg.label;
     label.style.color  = cfg.color;
-    // Strip is already green-tinted; update border color to match traffic level
     const strip = document.getElementById('traffic-strip');
     if (strip) strip.style.borderColor = cfg.color === '#00ff88' ? 'rgba(0,255,136,0.2)' : cfg.color === '#ffc107' ? 'rgba(255,193,7,0.2)' : 'rgba(255,107,107,0.2)';
   }
@@ -2006,7 +2042,7 @@ Lyft
     const arcActive = document.getElementById('gauge-arc-active');
     const hub       = document.getElementById('gauge-hub');
     const label     = document.getElementById('traffic-gauge-label');
-    needleG.style.transform       = 'rotate(-90deg)'; // off-scale left = "loading"
+    needleG.style.transform       = 'rotate(-90deg)';
     needleG.style.transformOrigin = '40px 44px';
     arcActive.setAttribute('d',      '');
     arcActive.setAttribute('opacity','0');
@@ -2017,11 +2053,6 @@ Lyft
     if (strip) strip.style.borderColor = 'rgba(0,255,136,0.15)';
   }
 
-  // ── Posting age display ──────────────────────────────────────────────────
-  // Formerly a live link-reachability checker; that was removed in favor of
-  // just showing how old each posting is (simpler, no false negatives from
-  // sites that block HEAD requests). Kept the traffic-strip-sub element and
-  // wiring since it's still a useful at-a-glance signal per job.
   function _ageLabel(created) {
     if (!created) return { text: 'Age unknown', color: 'rgba(255,255,255,0.28)' };
     const days = Math.floor((Date.now() - new Date(created).getTime()) / 864e5);
@@ -2043,15 +2074,11 @@ Lyft
     if (sub) sub.textContent = age.text;
   }
 
-  // ── Freshness helper ─────────────────────────────────────────────────────
-  // Flag listings created more than 30 days ago so users can self-filter
-  // likely-expired postings without a backend link-checker.
   function isStale(created) {
     if (!created) return false;
     return (Date.now() - new Date(created).getTime()) > NAV_CONFIG.STALE_JOB_DAYS * 24 * 60 * 60 * 1000;
   }
 
-  // ── Location ─────────────────────────────────────────────────────────────
   let userMarker = null;
   let _lastPinTap = { time: 0 };
 
@@ -2059,9 +2086,6 @@ Lyft
     if (userMarker) { userMarker.setLngLat(coords); return; }
     const el = document.createElement('div');
     el.className = 'user-location-marker';
-    // Diamond (rotated square) with offset shadow — same visual footprint as job circles.
-    // Shadow diamond sits offset +6px bottom-right at 32% opacity; main diamond sits top-left solid green.
-    // rx="1.5" keeps corners just barely rounded so it reads as a sharp diamond, not a blob.
     el.innerHTML = `
       <svg width="28" height="28" viewBox="0 0 28 28" style="display:block;overflow:visible">
         <rect x="7.5" y="7.5" width="11" height="11" rx="1.5"
@@ -2073,9 +2097,6 @@ Lyft
     el.setAttribute('role', 'button');
     el.setAttribute('tabindex', '0');
     el.setAttribute('aria-label', 'Your location. Double-tap or press twice quickly to start navigation to the selected job, in your last-used commute mode.');
-    // Second entry point into turn-by-turn nav, alongside double-tapping a
-    // commute-mode tile — double-tapping your own pin starts navigation in
-    // whichever mode (driving/walking/cycling/DART) was used last.
     el.addEventListener('click', () => {
       const now = Date.now();
       if (now - _lastPinTap.time < 350) {
@@ -2119,14 +2140,11 @@ Lyft
   function requestLocation() {
     if (!navigator.geolocation) return;
     const btn = document.getElementById('locate-btn');
-    // Guard against rapid repeat taps stacking extra geolocation watches and
-    // job-search API bursts on top of one already in flight.
     if (btn.classList.contains('locating')) return;
     document.getElementById('location-banner').classList.remove('show');
     btn.classList.add('locating');
     btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg> Locating…`;
 
-    // Clear any existing watch before starting a new one
     if (_watchId !== null) { navigator.geolocation.clearWatch(_watchId); _watchId = null; }
 
     let initialFix = true;
@@ -2135,13 +2153,10 @@ Lyft
       const coords = [pos.coords.longitude, pos.coords.latitude];
       const accuracy = Math.round(pos.coords.accuracy);
 
-      // Always update user marker with real GPS
       placeUserMarker(coords);
-      // Drive navigation overlay from real GPS when active
       if (ftActive) _navUpdateFromGPS(coords);
 
       if (initialFix) {
-        // First fix — fly to location, fetch jobs, update button
         initialFix = false;
         const wasLocated = userLocated;
         CENTER = coords;
@@ -2160,7 +2175,6 @@ Lyft
     };
 
     const _onErr = (err, isRetry) => {
-      // If high-accuracy failed for reasons other than permission denied, retry with low accuracy
       if (!isRetry && err.code !== 1) {
         console.warn('High-accuracy location failed, retrying with network location…', err.message);
         _watchId = navigator.geolocation.watchPosition(_onPos, (err2) => _onErr(err2, true), {
@@ -2203,7 +2217,6 @@ Lyft
 
   setTimeout(() => { if (!userLocated) document.getElementById('location-banner').classList.add('show'); }, 3000);
 
-  // ── ZIP code search ──────────────────────────────────────────────────────
   const zipToggleLink = document.getElementById('zip-toggle-link');
   const zipEntry      = document.getElementById('zip-entry');
   const zipInput      = document.getElementById('zip-input');
@@ -2263,11 +2276,9 @@ Lyft
     await refetchJobsAroundCenter();
   }
 
-  // Keep banner visible longer on mobile (small screens need more time to notice it)
   const bannerDuration = window.innerWidth < 640 ? 20000 : 9000;
   setTimeout(() => document.getElementById('location-banner').classList.remove('show'), bannerDuration);
 
-  // ── Commute / Directions ─────────────────────────────────────────────────
   let routeCache = {};
 
   async function fetchRoute(mode, destination) {
@@ -2308,7 +2319,6 @@ Lyft
     document.getElementById('commute-job-company').textContent = job.company;
     document.getElementById('commute-panel').classList.add('visible');
 
-    // Reset commute times and gauge to loading state; show posting age
     ['driving','walking','cycling','dart'].forEach(m => {
       const el = document.getElementById(`time-${m}`);
       el.textContent = '…'; el.className = 'mode-time loading';
@@ -2318,14 +2328,12 @@ Lyft
 
     const dest = [job.lng, job.lat];
 
-    // Uber deep-link
     document.getElementById('uber-link').href =
       `https://m.uber.com/ul/?action=setPickup` +
       `&pickup[latitude]=${CENTER[1]}&pickup[longitude]=${CENTER[0]}` +
       `&dropoff[latitude]=${job.lat}&dropoff[longitude]=${job.lng}` +
       `&dropoff[nickname]=${encodeURIComponent(job.company || job.title)}`;
 
-    // Lyft deep-link
     document.getElementById('lyft-link').href =
       `https://lyft.com/ride?id=lyft` +
       `&pickup[latitude]=${CENTER[1]}&pickup[longitude]=${CENTER[0]}` +
@@ -2337,11 +2345,9 @@ Lyft
     if (nearestDartStation) {
       const miles = nearestDartStation.distance;
       if (miles < 0.3) {
-        // Shorten long station names: strip trailing "Station", "Rail Station", etc.
         let sName = nearestDartStation.name
           .replace(/\s*(Light Rail\s*)?Station\s*$/i, '')
           .trim();
-        // If still too long (>16 chars), cut at "/" or " - "
         if (sName.length > 16) {
           const cut = sName.search(/[\/\-–]/);
           if (cut > 2) sName = sName.slice(0, cut).trim();
@@ -2367,7 +2373,6 @@ Lyft
       const el = document.getElementById('time-driving');
       el.textContent = formatTime(driveRoute.duration);
       el.className = 'mode-time';
-      // Update the gauge with live traffic level from the driving route
       setGaugeLevel(trafficFromCongestion(driveRoute.legs));
     }
     if (walkRoute) {
@@ -2404,10 +2409,6 @@ Lyft
 
   let _lastModeTap = { mode: null, time: 0 };
 
-  // Commute-mode tiles are clickable divs (role="button" for screen readers)
-  // — this delegated listener makes them keyboard-operable too, and reuses
-  // selectMode's own double-tap timing so two quick Enter/Space presses
-  // start navigation the same way two quick taps/clicks do.
   document.getElementById('commute-modes').addEventListener('keydown', e => {
     if (e.key !== 'Enter' && e.key !== ' ') return;
     const tile = e.target.closest('.commute-mode');
@@ -2419,7 +2420,6 @@ Lyft
   function selectMode(mode) {
     const now = Date.now();
     if (_lastModeTap.mode === mode && (now - _lastModeTap.time) < 350) {
-      // Double-tap — start GPS navigation
       _lastModeTap = { mode: null, time: 0 };
       startNavigation(mode);
       return;
@@ -2435,7 +2435,6 @@ Lyft
     }
   }
 
-  // ── Navigation (GPS-driven turn-by-turn) ──────────────────────────────────
   let ftActive   = false;
   let ftCoords   = [];
   let ftCoordIdx = 0;
@@ -2451,24 +2450,14 @@ Lyft
     dart:    { color: '#b794f6', label: 'DART',   zoom: 19.5 },
   };
 
-  // Named thresholds that used to be scattered as unlabeled magic numbers
-  // through the navigation/job-pin code — collected here so tuning any one
-  // of them doesn't require hunting through unrelated functions.
   const NAV_CONFIG = {
-    ARRIVAL_RADIUS_MI:      0.02,  // how close to the destination counts as "arrived" and auto-stops nav
-    STEP_ADVANCE_RADIUS_MI: 0.03,  // how close to a turn's waypoint before advancing the turn-by-turn banner
-    STALE_JOB_DAYS:         30,    // postings older than this get the "stale" badge
-    MAX_VISIBLE_JOB_PINS:   5,     // job pins rendered on the map at once (nearest-first)
-    BEARING_LOOKAHEAD_MI:   0.012, // how far ahead along the route the nav camera looks to compute its facing direction
+    ARRIVAL_RADIUS_MI:      0.02,
+    STEP_ADVANCE_RADIUS_MI: 0.03,
+    STALE_JOB_DAYS:         30,
+    MAX_VISIBLE_JOB_PINS:   5,
+    BEARING_LOOKAHEAD_MI:   0.012,
   };
 
-  // Walking/DART routes pack route-geometry points much closer together than
-  // driving routes do, so a fixed "N points ahead" lookahead (the old
-  // approach) covered wildly different real-world distances per mode — for
-  // walking that meant the camera bearing was computed from a point just a
-  // few feet away, making it swing around on every small GPS jiggle instead
-  // of pointing steadily down the sidewalk. Walking forward by distance
-  // instead of by point-count fixes that regardless of route density.
   function _ftLookaheadPoint(fromIdx, coords) {
     if (fromIdx >= coords.length - 1) return coords[coords.length - 1];
     let dist = 0;
@@ -2510,14 +2499,12 @@ Lyft
     const target = nextStep || step;
     document.getElementById('ft-turn-dist').textContent = `In ${_ftDistLabel(step.distance || 0)}`;
     document.getElementById('ft-turn-street').textContent = target.maneuver?.instruction || target.name || '—';
-    // Rotate arrow icon
     document.getElementById('ft-turn-arrow-box').innerHTML = `
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00ff88" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         ${(target.maneuver?.modifier || '').includes('left') ? '<path d="M15 18l-6-6 6-6"/>' :
           (target.maneuver?.modifier || '').includes('right') ? '<path d="M9 18l6-6-6-6"/>' :
           '<path d="M12 22V2M12 2l-4 4M12 2l4 4"/>'}
       </svg>`;
-    // Highlight active step in list
     document.querySelectorAll('.ft-step').forEach((el, i) => {
       el.classList.toggle('ft-step-active', i === stepIdx);
       const icon = el.querySelector('.ft-step-icon');
@@ -2528,9 +2515,6 @@ Lyft
   }
 
   async function startNavigation(mode) {
-    // Reachable from two gestures now (double-tap a commute-mode tile, or
-    // double-tap the user's own pin on the map) — the pin gesture has no
-    // job context of its own, so it's the one place this guard actually fires.
     if (!currentJob) { await showAppAlert('Select a job first to start navigation.'); return; }
     const cfg = FT_MODE_CFG[mode];
     if (!cfg) return;
@@ -2538,7 +2522,6 @@ Lyft
 
     const dest = [currentJob.lng, currentJob.lat];
 
-    // For DART, route walking legs; fall back to walking route for turn-by-turn
     const routeMode = mode === 'dart' ? 'walking' : mode;
     const routeKey = `${routeMode}|${dest[0]},${dest[1]}`;
     delete routeCache[routeKey];
@@ -2554,7 +2537,6 @@ Lyft
     ftSavedPitch   = map.getPitch();
     ftSavedBearing = map.getBearing();
 
-    // ── Populate overlay ──────────────────────────────────────────────────
     const distMi    = (route.distance * 0.000621371).toFixed(1);
     const arrival   = new Date(Date.now() + route.duration * 1000);
     const arrivalStr = arrival.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
@@ -2569,7 +2551,6 @@ Lyft
         color:${cfg.color};background:${cfg.color}1a;border:1px solid ${cfg.color}55;
         border-radius:20px;padding:4px 10px">${cfg.label}</span>`;
 
-    // Steps list
     const stepList = document.getElementById('ft-step-list');
     stepList.innerHTML = '';
     ftSteps.forEach((step, i) => {
@@ -2587,22 +2568,18 @@ Lyft
 
     trackEvent('navigation_start', { mode, distance_mi: distMi });
 
-    // Dismiss the double-tap hint permanently once used
     document.getElementById('double-tap-hint').classList.add('hidden');
 
-    // Hide job pins and any open popup during navigation
     ['clusters-shadow','clusters','cluster-count','unclustered-shadow','unclustered-point'].forEach(id => {
       if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none');
     });
     if (activePopup) { activePopup.remove(); activePopup = null; }
 
-    // ── Launch animation: badge flash + sidebar slide out ─────────────────
     const launchOverlay = document.getElementById('nav-launch-overlay');
     document.getElementById('nav-launch-mode').textContent  = cfg.label + ' Navigation';
     document.getElementById('nav-launch-title').textContent = currentJob.company;
     document.getElementById('nav-launch-co').textContent    = currentJob.title;
 
-    // Reset badge animation by cloning it
     const oldBadge = document.getElementById('nav-launch-badge');
     const newBadge = oldBadge.cloneNode(true);
     oldBadge.replaceWith(newBadge);
@@ -2610,54 +2587,45 @@ Lyft
     launchOverlay.classList.add('active');
     launchOverlay.style.opacity = '1';
 
-    // Slide sidebar out after badge has settled
     setTimeout(() => {
       document.getElementById('sidebar').classList.add('nav-hidden');
       resizeMapAfterSidebarTransition();
     }, 800);
 
-    // Show nav overlay and clear launch screen after animation completes
-    // (kept in sync with the navFlash CSS animation duration above — 5s)
     setTimeout(() => {
       document.getElementById('flythrough-overlay').classList.add('active');
       launchOverlay.style.opacity = '0';
       setTimeout(() => launchOverlay.classList.remove('active'), 300);
     }, 5000);
 
-    // Lock camera to user's current GPS position at nav pitch/zoom
     const userPos = userMarker ? userMarker.getLngLat().toArray() : CENTER;
     const ahead   = _ftLookaheadPoint(0, ftCoords);
     const bearing = _ftBearing(userPos, ahead);
     map.easeTo({ center: userPos, bearing, pitch: 72, zoom: cfg.zoom, duration: 900 });
   }
 
-  // Called on every GPS update — drives the nav overlay when active
   function _navUpdateFromGPS(coords) {
     if (!ftActive || !ftCoords.length) return;
 
     const cfg = FT_MODE_CFG[activeMode] || FT_MODE_CFG.driving;
 
-    // Find closest point on route to current GPS position
     let closestIdx = ftCoordIdx;
     let minDist = Infinity;
     for (let i = ftCoordIdx; i < ftCoords.length; i++) {
       const d = haversineMiles(coords[1], coords[0], ftCoords[i][1], ftCoords[i][0]);
       if (d < minDist) { minDist = d; closestIdx = i; }
-      if (d > 0.1) break; // stop scanning once we're far ahead
+      if (d > 0.1) break;
     }
     ftCoordIdx = closestIdx;
 
-    // Camera follows real GPS position, bearing toward next route point
     const ahead   = _ftLookaheadPoint(ftCoordIdx, ftCoords);
     const bearing = _ftBearing(coords, ahead);
     map.easeTo({ center: coords, bearing, pitch: 72, zoom: cfg.zoom, duration: 800 });
 
-    // Progress
     const pct = Math.round((ftCoordIdx / (ftCoords.length - 1)) * 100);
     document.getElementById('ft-progress-fill').style.width = `${pct}%`;
     document.getElementById('ft-progress-pct').textContent  = `${pct}% complete`;
 
-    // Advance turn banner based on proximity to step waypoints
     let newStepIdx = ftStepIdx;
     for (let i = ftStepIdx; i < ftSteps.length; i++) {
       const wp = ftSteps[i].maneuver?.location;
@@ -2670,7 +2638,6 @@ Lyft
       _ftUpdateTurnBanner(ftStepIdx);
     }
 
-    // Arrived if within ~100ft of destination
     if (currentJob) {
       const distToDest = haversineMiles(coords[1], coords[0], currentJob.lat, currentJob.lng);
       if (distToDest < NAV_CONFIG.ARRIVAL_RADIUS_MI) stopNavigation();
@@ -2682,7 +2649,6 @@ Lyft
     document.getElementById('flythrough-overlay').classList.remove('active');
     document.getElementById('sidebar').classList.remove('nav-hidden');
     resizeMapAfterSidebarTransition();
-    // Restore job pins
     ['clusters-shadow','clusters','cluster-count','unclustered-shadow','unclustered-point'].forEach(id => {
       if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'visible');
     });
@@ -2693,7 +2659,6 @@ Lyft
     trackEvent('navigation_stop', { pct_complete: ftCoordIdx && ftCoords.length ? Math.round(ftCoordIdx / ftCoords.length * 100) : 0 });
   }
 
-  // Keep stopFlythrough as alias so the overlay exit button still works
   function stopFlythrough() { stopNavigation(); }
 
   function closeCommute() {
@@ -2707,7 +2672,6 @@ Lyft
     resetPostingAge();
   }
 
-  // ── Dropdown ─────────────────────────────────────────────────────────────
   const sel = document.getElementById('category-select');
   const dot = document.getElementById('cat-dot');
   CATEGORIES.forEach(cat => {
@@ -2733,6 +2697,9 @@ Lyft
     renderSidebar(); updateMapLayer();
     document.getElementById('reset-filter-btn').disabled = false;
     trackEvent('filter_used', { category: activeFilter });
+    // Land on the full-screen browse view first — the map/commute
+    // experience opens once a specific job is tapped (see focusJob()).
+    enterBrowseMode();
   });
 
   document.getElementById('reset-filter-btn').addEventListener('click', () => {
@@ -2743,14 +2710,14 @@ Lyft
     closeCommute();
     if (activeCard) { activeCard.classList.remove('active'); activeCard = null; }
     updateMapLayer();
+    exitBrowseMode();
+    document.getElementById('map-return-btn').classList.remove('show');
   });
   document.getElementById('reset-filter-btn').disabled = true;
 
-  // ── View toggle: pins only ───────────────────────────────────────────────
   const pinsBtn = document.getElementById('toggle-pins');
   pinsBtn.classList.add('active');
 
-  // ── Light / Dark theme toggle ─────────────────────────────────────────────
   let isLight = false;
 
   const THEME = {
@@ -2798,7 +2765,6 @@ Lyft
     isLight = !isLight;
     const t = isLight ? THEME.light : THEME.dark;
 
-    // Swap map style — re-add layers once style loads
     map.setStyle(t.mapStyle);
     map.once('style.load', () => {
       applyMapFog();
@@ -2810,7 +2776,6 @@ Lyft
     applyTheme(t);
     document.body.classList.toggle('light', isLight);
 
-    // Update button
     const themeBtn = document.getElementById('toggle-theme');
     themeBtn.classList.toggle('active', isLight);
     document.getElementById('theme-icon-dark').style.display  = isLight ? 'none'  : '';
@@ -2820,7 +2785,6 @@ Lyft
 
   document.getElementById('toggle-theme').addEventListener('click', toggleTheme);
 
-  // ── Sidebar ───────────────────────────────────────────────────────────────
   function filteredJobs() {
     return (activeFilter === 'all' || activeFilter === 'placeholder')
       ? allJobs
@@ -2830,11 +2794,6 @@ Lyft
   function renderSidebar() {
     const jobs = filteredJobs();
     const list = document.getElementById('job-list');
-    // Three distinct states so "no results" never looks like a stuck loading
-    // spinner, and "no jobs at this location" reads differently from "no
-    // jobs in this particular category" (there's a real difference between
-    // the two — the first means try another area, the second means try
-    // another filter).
     document.getElementById('loading-state').style.display  = !hasCompletedSearch ? 'block' : 'none';
     document.getElementById('no-jobs-state').style.display  = hasCompletedSearch && allJobs.length === 0 ? 'block' : 'none';
     document.getElementById('empty-state').style.display    = hasCompletedSearch && allJobs.length > 0 && jobs.length === 0 ? 'block' : 'none';
@@ -2849,29 +2808,20 @@ Lyft
       const card = document.createElement('div');
       card.className = 'job-card'; card.dataset.index = i;
       card.style.borderLeftColor = cat.color;
-      // Job cards are clickable divs (not native <button>s, since they
-      // contain a nested link) — make them keyboard-reachable and
-      // screen-reader-nameable too.
       card.setAttribute('role', 'button');
       card.setAttribute('tabindex', '0');
       card.setAttribute('aria-label', `${job.title} at ${job.company}`);
 
-      // Source badge (Jooble vs Adzuna vs direct employer posting)
       const sourceBadge = job.source === 'jooble'
         ? '<span class="card-source">Jooble</span>'
         : job.source === 'direct'
         ? '<span class="card-source">Labor Network</span>'
         : '';
 
-      // Stale listing warning
       const staleBadge = isStale(job.created)
         ? '<span class="card-stale">⚠️ Posted 30+ days ago</span>'
         : '';
 
-      // Direct (employer-posted) jobs use the in-app application form instead
-      // of an outbound link. Aggregated (Adzuna/Jooble) jobs still route out
-      // via job.url. A job already applied to (tracked client-side, since
-      // seekers have no login) shows "Applied ✓" instead of the button.
       const applyMarkup = job.url
         ? `<a class="card-apply" href="${job.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Apply →</a>`
         : job.source === 'direct' && job.postingId
@@ -2900,7 +2850,6 @@ Lyft
     loadCardDriveTimes(jobs);
   }
 
-  // ── Lazy drive-time fetch for card list ──────────────────────────────────
   async function loadCardDriveTimes(jobs) {
     const BATCH_SIZE = 8;
     const MAX_CARDS  = 40;
@@ -2921,9 +2870,6 @@ Lyft
     }
   }
 
-  // Shared job-popup markup — was copy-pasted at 3 call sites (sidebar card
-  // click, 3D pin click, unclustered-point click); any future styling tweak
-  // now only needs to happen here.
   function jobPopupHTML({ title, company, url, source, postingId }) {
     let applyMarkup;
     if (url) {
@@ -2946,6 +2892,9 @@ Lyft
     if (activeCard) activeCard.classList.remove('active');
     card.classList.add('active'); activeCard = card;
     if (activePopup) activePopup.remove();
+    // Tapping a job is the moment we "arrive" at the map — leave browse mode
+    // so the pin/commute/nav experience is visible again.
+    exitBrowseMode();
     map.flyTo({ center:[job.lng,job.lat], zoom:Math.max(map.getZoom(),15), pitch:50, duration:800 });
     activePopup = new mapboxgl.Popup({ closeButton:true, maxWidth:'260px' })
       .setLngLat([job.lng, job.lat])
@@ -2970,7 +2919,6 @@ Lyft
     syncJobPinMarkers();
   }
 
-  // ── 3D pin markers ────────────────────────────────────────────────────────
   let jobPinMarkers = {};
 
   function categoryEmoji(tag) {
@@ -2982,13 +2930,6 @@ Lyft
     return emojiMap[tag] || '💼';
   }
 
-  // ── Concurrency limiter ──────────────────────────────────────────────────
-  // A location search fans out to ~7 job categories, each hitting Adzuna
-  // (4 pages) + Jooble (1 request) — fired all at once that's ~35 simultaneous
-  // requests, which risks tripping Adzuna's rate limit. Run the per-category
-  // work through this limiter instead so only a few categories are in flight
-  // at a time; each category's own internal Adzuna page fetches still run in
-  // parallel, so total concurrent requests stays bounded and predictable.
   async function mapWithConcurrency(items, limit, worker) {
     const results = new Array(items.length);
     let nextIndex = 0;
@@ -3003,7 +2944,6 @@ Lyft
     return results;
   }
 
-  // ── Dedup ─────────────────────────────────────────────────────────────────
   function dedupeJobs(jobs) {
     const seenIds  = new Set();
     const seenKeys = new Set();
@@ -3072,7 +3012,6 @@ Lyft
     const el = document.createElement('div');
     el.className = 'job-pin-badge';
     const c = props.color || '#00ff88';
-    // Shadow circle sits bottom-right at 30% opacity; main circle sits top-left at full opacity
     el.innerHTML = `
       <svg width="28" height="28" viewBox="0 0 28 28" style="display:block;overflow:visible">
         <circle cx="17" cy="17" r="9" fill="${c}" opacity="0.3"/>
@@ -3101,7 +3040,6 @@ Lyft
     jobPinMarkers[key] = new mapboxgl.Marker({ element:el, anchor:'bottom' }).setLngLat([lng, lat]).addTo(map);
   }
 
-  // ── Adzuna fetch (pages 1–4) ─────────────────────────────────────────────
   async function fetchCategory(tag) {
     const catParam = (tag === 'all') ? '' : `&category=${tag}`;
 
@@ -3116,7 +3054,7 @@ Lyft
           lat:      j.latitude,
           lng:      j.longitude,
           category: tag === 'all' ? (j.category?.tag || 'all') : tag,
-          created:  j.created || null,   // ISO date string — used for stale badge
+          created:  j.created || null,
           source:   'adzuna'
         }));
 
@@ -3131,20 +3069,10 @@ Lyft
       } catch(e) { return []; }
     };
 
-    // Pages 1–4 in parallel — doubles the previous 2-page fetch.
-    // Page 3 & 4 sometimes return fewer or no results for smaller categories,
-    // which is fine — they go through dedup and cost nothing extra.
     const [p1, p2, p3, p4] = await Promise.all([fetchPage(1), fetchPage(2), fetchPage(3), fetchPage(4)]);
     return [...p1, ...p2, ...p3, ...p4];
   }
 
-  // ── Jooble fetch ──────────────────────────────────────────────────────────
-  // Jooble aggregates sources Adzuna doesn't cover (ZipRecruiter, Snagajob,
-  // CareerBuilder, etc.). Their API doesn't return coordinates, so we geocode
-  // unique location strings via Mapbox (max 12 unique locations per request).
-  // Routed through the Cloudflare Worker proxy (PROXY_BASE) rather than
-  // hitting jooble.org directly — sidesteps their CORS requirements and
-  // keeps JOOBLE_KEY off the client entirely.
   const joobleKeywordMap = {
     'logistics-warehouse-jobs':      'warehouse logistics forklift',
     'manufacturing-jobs':            'manufacturing production assembly',
@@ -3159,7 +3087,7 @@ Lyft
     'maintenance-jobs':              'maintenance facilities technician repair'
   };
 
-  const joobleLocCache = {}; // shared across calls within a session
+  const joobleLocCache = {};
 
   async function fetchJooble(tag) {
     const keywords = joobleKeywordMap[tag] || tag.replace(/-jobs$/, '').replace(/-/g, ' ');
@@ -3179,7 +3107,6 @@ Lyft
       const data = await res.json();
       if (!data.jobs?.length) return [];
 
-      // Geocode unique location strings we haven't seen before
       const uniqueLocs = [...new Set(data.jobs.map(j => j.location).filter(Boolean))]
         .filter(loc => !joobleLocCache[loc])
         .slice(0, 12);
@@ -3199,8 +3126,6 @@ Lyft
         .filter(j => j.link && j.title)
         .map(j => {
           const coords = joobleLocCache[j.location] || CENTER;
-          // Small random jitter (≈0.6 mi max) so jobs at the same location
-          // don't stack on an identical pin coordinate
           const jitter = () => (Math.random() - 0.5) * 0.018;
           return {
             id:       `jooble-${j.id || Math.random().toString(36).slice(2)}`,
@@ -3221,11 +3146,9 @@ Lyft
     }
   }
 
-  // ── Map layer setup (called on initial load + after style swap) ──────────
   function setupMapLayers() {
     const accent = isLight ? '#006e3c' : '#00ff88';
 
-    // Dark mode: tint base layers; light mode: leave Mapbox defaults
     if (!isLight) {
       [
         ['background',    'background-color', '#0d0f14'],
@@ -3240,7 +3163,6 @@ Lyft
       });
     }
 
-    // 3D buildings
     map.addLayer({
       id:'3d-buildings', source:'composite', 'source-layer':'building',
       filter:['==','extrude','true'], type:'fill-extrusion', minzoom:14,
@@ -3252,18 +3174,15 @@ Lyft
       }
     });
 
-    // Radius circle
     map.addSource('radius-circle', { type:'geojson', data:makeCircle(CENTER, RADIUS) });
     map.addLayer({ id:'radius-fill',    type:'fill', source:'radius-circle', paint:{'fill-color':accent,'fill-opacity':0.03} });
     map.addLayer({ id:'radius-outline', type:'line', source:'radius-circle', paint:{'line-color':accent,'line-width':1.5,'line-opacity':0.3,'line-dasharray':[4,3]} });
 
-    // Jobs source + layers
     map.addSource('jobs', {
       type:'geojson', data:{type:'FeatureCollection',features:[]},
       cluster:true, clusterMaxZoom:13, clusterRadius:48
     });
 
-    // ── Cluster shadow (offset badge) ──
     map.addLayer({ id:'clusters-shadow', type:'circle', source:'jobs', filter:['has','point_count'],
       paint:{
         'circle-color':['step',['get','point_count'], isLight?'#00a055':'#00cc6e', 5, accent, 15,'#66ffbb'],
@@ -3287,7 +3206,6 @@ Lyft
       },
       paint:{'text-color': isLight ? '#fff' : '#0a0a0a'}
     });
-    // ── Unclustered shadow ──
     map.addLayer({ id:'unclustered-shadow', type:'circle', source:'jobs', filter:['!',['has','point_count']],
       paint:{
         'circle-color':['coalesce',['get','color'],accent],
@@ -3295,7 +3213,6 @@ Lyft
         'circle-opacity':0.28, 'circle-translate':[4,4]
       }
     });
-    // ── Unclustered main pin ──
     map.addLayer({ id:'unclustered-point', type:'circle', source:'jobs', filter:['!',['has','point_count']],
       paint:{
         'circle-color':['coalesce',['get','color'],accent],
@@ -3307,13 +3224,11 @@ Lyft
     });
   }
 
-  // ── Map load ─────────────────────────────────────────────────────────────
   map.on('load', async () => {
     requestAnimationFrame(() => map.resize());
     applyMapFog();
     setupMapLayers();
 
-    // Cluster click → expand
     map.on('click', 'clusters', e => {
       const f = map.queryRenderedFeatures(e.point, { layers:['clusters'] });
       map.getSource('jobs').getClusterExpansionZoom(f[0].properties.cluster_id, (err, zoom) => {
@@ -3321,7 +3236,6 @@ Lyft
       });
     });
 
-    // Unclustered point click → popup + commute
     map.on('click', 'unclustered-point', e => {
       const { title, company, url, source, postingId } = e.features[0].properties;
       const coords = e.features[0].geometry.coordinates.slice();
@@ -3360,7 +3274,6 @@ Lyft
     map.on('moveend',    syncJobPinMarkers);
     map.on('sourcedata', e => { if (e.sourceId === 'jobs' && e.isSourceLoaded) syncJobPinMarkers(); });
 
-    // ── Initial data load: Adzuna (4 pages) + Jooble + direct postings ────
     const tags = CATEGORIES.filter(c => c.tag !== 'all' && c.tag !== 'placeholder').map(c => c.tag);
     joobleFailureCount = 0;
     const [adzunaRes, joobleRes, directRes] = await Promise.all([
@@ -3430,7 +3343,6 @@ Lyft
     return signOut(fbAuth);
   };
 
-  // ── Job postings (jobPostings collection) ─────────────────────────────
   window.postJobPosting = async function(posting) {
     const user = fbAuth.currentUser;
     if (!user) throw new Error('You need to be signed in to post a job.');
@@ -3462,8 +3374,6 @@ Lyft
     await updateDoc(doc(fbDb, 'jobPostings', postingId), { status: 'closed' });
   };
 
-  // Public read — no auth required, matches Firestore rules. Job seekers
-  // (who never sign in) see these mixed in with Adzuna/Jooble results.
   window.fetchActiveDirectPostings = async function() {
     const q = query(collection(fbDb, 'jobPostings'), where('status', '==', 'active'));
     const snap = await getDocs(q);
@@ -3471,11 +3381,11 @@ Lyft
       const data = d.data();
       return {
         id:         `direct-${d.id}`,
-        postingId:  d.id,             // raw jobPostings doc ID — needed to file an application
-        employerId: data.employerId,  // required by the applications collection's security rules
+        postingId:  d.id,
+        employerId: data.employerId,
         title:      data.title,
         company:    data.companyName || 'Employer',
-        url:        null, // job seekers apply in-app instead of an outbound link (Phase 2)
+        url:        null,
         lat:        data.lat,
         lng:        data.lng,
         category:   data.category,
@@ -3485,11 +3395,6 @@ Lyft
     });
   };
 
-  // ── Applications (applications collection) ─────────────────────────────
-  // Public create — job seekers never sign in. Firestore rules require
-  // postingId/employerId/applicantName/applicantEmail and status:'applied'.
-  // The auto-generated doc ID doubles as an unguessable no-login status-check
-  // token for a later phase (Phase 3 — status-check-by-link).
   window.submitApplication = async function({ postingId, employerId, applicantName, applicantEmail, applicantPhone }) {
     if (!postingId || !employerId) throw new Error('This job posting is missing required data — try refreshing the page.');
     const ref = await addDoc(collection(fbDb, 'applications'), {
@@ -3504,27 +3409,16 @@ Lyft
     return ref.id;
   };
 
-  // Employer-only: full applicant roster across all of an employer's
-  // postings. Scoped by employerId (not postingId) to match the Firestore
-  // rule, which restricts `list` to the owning employer — the dashboard
-  // groups these client-side by postingId.
   window.fetchApplicantsForEmployer = async function(employerId) {
     const q = query(collection(fbDb, 'applications'), where('employerId', '==', employerId));
     const snap = await getDocs(q);
     return snap.docs.map(d => ({ id: d.id, ...d.data() }));
   };
 
-  // Employer-only: update an applicant's status. Rules restrict this to the
-  // owning employer and to the status/updatedAt fields only.
   window.updateApplicationStatus = async function(applicationId, status) {
     await updateDoc(doc(fbDb, 'applications', applicationId), { status, updatedAt: serverTimestamp() });
   };
 
-  // Public, no-login lookup for the seeker-facing status-check link — the
-  // application doc's own auto-ID is the unguessable token (see Firestore
-  // rules: single-doc `get` is public). Applications don't store job title/
-  // company themselves, so this also does a second public read against the
-  // jobPostings doc to fill those in for display.
   window.fetchApplicationStatus = async function(applicationId) {
     const snap = await getDoc(doc(fbDb, 'applications', applicationId));
     if (!snap.exists()) return null;
@@ -3544,12 +3438,6 @@ Lyft
     }
   });
 
-  // If this page was opened via a seeker's no-login status-check link
-  // (?application=<id>), kick off the status view now. The classic script
-  // above (parsed earlier, during document parsing) already defined
-  // window.renderStatusCheck; this module script — deferred like all
-  // type="module" scripts — always runs after that, so both are guaranteed
-  // to exist by this point.
   const _statusCheckId = new URLSearchParams(location.search).get('application');
   if (_statusCheckId && typeof window.renderStatusCheck === 'function') {
     window.renderStatusCheck(_statusCheckId);
