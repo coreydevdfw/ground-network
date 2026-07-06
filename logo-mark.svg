@@ -1,0 +1,40 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ground Network">
+  <title>Ground Network</title>
+  <defs>
+    <clipPath id="gn-sphere-clip">
+      <circle cx="256" cy="256" r="200"/>
+    </clipPath>
+    <radialGradient id="gn-sheen" cx="35%" cy="28%" r="75%">
+      <stop offset="0%" stop-color="#d9ff8a" stop-opacity="0.9"/>
+      <stop offset="45%" stop-color="#8ee62e" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#1f9e4e" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Offset "orbit" crescent echo behind the sphere (network motion) -->
+  <path
+    fill-rule="evenodd"
+    fill="#0f6e30"
+    opacity="0.9"
+    d="M 496 276 A 200 200 0 1 0 96 276 A 200 200 0 1 0 496 276 Z
+       M 456 256 A 200 200 0 1 0 56 256 A 200 200 0 1 0 456 256 Z"
+  />
+
+  <!-- Sphere base -->
+  <circle cx="256" cy="256" r="200" fill="#1c7a44"/>
+
+  <!-- Layered terrain bands (ground), clipped to the sphere -->
+  <g clip-path="url(#gn-sphere-clip)">
+    <rect x="56" y="56" width="400" height="130" fill="#8ee62e"/>
+    <path d="M 56 168 Q 156 138 256 168 T 456 152 V 400 H 56 Z" fill="#5bc93f"/>
+    <path d="M 56 226 Q 156 200 256 226 T 456 206 V 400 H 56 Z" fill="#2fa85a"/>
+    <path d="M 56 282 Q 156 262 256 282 T 456 258 V 400 H 56 Z" fill="#1c7a44"/>
+    <path d="M 56 330 Q 156 316 256 330 T 456 308 V 400 H 56 Z" fill="#0f5c33"/>
+  </g>
+
+  <!-- Glossy sheen overlay -->
+  <circle cx="256" cy="256" r="200" fill="url(#gn-sheen)"/>
+
+  <!-- Subtle outer edge so the mark reads crisply on light backgrounds too -->
+  <circle cx="256" cy="256" r="200" fill="none" stroke="#000000" stroke-opacity="0.15" stroke-width="1.5"/>
+</svg>
