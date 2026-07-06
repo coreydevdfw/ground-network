@@ -1615,6 +1615,11 @@ Lyft
       signedOutRow.style.display = '';
       signedInRow.style.display  = 'none';
     }
+    // Job cards bake in the vouch button's visibility at render time (it
+    // depends on window.currentEmployerUser), so sign-in/out needs a
+    // re-render for "Vouch" to appear/disappear on already-loaded cards.
+    // Map popups don't need this — jobPopupHTML runs fresh on every click.
+    if (activeFilter !== 'placeholder') renderSidebar();
   };
 
   document.getElementById('employer-toggle-link').addEventListener('click', openEmployerModal);
