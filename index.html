@@ -42,6 +42,16 @@
   <link href='https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css' rel='stylesheet' />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --tg-lime: #d9ff8a; --tg-mid: #8ee62e; --tg-green: #2fa85a; --tg-deep: #0f5c33; --tg-ink: #0f2e1a;
+      --tg-glass-bg: radial-gradient(120% 140% at 12% 0%, rgba(217,255,138,0.14), transparent 55%), linear-gradient(155deg, rgba(142,230,46,0.09) 0%, rgba(15,92,51,0.16) 55%, rgba(10,10,10,0.5) 100%);
+      --tg-glass-border: rgba(255,255,255,0.09);
+      --tg-glass-shadow: 0 24px 48px -16px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.08);
+      --tg-glass-shadow-lg: 0 30px 60px -20px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.09);
+      --tg-btn-grad: linear-gradient(180deg, #e4ffab 0%, #8ee62e 45%, #2fa85a 100%);
+      --tg-btn-hover-grad: linear-gradient(180deg, #eeffc4 0%, #a3ec4a 45%, #3bbf67 100%);
+      --tg-btn-shadow: 0 10px 24px -6px rgba(94,201,63,0.5), inset 0 1px 0 rgba(255,255,255,0.55);
+    }
     body { font-family: 'Inter', system-ui, sans-serif; background: #0a0a0a; overflow: hidden; padding-top: env(safe-area-inset-top); }
 
     /* ── Light mode overrides ── */
@@ -330,12 +340,15 @@
     .ps-title { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.6); }
     .ps-sub { font-size: 11px; color: rgba(255,255,255,0.25); line-height: 1.6; }
     .job-card {
-      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 10px; padding: 11px 13px; margin-bottom: 6px;
+      background: var(--tg-glass-bg);
+      backdrop-filter: blur(22px) saturate(140%); -webkit-backdrop-filter: blur(22px) saturate(140%);
+      border: 1px solid var(--tg-glass-border);
+      border-radius: 12px; padding: 11px 13px; margin-bottom: 8px;
       cursor: pointer; transition: all 0.15s; border-left: 3px solid;
+      box-shadow: var(--tg-glass-shadow);
     }
-    .job-card:hover { background: rgba(255,255,255,0.06); transform: translateX(2px); }
-    .job-card.active { background: rgba(255,255,255,0.08); }
+    .job-card:hover { transform: translateX(2px); box-shadow: 0 28px 54px -16px rgba(0,0,0,0.72), inset 0 1px 0 rgba(255,255,255,0.12); }
+    .job-card.active { border-color: rgba(217,255,138,0.4); box-shadow: var(--tg-glass-shadow), 0 0 0 1px rgba(217,255,138,0.15); }
     .job-card:focus-visible, .commute-mode:focus-visible, button:focus-visible {
       outline: 2px solid #00ff88; outline-offset: 2px;
     }
@@ -350,7 +363,7 @@
     .dt-dot.clear { background: #00ff88; }
     .dt-dot.moderate { background: #ffc107; }
     .dt-dot.heavy { background: #ff6b6b; }
-    .card-cat { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 10px; background: rgba(255,255,255,0.06); }
+    .card-cat { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 10px; background: rgba(255,255,255,0.06); box-shadow: inset 0 1px 0 rgba(255,255,255,0.08); }
     .card-apply { font-size: 10px; font-weight: 700; color: #00ff88; text-decoration: none; }
     .card-apply:hover { text-decoration: underline; }
     /* ── Stale listing & source badges ── */
@@ -380,10 +393,10 @@
     .card-vouch:hover { color: #00ff88; border-color: #00ff88; }
     .popup-vouch {
       display: block; margin-top: 6px; font-size: 11px; font-weight: 700;
-      color: #0a0a0a; background: #00ff88; border: none; border-radius: 6px;
+      color: var(--tg-ink); background: var(--tg-btn-grad); box-shadow: var(--tg-btn-shadow); border: none; border-radius: 8px;
       padding: 5px 12px; cursor: pointer; font-family: inherit; width: 100%;
     }
-    .popup-vouch:hover { opacity: 0.85; }
+    .popup-vouch:hover { background: var(--tg-btn-hover-grad); }
     .popup-vouch:disabled { opacity: 0.5; cursor: default; }
     #empty-state, #no-jobs-state { text-align:center; padding:32px 20px; color:rgba(255,255,255,0.25); font-size:12px; line-height:1.6; display:none; }
     #loading-state { text-align:center; padding:32px 20px; color:rgba(255,255,255,0.3); font-size:12px; display:none; }
@@ -438,12 +451,12 @@
     }
     /* ── User location marker — offset shadow badge style, green ── */
     .user-location-marker { width: 28px; height: 28px; position: relative; display: block; cursor: pointer; }
-    .mapboxgl-popup-content { background:#111!important; border:1px solid rgba(0,255,136,0.25)!important; border-radius:10px!important; padding:14px 16px!important; box-shadow:0 8px 32px rgba(0,0,0,0.6)!important; min-width:200px; }
+    .mapboxgl-popup-content { background:var(--tg-glass-bg)!important; backdrop-filter: blur(26px) saturate(140%)!important; -webkit-backdrop-filter: blur(26px) saturate(140%)!important; border:1px solid var(--tg-glass-border)!important; border-radius:14px!important; padding:14px 16px!important; box-shadow: var(--tg-glass-shadow-lg)!important; min-width:200px; }
     .mapboxgl-popup-tip { display:none!important; }
     .mapboxgl-popup-close-button { color:rgba(255,255,255,0.4)!important; font-size:16px!important; top:6px!important; right:8px!important; }
     .popup-title { font-size:13px; font-weight:700; color:#fff; margin-bottom:4px; line-height:1.3; padding-right:16px; }
     .popup-company { font-size:12px; color:rgba(255,255,255,0.5); margin-bottom:10px; }
-    .popup-apply { display:inline-block; font-size:12px; font-weight:600; color:#0a0a0a; background:#00ff88; border-radius:6px; padding:5px 12px; text-decoration:none; }
+    .popup-apply { display:inline-block; font-size:12px; font-weight:700; color:var(--tg-ink); background:var(--tg-btn-grad); box-shadow: var(--tg-btn-shadow); border-radius:8px; padding:5px 12px; text-decoration:none; }
     /* ── Flythrough overlay ── */
     #flythrough-overlay {
       display: none; position: absolute; inset: 0; z-index: 10;
@@ -470,10 +483,11 @@
     }
     #nav-launch-badge {
       position: relative;
-      background: #0f0f0f;
-      border: 2px solid #00ff88;
-      box-shadow: 0 0 0 6px rgba(0,255,136,0.08), 4px 6px 0 rgba(0,255,136,0.28);
-      border-radius: 14px;
+      background: var(--tg-glass-bg);
+      backdrop-filter: blur(30px) saturate(150%); -webkit-backdrop-filter: blur(30px) saturate(150%);
+      border: 1px solid var(--tg-glass-border);
+      box-shadow: var(--tg-glass-shadow-lg);
+      border-radius: 18px;
       padding: 20px 36px;
       text-align: center;
       animation: navFlash 5s cubic-bezier(0.22,1,0.36,1) forwards;
@@ -505,9 +519,11 @@
     #app-dialog-overlay.show { display: flex; }
     #app-dialog-box {
       position: relative;
-      background: #0f0f0f; border: 2px solid #00ff88;
-      box-shadow: 0 0 0 6px rgba(0,255,136,0.08), 4px 6px 0 rgba(0,255,136,0.28);
-      border-radius: 14px; padding: 22px 24px; max-width: 340px; width: 100%;
+      background: var(--tg-glass-bg);
+      backdrop-filter: blur(30px) saturate(150%); -webkit-backdrop-filter: blur(30px) saturate(150%);
+      border: 1px solid var(--tg-glass-border);
+      box-shadow: var(--tg-glass-shadow-lg);
+      border-radius: 18px; padding: 22px 24px; max-width: 340px; width: 100%;
     }
     body.light #app-dialog-box { background: #fff; border-color: #00a055; box-shadow: 0 0 0 6px rgba(0,160,85,0.08), 4px 6px 0 rgba(0,160,85,0.22); }
     #app-dialog-message { font-size: 13px; line-height: 1.5; color: rgba(255,255,255,0.9); white-space: pre-line; }
@@ -519,7 +535,8 @@
     }
     #app-dialog-cancel { background: transparent; border-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.7); }
     body.light #app-dialog-cancel { border-color: rgba(0,0,0,0.2); color: rgba(0,0,0,0.6); }
-    #app-dialog-confirm { background: #00ff88; color: #0a0a0a; }
+    #app-dialog-confirm { background: var(--tg-btn-grad); color: var(--tg-ink); box-shadow: var(--tg-btn-shadow); }
+    #app-dialog-confirm:hover { background: var(--tg-btn-hover-grad); }
     body.light #app-dialog-confirm { background: #00a055; color: #fff; }
     /* ── Employer entry point + auth modal ── */
     #employer-row { padding: 8px 14px 12px; border-top: 1px solid rgba(255,255,255,0.06); }
@@ -542,9 +559,11 @@
     #employer-modal-overlay.show { display: flex; }
     #employer-modal-box {
       position: relative;
-      background: #0f0f0f; border: 2px solid #00ff88;
-      box-shadow: 0 0 0 6px rgba(0,255,136,0.08), 4px 6px 0 rgba(0,255,136,0.28);
-      border-radius: 14px; padding: 26px 26px 22px; max-width: 360px; width: 100%;
+      background: var(--tg-glass-bg);
+      backdrop-filter: blur(30px) saturate(150%); -webkit-backdrop-filter: blur(30px) saturate(150%);
+      border: 1px solid var(--tg-glass-border);
+      box-shadow: var(--tg-glass-shadow-lg);
+      border-radius: 18px; padding: 26px 26px 22px; max-width: 360px; width: 100%;
     }
     body.light #employer-modal-box { background: #fff; border-color: #00a055; box-shadow: 0 0 0 6px rgba(0,160,85,0.08), 4px 6px 0 rgba(0,160,85,0.22); }
     #employer-modal-close {
@@ -570,10 +589,11 @@
     }
     #employer-modal-error.show { display: block; }
     #employer-modal-submit {
-      width: 100%; font-size: 13px; font-weight: 700; color: #0a0a0a; background: #00ff88;
-      border: none; border-radius: 8px; padding: 10px; cursor: pointer; font-family: inherit; margin-top: 4px;
+      width: 100%; font-size: 13px; font-weight: 700; color: var(--tg-ink); background: var(--tg-btn-grad);
+      box-shadow: var(--tg-btn-shadow);
+      border: none; border-radius: 10px; padding: 10px; cursor: pointer; font-family: inherit; margin-top: 4px;
     }
-    #employer-modal-submit:hover { background: #33ffa3; }
+    #employer-modal-submit:hover { background: var(--tg-btn-hover-grad); }
     #employer-modal-submit:disabled { opacity: 0.5; pointer-events: none; }
     #employer-modal-switch { text-align: center; margin-top: 14px; font-size: 11px; color: rgba(255,255,255,0.4); }
     body.light #employer-modal-switch { color: rgba(0,0,0,0.4); }
@@ -614,9 +634,11 @@
     #employer-dashboard-overlay.show { display: flex; }
     #employer-dashboard-box {
       position: relative;
-      background: #0f0f0f; border: 2px solid #00ff88;
-      box-shadow: 0 0 0 6px rgba(0,255,136,0.08), 4px 6px 0 rgba(0,255,136,0.28);
-      border-radius: 14px; padding: 26px 26px 22px; max-width: 420px; width: 100%;
+      background: var(--tg-glass-bg);
+      backdrop-filter: blur(30px) saturate(150%); -webkit-backdrop-filter: blur(30px) saturate(150%);
+      border: 1px solid var(--tg-glass-border);
+      box-shadow: var(--tg-glass-shadow-lg);
+      border-radius: 18px; padding: 26px 26px 22px; max-width: 420px; width: 100%;
       max-height: 86vh; overflow-y: auto;
     }
     body.light #employer-dashboard-box { background: #fff; border-color: #00a055; box-shadow: 0 0 0 6px rgba(0,160,85,0.08), 4px 6px 0 rgba(0,160,85,0.22); }
@@ -645,10 +667,11 @@
     }
     #employer-post-error.show { display: block; }
     #employer-post-submit {
-      width: 100%; font-size: 13px; font-weight: 700; color: #0a0a0a; background: #00ff88;
-      border: none; border-radius: 8px; padding: 10px; cursor: pointer; font-family: inherit; margin-top: 4px;
+      width: 100%; font-size: 13px; font-weight: 700; color: var(--tg-ink); background: var(--tg-btn-grad);
+      box-shadow: var(--tg-btn-shadow);
+      border: none; border-radius: 10px; padding: 10px; cursor: pointer; font-family: inherit; margin-top: 4px;
     }
-    #employer-post-submit:hover { background: #33ffa3; }
+    #employer-post-submit:hover { background: var(--tg-btn-hover-grad); }
     #employer-post-submit:disabled { opacity: 0.5; pointer-events: none; }
     #employer-postings-section { margin-top: 22px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.1); }
     body.light #employer-postings-section { border-top-color: rgba(0,0,0,0.1); }
@@ -734,9 +757,11 @@
     #apply-modal-overlay.show { display: flex; }
     #apply-modal-box {
       position: relative;
-      background: #0f0f0f; border: 2px solid #00ff88;
-      box-shadow: 0 0 0 6px rgba(0,255,136,0.08), 4px 6px 0 rgba(0,255,136,0.28);
-      border-radius: 14px; padding: 26px 26px 22px; max-width: 360px; width: 100%;
+      background: var(--tg-glass-bg);
+      backdrop-filter: blur(30px) saturate(150%); -webkit-backdrop-filter: blur(30px) saturate(150%);
+      border: 1px solid var(--tg-glass-border);
+      box-shadow: var(--tg-glass-shadow-lg);
+      border-radius: 18px; padding: 26px 26px 22px; max-width: 360px; width: 100%;
     }
     body.light #apply-modal-box { background: #fff; border-color: #00a055; box-shadow: 0 0 0 6px rgba(0,160,85,0.08), 4px 6px 0 rgba(0,160,85,0.22); }
     #apply-modal-close {
@@ -753,10 +778,11 @@
     }
     #apply-modal-error.show { display: block; }
     #apply-submit-btn {
-      width: 100%; font-size: 13px; font-weight: 700; color: #0a0a0a; background: #00ff88;
-      border: none; border-radius: 8px; padding: 10px; cursor: pointer; font-family: inherit; margin-top: 4px;
+      width: 100%; font-size: 13px; font-weight: 700; color: var(--tg-ink); background: var(--tg-btn-grad);
+      box-shadow: var(--tg-btn-shadow);
+      border: none; border-radius: 10px; padding: 10px; cursor: pointer; font-family: inherit; margin-top: 4px;
     }
-    #apply-submit-btn:hover { background: #33ffa3; }
+    #apply-submit-btn:hover { background: var(--tg-btn-hover-grad); }
     #apply-submit-btn:disabled { opacity: 0.5; pointer-events: none; }
     #apply-success { display: none; text-align: center; padding: 10px 0 4px; }
     #apply-success-icon { font-size: 30px; margin-bottom: 10px; }
@@ -765,10 +791,11 @@
     #apply-success-sub { font-size: 12px; color: rgba(255,255,255,0.45); line-height: 1.5; margin-bottom: 18px; }
     body.light #apply-success-sub { color: rgba(0,0,0,0.5); }
     #apply-success-close {
-      width: 100%; font-size: 13px; font-weight: 700; color: #0a0a0a; background: #00ff88;
-      border: none; border-radius: 8px; padding: 10px; cursor: pointer; font-family: inherit;
+      width: 100%; font-size: 13px; font-weight: 700; color: var(--tg-ink); background: var(--tg-btn-grad);
+      box-shadow: var(--tg-btn-shadow);
+      border: none; border-radius: 10px; padding: 10px; cursor: pointer; font-family: inherit;
     }
-    #apply-success-close:hover { background: #33ffa3; }
+    #apply-success-close:hover { background: var(--tg-btn-hover-grad); }
     /* ── Status-check link (Phase 3) — shown on the apply-success screen ── */
     #apply-status-link-row { margin-bottom: 16px; text-align: left; }
     #apply-status-link-label {
@@ -928,6 +955,18 @@
   </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <radialGradient id="pinGloss" cx="32%" cy="26%" r="70%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.85"/>
+      <stop offset="35%" stop-color="#ffffff" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="pinShadowBlur" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="1.4"/>
+    </filter>
+  </defs>
+</svg>
 <div id="app">
   <div id="sidebar">
     <div id="sidebar-header-wrap">
@@ -2139,11 +2178,19 @@ Lyft
     // rx="1.5" keeps corners just barely rounded so it reads as a sharp diamond, not a blob.
     el.innerHTML = `
       <svg width="28" height="28" viewBox="0 0 28 28" style="display:block;overflow:visible">
+        <defs>
+          <linearGradient id="userDiamondGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#d9ff8a"/>
+            <stop offset="100%" stop-color="#2fa85a"/>
+          </linearGradient>
+        </defs>
         <rect x="7.5" y="7.5" width="11" height="11" rx="1.5"
-              fill="rgba(0,255,136,0.28)" transform="rotate(45 13 13)"/>
+              fill="rgba(15,92,51,0.32)" transform="rotate(45 13 13)" filter="url(#pinShadowBlur)"/>
         <rect x="5.5" y="5.5" width="11" height="11" rx="1.5"
-              fill="#00ff88" stroke="rgba(255,255,255,0.75)" stroke-width="1.5"
+              fill="url(#userDiamondGrad)" stroke="rgba(255,255,255,0.75)" stroke-width="1.5"
               transform="rotate(45 11 11)"/>
+        <rect x="5.5" y="5.5" width="11" height="11" rx="1.5"
+              fill="url(#pinGloss)" transform="rotate(45 11 11)"/>
       </svg>`;
     el.setAttribute('role', 'button');
     el.setAttribute('tabindex', '0');
@@ -2976,7 +3023,7 @@ Lyft
         </div>
         ${staleBadge}
         <div class="card-footer">
-          <span class="card-cat" style="color:${cat.color}">${cat.label}</span>
+          <span class="card-cat" style="color:${cat.color};background:linear-gradient(135deg, ${cat.color}33, ${cat.color}14);border:1px solid ${cat.color}55">${cat.label}</span>
           ${vouchMarkup}
           ${applyMarkup}
         </div>`;
@@ -3190,8 +3237,9 @@ Lyft
     // Shadow circle sits bottom-right at 30% opacity; main circle sits top-left at full opacity
     el.innerHTML = `
       <svg width="28" height="28" viewBox="0 0 28 28" style="display:block;overflow:visible">
-        <circle cx="17" cy="17" r="9" fill="${c}" opacity="0.3"/>
+        <circle cx="17" cy="17" r="9" fill="${c}" opacity="0.3" filter="url(#pinShadowBlur)"/>
         <circle cx="11" cy="11" r="9" fill="${c}" stroke="rgba(255,255,255,0.55)" stroke-width="1.2"/>
+        <circle cx="11" cy="11" r="9" fill="url(#pinGloss)"/>
       </svg>`;
     // Keyboard/screen-reader parity with the user-location marker — these
     // were plain click-only divs before, unreachable without a mouse.
@@ -3392,7 +3440,7 @@ Lyft
       paint:{
         'circle-color':['step',['get','point_count'], isLight?'#00a055':'#00cc6e', 5, accent, 15,'#66ffbb'],
         'circle-radius':['step',['get','point_count'],20,5,26,15,33],
-        'circle-opacity':0.28, 'circle-translate':[4,4]
+        'circle-opacity':0.28, 'circle-translate':[4,4], 'circle-blur':0.55
       }
     });
     map.addLayer({ id:'clusters', type:'circle', source:'jobs', filter:['has','point_count'],
@@ -3401,6 +3449,13 @@ Lyft
         'circle-radius':['step',['get','point_count'],20,5,26,15,33],
         'circle-opacity':0.92, 'circle-stroke-width':1.5,
         'circle-stroke-color': isLight ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.3)'
+      }
+    });
+    map.addLayer({ id:'clusters-gloss', type:'circle', source:'jobs', filter:['has','point_count'],
+      paint:{
+        'circle-color':'#ffffff',
+        'circle-radius':['step',['get','point_count'],8,5,11,15,14],
+        'circle-translate':[-5,-6], 'circle-opacity':0.32, 'circle-blur':0.6
       }
     });
     map.addLayer({ id:'cluster-count', type:'symbol', source:'jobs', filter:['has','point_count'],
@@ -3416,7 +3471,7 @@ Lyft
       paint:{
         'circle-color':['coalesce',['get','color'],accent],
         'circle-radius':['interpolate',['linear'],['zoom'],13,8,16,12],
-        'circle-opacity':0.28, 'circle-translate':[4,4]
+        'circle-opacity':0.28, 'circle-translate':[4,4], 'circle-blur':0.5
       }
     });
     // ── Unclustered main pin ──
@@ -3427,6 +3482,15 @@ Lyft
         'circle-stroke-width':1.5,
         'circle-stroke-color': isLight ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.55)',
         'circle-opacity':0.92
+      }
+    });
+    // ── Unclustered gloss highlight — small offset white circle to match
+    // the glossy sphere treatment used on job-pin-badge DOM markers ──
+    map.addLayer({ id:'unclustered-gloss', type:'circle', source:'jobs', filter:['!',['has','point_count']],
+      paint:{
+        'circle-color':'#ffffff',
+        'circle-radius':['interpolate',['linear'],['zoom'],13,3,16,4.5],
+        'circle-translate':[-2.5,-3], 'circle-opacity':0.4, 'circle-blur':0.5
       }
     });
   }
