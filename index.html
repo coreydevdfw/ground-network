@@ -1096,7 +1096,7 @@
           <div class="mode-label">Bike</div>
           <div class="mode-time loading" id="time-cycling">—</div>
         </div>
-        <div class="commute-mode" id="mode-dart" onclick="selectMode('dart')" title="Nearest DART rail station" role="button" tabindex="0" aria-label="DART transit commute mode, nearest rail station. Double-tap or press twice quickly to start navigation.">
+        <div class="commute-mode" id="mode-dart" onclick="selectMode('dart')" title="Nearest rail station (DART or DCTA)" role="button" tabindex="0" aria-label="Rail transit commute mode, nearest DART or DCTA station. Double-tap or press twice quickly to start navigation.">
           <div class="mode-icon">
             <svg width="22" height="22" viewBox="0 0 22 22">
               <rect x="4" y="6" width="16" height="10" rx="2" fill="rgba(183,148,246,0.25)"/>
@@ -1108,7 +1108,7 @@
               <line x1="13.5" y1="15" x2="13.5" y2="17.5" stroke="#b794f6" stroke-width="1.4" stroke-linecap="round"/>
             </svg>
           </div>
-          <div class="mode-label">DART</div>
+          <div class="mode-label">Rail</div>
           <div class="mode-time loading" id="time-dart">—</div>
         </div>
       </div>
@@ -1390,13 +1390,22 @@ Lyft
   const RADIUS  = 25;
   let currentJob = null;
   let currentDartDest = null;
-  let dartStations = [];
+  let transitStations = [];
   let nearestDartStation = null;
 
-  fetch('dart-stations.json')
-    .then(res => res.json())
-    .then(data => { dartStations = data; })
-    .catch(() => { console.warn('dart-stations.json unavailable — DART feature disabled.'); });
+  // Merged rail pool: DART (core-metro light rail) + DCTA (Denton County —
+  // A-train/UNT/TWU). Tagging each station with its agency lets the single
+  // "Rail" commute tile always surface whichever network is actually nearest,
+  // instead of a DCTA-only or DART-only tile going empty outside its territory.
+  Promise.all([
+    fetch('dart-stations.json').then(res => res.json()).catch(() => []),
+    fetch('dcta-stations.json').then(res => res.json()).catch(() => [])
+  ]).then(([dart, dcta]) => {
+    transitStations = [
+      ...dart.map(s => ({ ...s, agency: 'DART' })),
+      ...dcta.map(s => ({ ...s, agency: 'DCTA' }))
+    ];
+  }).catch(() => { console.warn('Transit station data unavailable — Rail feature disabled.'); });
 
   function haversineMiles(lat1, lon1, lat2, lon2) {
     const R = 3958.8;
@@ -1407,9 +1416,9 @@ Lyft
   }
 
   function findNearestDartStation(lat, lon) {
-    if (!dartStations.length) return null;
+    if (!transitStations.length) return null;
     let nearest = null, minDist = Infinity;
-    for (const s of dartStations) {
+    for (const s of transitStations) {
       const d = haversineMiles(lat, lon, s.lat, s.lon);
       if (d < minDist) { minDist = d; nearest = s; }
     }
@@ -2479,6 +2488,10 @@ Lyft
           const cut = sName.search(/[\/\-–]/);
           if (cut > 2) sName = sName.slice(0, cut).trim();
         }
+        // DART is the default/assumed network for this tile — only call out
+        // the agency explicitly when it's a DCTA (Denton County) stop, so
+        // riders outside DART's core-metro territory aren't misled.
+        if (nearestDartStation.agency === 'DCTA') sName = `${sName} (DCTA)`;
         dartEl.className = 'mode-time dart-station';
         dartEl.textContent = sName || nearestDartStation.name;
       } else {
@@ -2581,7 +2594,7 @@ Lyft
     driving: { color: '#63b3ed', label: 'Drive',  zoom: 19.5 },
     walking: { color: '#ffb347', label: 'Walk',   zoom: 19.5 },
     cycling: { color: '#68d391', label: 'Bike',   zoom: 19.5 },
-    dart:    { color: '#b794f6', label: 'DART',   zoom: 19.5 },
+    dart:    { color: '#b794f6', label: 'Rail',   zoom: 19.5 },
   };
 
   // Named thresholds that used to be scattered as unlabeled magic numbers

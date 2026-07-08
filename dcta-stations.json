@@ -1,0 +1,8 @@
+[
+  { "name": "Downtown Denton Transit Center", "lat": 33.2136029, "lon": -97.1256590 },
+  { "name": "MedPark Station",                "lat": 33.1819451, "lon": -97.0913106 },
+  { "name": "Highland Village/Lewisville Lake Station", "lat": 33.0838279, "lon": -97.0253690 },
+  { "name": "Old Town Station",               "lat": 33.0483530, "lon": -96.9852520 },
+  { "name": "Hebron Station",                 "lat": 33.0096394, "lon": -96.9593313 },
+  { "name": "Trinity Mills Station",          "lat": 32.9815508, "lon": -96.9259451 }
+]
