@@ -2214,15 +2214,19 @@ Lyft
       </svg>`;
     el.setAttribute('role', 'button');
     el.setAttribute('tabindex', '0');
-    el.setAttribute('aria-label', 'Your location. Double-tap or press twice quickly to start navigation to the selected job, in your last-used commute mode.');
+    el.setAttribute('aria-label', 'Your location. Double-tap or press twice quickly to start navigation to the selected job, or to recenter the map on your location if no job is selected.');
     // Second entry point into turn-by-turn nav, alongside double-tapping a
     // commute-mode tile — double-tapping your own pin starts navigation in
-    // whichever mode (driving/walking/cycling/DART) was used last.
+    // whichever mode (driving/walking/cycling/DART) was used last. If no job
+    // is currently selected there's no navigation to start, so the same
+    // gesture instead recenters/zooms the map back onto the user's own
+    // location — handy after panning/zooming out to browse the cluster view.
     el.addEventListener('click', () => {
       const now = Date.now();
       if (now - _lastPinTap.time < 350) {
         _lastPinTap = { time: 0 };
-        startNavigation(activeMode);
+        if (currentJob) startNavigation(activeMode);
+        else map.flyTo({ center: userMarker.getLngLat().toArray(), zoom: 13, pitch: 50, duration: 700 });
       } else {
         _lastPinTap = { time: now };
       }
@@ -2233,7 +2237,8 @@ Lyft
       const now = Date.now();
       if (now - _lastPinTap.time < 350) {
         _lastPinTap = { time: 0 };
-        startNavigation(activeMode);
+        if (currentJob) startNavigation(activeMode);
+        else map.flyTo({ center: userMarker.getLngLat().toArray(), zoom: 13, pitch: 50, duration: 700 });
       } else {
         _lastPinTap = { time: now };
       }
@@ -2253,24 +2258,16 @@ Lyft
     showSourceWarningIfNeeded(tags.length);
     allJobs = dedupeJobs([...adzunaRes.flat(), ...joobleRes.flat(), ...directRes]);
     hasCompletedSearch = true;
-    // Sharing location or searching a ZIP is an explicit "show me jobs near
-    // me" action — if the category dropdown is still sitting on its unpicked
-    // placeholder, results would otherwise render nowhere (sidebar list stays
-    // hidden behind the pre-select prompt, and the map layer shows nothing)
-    // until the user *also* separately opened the dropdown. Auto-select
-    // "All Jobs" here so location/ZIP search alone is enough to see results,
-    // matching what a user reasonably expects. The very first page load is
-    // deliberately left on the pre-select prompt — this only kicks in once
-    // someone has actively asked to see jobs near a place.
-    if (activeFilter === 'placeholder') {
-      sel.value = 'all'; activeFilter = 'all'; syncDot();
-      document.getElementById('pre-select').style.display = 'none';
-      const ls = document.getElementById('list-section');
-      ls.style.display = 'flex'; ls.style.flexDirection = 'column';
-      ls.style.overflow = 'hidden'; ls.style.flex = '1';
-      document.getElementById('reset-filter-btn').disabled = false;
-    }
-    renderSidebar(); updateMapLayer();
+    // filteredJobs() already treats 'placeholder' the same as 'all', so the
+    // map layer (clusters + pins) renders real data immediately — no need to
+    // force a category selection just to make jobs appear on the map. The
+    // sidebar list stays behind the pre-select prompt until a category is
+    // actively chosen; that's intentional now (see the category <select>
+    // change handler) — clusters are the "see jobs near me" view, and
+    // picking a category is the deliberate step that zooms into individual
+    // pins and reveals the list.
+    updateMapLayer();
+    if (activeFilter !== 'placeholder') renderSidebar();
   }
 
   let _watchId = null;
@@ -2305,7 +2302,11 @@ Lyft
         const wasLocated = userLocated;
         CENTER = coords;
         userLocated = true;
-        if (!wasLocated) map.flyTo({ center: CENTER, zoom: 13, pitch: 45, duration: 1400 });
+        // Land on a cluster-level overview, not individual pins — the goal is
+        // to surface as many jobs as possible (as cluster counts) before the
+        // user commits to a category. Picking a category is what zooms in to
+        // individual pins (see the category <select> change handler below).
+        if (!wasLocated) map.flyTo({ center: CENTER, zoom: 9, pitch: 0, duration: 1400 });
         updateCircle();
         btn.classList.remove('locating');
         btn.classList.add('located');
@@ -2412,7 +2413,8 @@ Lyft
     }
     CENTER = coords; userLocated = false; routeCache = {};
     if (userMarker) { userMarker.remove(); userMarker = null; }
-    map.flyTo({ center: CENTER, zoom: 12, pitch: 40, duration: 1400 });
+    // Same cluster-first landing as requestLocation() — see the comment there.
+    map.flyTo({ center: CENTER, zoom: 9, pitch: 0, duration: 1400 });
     updateCircle();
     const locateBtn = document.getElementById('locate-btn');
     locateBtn.classList.remove('located');
@@ -2896,6 +2898,11 @@ Lyft
     renderSidebar(); updateMapLayer();
     document.getElementById('reset-filter-btn').disabled = false;
     trackEvent('filter_used', { category: activeFilter });
+    // Choosing a category is the deliberate "show me individual jobs" step —
+    // zoom in from the cluster-level overview to pin-viewing zoom, centered
+    // on the user's real location if we have one, otherwise the search center.
+    const zoomTarget = (userLocated && userMarker) ? userMarker.getLngLat().toArray() : CENTER;
+    map.flyTo({ center: zoomTarget, zoom: 13, pitch: 50, duration: 900 });
   });
 
   document.getElementById('reset-filter-btn').addEventListener('click', () => {
