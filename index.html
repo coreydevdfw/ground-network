@@ -18,6 +18,9 @@
   <link rel="icon" type="image/svg+xml" href="logo-mark.svg"/>
   <link rel="icon" type="image/png" href="favicon.png"/>
   <link rel="apple-touch-icon" href="icon-192.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="canonical" href="https://coreydevdfw.github.io/ground-network/"/>
   <!-- Open Graph / Social -->
   <meta property="og:type"        content="website"/>
@@ -165,11 +168,16 @@
       display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
     }
     .logo {
-      font-size: 30px; font-weight: 800; color: #00ff88; letter-spacing: 0.01em;
-      text-shadow: 2px 2px 0 rgba(0,255,136,0.25), 4px 4px 0 rgba(0,255,136,0.1);
-      line-height: 1.02;
+      font-family: 'Space Grotesk', 'Inter', sans-serif;
+      font-size: 28px; font-weight: 700; color: #fff; letter-spacing: -0.01em;
+      text-shadow: 0 0 16px rgba(217,255,138,0.3);
+      line-height: 1.05;
     }
-    .tagline { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 5px; letter-spacing: 0.02em; }
+    .tagline {
+      font-family: 'Space Grotesk', 'Inter', sans-serif;
+      font-size: 12px; font-weight: 400; color: var(--tg-mid); opacity: 0.85;
+      margin-top: 5px; letter-spacing: 0.01em;
+    }
     #zip-row {
       padding: 10px 14px 10px;
       border-top: 1px solid rgba(255,255,255,0.06);
@@ -497,7 +505,8 @@
       text-transform: uppercase; color: #00ff88; margin-bottom: 6px;
     }
     #nav-launch-badge .nav-dest-label {
-      font-size: 17px; font-weight: 800; color: #fff; letter-spacing: 0.01em;
+      font-family: 'Space Grotesk', 'Inter', sans-serif;
+      font-size: 18px; font-weight: 700; color: #fff; letter-spacing: -0.01em;
     }
     #nav-launch-badge .nav-dest-co {
       font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 3px;
@@ -571,7 +580,7 @@
       color: rgba(255,255,255,0.35); cursor: pointer; font-size: 16px; padding: 2px;
     }
     body.light #employer-modal-close { color: rgba(0,0,0,0.35); }
-    #employer-modal-title { font-size: 17px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+    #employer-modal-title { font-family: 'Space Grotesk', 'Inter', sans-serif; font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 4px; }
     body.light #employer-modal-title { color: #111; }
     #employer-modal-sub { font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 18px; line-height: 1.5; }
     body.light #employer-modal-sub { color: rgba(0,0,0,0.45); }
@@ -647,7 +656,7 @@
       color: rgba(255,255,255,0.35); cursor: pointer; font-size: 16px; padding: 2px;
     }
     body.light #employer-dashboard-close { color: rgba(0,0,0,0.35); }
-    #employer-dashboard-title { font-size: 17px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+    #employer-dashboard-title { font-family: 'Space Grotesk', 'Inter', sans-serif; font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 4px; }
     body.light #employer-dashboard-title { color: #111; }
     #employer-dashboard-sub { font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 18px; line-height: 1.5; }
     body.light #employer-dashboard-sub { color: rgba(0,0,0,0.45); }
@@ -769,7 +778,7 @@
       color: rgba(255,255,255,0.35); cursor: pointer; font-size: 16px; padding: 2px;
     }
     body.light #apply-modal-close { color: rgba(0,0,0,0.35); }
-    #apply-modal-title { font-size: 17px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+    #apply-modal-title { font-family: 'Space Grotesk', 'Inter', sans-serif; font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 4px; }
     body.light #apply-modal-title { color: #111; }
     #apply-modal-sub { font-size: 12px; color: rgba(0,255,136,0.6); margin-bottom: 18px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
     body.light #apply-modal-sub { color: #006e3c; }
