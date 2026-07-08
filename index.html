@@ -833,9 +833,11 @@
     #status-check-overlay.show { display: flex; }
     #status-check-box {
       position: relative;
-      background: #0f0f0f; border: 2px solid #00ff88;
-      box-shadow: 0 0 0 6px rgba(0,255,136,0.08), 4px 6px 0 rgba(0,255,136,0.28);
-      border-radius: 14px; padding: 28px 26px 24px; max-width: 360px; width: 100%; text-align: center;
+      background: var(--tg-glass-bg);
+      backdrop-filter: blur(30px) saturate(150%); -webkit-backdrop-filter: blur(30px) saturate(150%);
+      border: 1px solid var(--tg-glass-border);
+      box-shadow: var(--tg-glass-shadow-lg);
+      border-radius: 18px; padding: 28px 26px 24px; max-width: 360px; width: 100%; text-align: center;
     }
     body.light #status-check-box { background: #fff; border-color: #00a055; box-shadow: 0 0 0 6px rgba(0,160,85,0.08), 4px 6px 0 rgba(0,160,85,0.22); }
     #status-check-title { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(0,255,136,0.6); margin-bottom: 16px; }
@@ -3196,7 +3198,7 @@ Lyft
 
   function syncJobPinMarkers() {
     if (!map.getSource('jobs') || !map.isStyleLoaded()) return;
-    const showPins = map.getZoom() > 15;
+    const showPins = map.getZoom() > 10;
     if (!showPins) {
       Object.keys(jobPinMarkers).forEach(key => { jobPinMarkers[key].remove(); delete jobPinMarkers[key]; });
       return;
