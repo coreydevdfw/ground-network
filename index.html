@@ -2253,7 +2253,24 @@ Lyft
     showSourceWarningIfNeeded(tags.length);
     allJobs = dedupeJobs([...adzunaRes.flat(), ...joobleRes.flat(), ...directRes]);
     hasCompletedSearch = true;
-    if (activeFilter !== 'placeholder') { renderSidebar(); updateMapLayer(); }
+    // Sharing location or searching a ZIP is an explicit "show me jobs near
+    // me" action — if the category dropdown is still sitting on its unpicked
+    // placeholder, results would otherwise render nowhere (sidebar list stays
+    // hidden behind the pre-select prompt, and the map layer shows nothing)
+    // until the user *also* separately opened the dropdown. Auto-select
+    // "All Jobs" here so location/ZIP search alone is enough to see results,
+    // matching what a user reasonably expects. The very first page load is
+    // deliberately left on the pre-select prompt — this only kicks in once
+    // someone has actively asked to see jobs near a place.
+    if (activeFilter === 'placeholder') {
+      sel.value = 'all'; activeFilter = 'all'; syncDot();
+      document.getElementById('pre-select').style.display = 'none';
+      const ls = document.getElementById('list-section');
+      ls.style.display = 'flex'; ls.style.flexDirection = 'column';
+      ls.style.overflow = 'hidden'; ls.style.flex = '1';
+      document.getElementById('reset-filter-btn').disabled = false;
+    }
+    renderSidebar(); updateMapLayer();
   }
 
   let _watchId = null;
@@ -3142,7 +3159,14 @@ Lyft
   }
 
   function updateMapLayer() {
-    const jobs = activeFilter === 'placeholder' ? [] : filteredJobs();
+    // filteredJobs() already treats 'placeholder' (no category picked yet)
+    // the same as 'all' — this used to special-case it back to an empty
+    // array, which meant the map (both the clustered layers and the DOM pin
+    // markers) silently showed zero jobs until a category was explicitly
+    // chosen, even though the sidebar list was already showing everything.
+    // That mismatch — not just the zoom threshold — was why pins looked
+    // "missing" right after a ZIP search or sharing location.
+    const jobs = filteredJobs();
     activeMapJobs = jobs;
     const geojson = {
       type:'FeatureCollection',
