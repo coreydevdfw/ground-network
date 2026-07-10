@@ -1395,7 +1395,7 @@ Lyft
 
   let CENTER    = [-96.7970, 33.0137];
   let userLocated = false;
-  const RADIUS  = 25;
+  const RADIUS  = 25; let searchLocationText = 'Dallas, TX';
   let currentJob = null;
   let currentDartDest = null;
   let transitStations = [];
@@ -2256,6 +2256,7 @@ Lyft
 
   async function refetchJobsAroundCenter() {
     document.getElementById('job-count').textContent = '…';
+    await updateSearchLocationText();
     const tags = CATEGORIES.filter(c => c.tag !== 'all' && c.tag !== 'placeholder').map(c => c.tag);
     joobleFailureCount = 0;
     const [adzunaRes, joobleRes, directRes] = await Promise.all([
@@ -2399,7 +2400,9 @@ Lyft
     return data.features[0].center;
   }
 
-  async function submitZip() {
+  async function updateSearchLocationText() { try { const [lon, lat] = CENTER; const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lon},${lat}.json?types=place&access_token=${mapboxgl.accessToken}`; const res = await fetch(url); const data = await res.json(); const feature = data.features && data.features[0]; if (!feature) return; const region = (feature.context || []).find(c => c.id.startsWith('region')); const stateAbbr = region && region.short_code ? region.short_code.replace('US-', '') : ''; searchLocationText = stateAbbr ? `${feature.text}, ${stateAbbr}` : feature.text; } catch (e) { console.warn('Reverse geocode failed:', e); } } function joobleRadiusKm(miles) { const steps = [0, 4, 8, 16, 26, 40, 80]; const km = miles * 1.60934; return String(steps.reduce((a, b) => Math.abs(b - km) < Math.abs(a - km) ? b : a)); }
+
+    async function submitZip() {
     const zip = zipInput.value.trim();
     if (!/^\d{5}$/.test(zip)) {
       zipStatus.textContent = 'Please enter a valid 5-digit ZIP code.';
@@ -3359,7 +3362,7 @@ Lyft
       try {
         const res = await fetch(
           `${PROXY_BASE}/adzuna/${page}` +
-          `?where=Dallas,TX&results_per_page=50&distance=${RADIUS}${catParam}`
+          `?where=${encodeURIComponent(searchLocationText)}&results_per_page=50&distance=${RADIUS}${catParam}`
         );
         if (!res.ok) return [];
         return parseResults(await res.json());
@@ -3404,8 +3407,8 @@ Lyft
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           keywords,
-          location:      'Dallas, TX',
-          radius:        String(RADIUS),
+          location:      searchLocationText,
+          radius:        joobleRadiusKm(RADIUS),
           page:          '1',
           resultsOnPage: '20'
         })
