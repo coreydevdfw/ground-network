@@ -21,7 +21,18 @@ These were discussed 2026-07-11 and explicitly parked for later rather than buil
 
 ## Open decisions in progress
 - **Business entity formation** (sole prop vs. LLC) — leaning toward forming an LLC before real revenue starts rather than after, but not yet decided/filed.
-- **Placement fee mechanics** — actively being hashed out as of 2026-07-11 (see below / next session update for outcome). Key open sub-decisions: fee structure (flat vs. % of pay vs. tiered), hire-confirmation/anti-fraud mechanism (employer self-report only vs. dual employer+seeker confirmation), guarantee/refund period (none vs. 30/90-day), and payment collection approach (Stripe invoicing vs. card-on-file auto-charge).
+- **Placement fee mechanics** — decided 2026-07-11, see dedicated section below. Still open: exact flat fee dollar amount (leaning $250-500 to start) and final Stripe/payment integration work.
+
+## Placement fee mechanics (decided 2026-07-11)
+Design finalized in conversation; not yet built. Captured here so implementation can happen in a later session without re-deriving the design.
+
+- **Fee structure:** Flat fee per hire (not a percentage of pay, not tiered by role — flat fits the hourly/warehouse-logistics center of gravity of current job categories). Amount not finalized; leaning toward the $250-$500 range to start. Must be implemented as a configurable value, not hardcoded, so it can be adjusted without a code deploy.
+- **Trigger / anti-fraud mechanism:** Dual confirmation. Employer marks an applicant "Hired" (existing dropdown) — this alone does NOT trigger the fee, it moves the application into a pending-confirmation state. The seeker is then asked (in-app / email) "Did you get this job at [Employer]?" The fee is only triggered once the seeker independently confirms. A seeker "no" or a non-response past some cutoff means no fee is charged. An employer-says-hired / seeker-says-no mismatch is a manual review flag (at current volume: a notification to Corey, not an automated dispute system).
+  - Still open: exact non-response timeout/cutoff before a "no fee" default kicks in.
+- **Guarantee/refund period:** None. No clawback or refund logic needed — the fee is due once dual confirmation completes, full stop.
+- **Collection mechanism:** Hybrid. Default path is invoicing (net-15 or net-30) after confirmation — no card required just to sign up or post a job, keeping employer-side friction low. Once confirmed, the employer is also offered an optional "pay now by card" path for those who'd rather not wait on an invoice. Requires Stripe (or equivalent) integration before either path is live. Card-on-file is NOT a gate on posting jobs — only real money movement is gated on having Stripe + a formed business entity in place.
+- **Dependency on entity formation:** Payment processors generally require a real business entity + EIN for anything beyond minimal test volume — this is the point where the LLC-timing decision (still open, see above) becomes concretely necessary rather than just a liability-shield nice-to-have.
+- **Multi-state note:** This structure (charging the employer, not the seeker) is what currently keeps Ground Network on the permissive side of Texas's employment-agency licensing rule. Re-verify this per-state before turning on real fee collection in any market beyond Texas.
 
 ## Why this file exists
 Same rationale as PROJECT_STATE.md: chat memory across sessions is unreliable and has previously lagged real progress. Legal and business decisions are high-stakes enough that they need their own durable, committed, versioned record — separate from the engineering/technical log in PROJECT_STATE.md — so any future session (or an actual attorney/accountant brought in later) can see exactly what's been decided, what's been deferred on purpose, and what's still genuinely open.
