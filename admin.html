@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>Ground Network — Admin</title>
+<meta name="robots" content="noindex, nofollow"/>
+<link rel="icon" type="image/svg+xml" href="logo-mark.svg"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --tg-lime: #d9ff8a; --tg-mid: #8ee62e; --tg-green: #2fa85a; --tg-deep: #0f5c33; --tg-ink: #0f2e1a;
+    --panel-bg: rgba(255,255,255,0.03); --panel-border: rgba(255,255,255,0.08);
+    --danger: #ff6b6b; --warn: #ffc107;
+  }
+  body {
+    font-family: 'Inter', system-ui, sans-serif; background: #0a0a0a; color: #fff;
+    min-height: 100vh; padding: 24px; font-family: system-ui, sans-serif;
+  }
+  h1, h2 { font-family: 'Space Grotesk', system-ui, sans-serif; }
+  a { color: var(--tg-lime); }
+
+  /* ── Sign-in gate ── */
+  #signin-view {
+    max-width: 360px; margin: 12vh auto 0; text-align: center;
+  }
+  #signin-view .logo { font-size: 22px; font-weight: 700; color: var(--tg-lime); margin-bottom: 4px; }
+  #signin-view .sub { font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 28px; }
+  #signin-view input {
+    width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px; padding: 11px 12px; color: #fff; font-size: 14px; font-family: inherit;
+    outline: none; margin-bottom: 10px;
+  }
+  #signin-view input:focus { border-color: var(--tg-mid); }
+  #signin-btn {
+    width: 100%; font-size: 14px; font-weight: 700; color: #0a0a0a;
+    background: linear-gradient(180deg, #e4ffab 0%, #8ee62e 45%, #2fa85a 100%);
+    border: none; border-radius: 8px; padding: 11px; cursor: pointer; margin-top: 6px;
+  }
+  #signin-btn:disabled { opacity: 0.5; pointer-events: none; }
+  #signin-error {
+    font-size: 12px; color: var(--danger); margin-top: 12px; line-height: 1.5; display: none;
+  }
+  #signin-error.show { display: block; }
+
+  /* ── Access denied ── */
+  #denied-view { max-width: 420px; margin: 16vh auto 0; text-align: center; display: none; }
+  #denied-view.show { display: block; }
+  #denied-view h2 { margin-bottom: 10px; }
+  #denied-view p { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.6; margin-bottom: 20px; }
+
+  /* ── Dashboard ── */
+  #dash-view { display: none; max-width: 1080px; margin: 0 auto; }
+  #dash-view.show { display: block; }
+  #dash-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 20px; margin-bottom: 24px; border-bottom: 1px solid var(--panel-border);
+  }
+  #dash-header .title { font-size: 20px; font-weight: 700; color: var(--tg-lime); }
+  #dash-header .who { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 4px; }
+  #signout-btn {
+    background: none; border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.6);
+    font-size: 12px; font-family: inherit; cursor: pointer; padding: 7px 14px; border-radius: 7px;
+  }
+  #signout-btn:hover { border-color: var(--danger); color: var(--danger); }
+
+  .section { margin-bottom: 36px; }
+  .section h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.04em; color: rgba(255,255,255,0.5); margin-bottom: 14px; }
+
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+  .metric-card {
+    background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 10px; padding: 16px;
+  }
+  .metric-card .num { font-size: 26px; font-weight: 700; font-family: 'Space Grotesk', system-ui, sans-serif; }
+  .metric-card .label { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.03em; }
+  .metric-card .breakdown { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 8px; line-height: 1.6; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.03em; color: rgba(255,255,255,0.35); padding: 8px 10px; border-bottom: 1px solid var(--panel-border); }
+  td { padding: 9px 10px; border-bottom: 1px solid rgba(255,255,255,0.04); color: rgba(255,255,255,0.8); }
+  tr:last-child td { border-bottom: none; }
+  .uid-cell { font-family: monospace; font-size: 10px; color: rgba(255,255,255,0.3); cursor: pointer; }
+  .uid-cell:hover { color: var(--tg-lime); }
+  .badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+  .badge.verified { background: rgba(142,230,46,0.15); color: var(--tg-mid); }
+  .badge.unverified { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.35); }
+  .badge.active { background: rgba(142,230,46,0.15); color: var(--tg-mid); }
+  .badge.closed { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.35); }
+
+  .empty-note { font-size: 12px; color: rgba(255,255,255,0.3); padding: 20px 0; text-align: center; }
+  .phase2-note {
+    font-size: 12px; color: rgba(255,193,7,0.7); background: rgba(255,193,7,0.06);
+    border: 1px solid rgba(255,193,7,0.2); border-radius: 8px; padding: 12px 14px; line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Sign-in gate ── -->
+<div id="signin-view">
+  <div class="logo">Ground Network</div>
+  <div class="sub">Admin — authorized accounts only</div>
+  <input type="email" id="signin-email" placeholder="Email" autocomplete="username"/>
+  <input type="password" id="signin-password" placeholder="Password" autocomplete="current-password"/>
+  <button id="signin-btn">Sign in</button>
+  <div id="signin-error"></div>
+</div>
+
+<!-- ── Access denied ── -->
+<div id="denied-view">
+  <h2>Not authorized</h2>
+  <p>This account is signed in but isn't on the admin list. If this should be an admin account, add a doc under <code>/admins</code> with this account's UID as the doc ID in the Firebase console.</p>
+  <button id="denied-signout-btn" class="signin-btn" style="background:none;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);padding:9px 16px;border-radius:7px;cursor:pointer;font-family:inherit;">Sign out</button>
+</div>
+
+<!-- ── Dashboard ── -->
+<div id="dash-view">
+  <div id="dash-header">
+    <div>
+      <div class="title">Ground Network — Admin</div>
+      <div class="who">Signed in as <span id="who-email"></span></div>
+    </div>
+    <button id="signout-btn">Sign out</button>
+  </div>
+
+  <div class="section">
+    <h2>Metrics</h2>
+    <div class="metric-grid" id="metrics-grid">
+      <div class="metric-card"><div class="num">—</div><div class="label">Loading…</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Employers (<span id="employer-count">—</span>)</h2>
+    <div id="employers-table-wrap"><div class="empty-note">Loading…</div></div>
+  </div>
+
+  <div class="section">
+    <h2>Job postings (<span id="postings-count">—</span>)</h2>
+    <div id="postings-table-wrap"><div class="empty-note">Loading…</div></div>
+  </div>
+
+  <div class="section">
+    <div class="phase2-note">
+      Suspend/reactivate accounts, sign-in policy controls, and publishing Firestore rules from
+      this page all need a backend (Cloudflare Worker + Firebase service account) that hasn't
+      been wired up yet — coming in the next phase. This view is read-only for now.
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js';
+  import {
+    getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged
+  } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js';
+  import {
+    getFirestore, doc, getDoc, collection, getDocs, getCountFromServer, query, where
+  } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js';
+
+  // Same public client config used in index.html — this key isn't a secret;
+  // Firebase access control lives in the Firestore/Auth rules, not here.
+  const firebaseConfig = {
+    apiKey: "AIzaSyDhomUbKFYPCCwxd4K3OrUtxC4HoUsbv00",
+    authDomain: "ground-network.firebaseapp.com",
+    projectId: "ground-network",
+    storageBucket: "ground-network.firebasestorage.app",
+    messagingSenderId: "895049359270",
+    appId: "1:895049359270:web:d9f67213f663c1d15db967",
+    measurementId: "G-XXPW98V6RS"
+  };
+  const fbApp = initializeApp(firebaseConfig);
+  const fbAuth = getAuth(fbApp);
+  const fbDb = getFirestore(fbApp);
+
+  const signinView = document.getElementById('signin-view');
+  const deniedView = document.getElementById('denied-view');
+  const dashView = document.getElementById('dash-view');
+
+  function showOnly(view) {
+    [signinView, deniedView, dashView].forEach(v => v.classList.remove('show'));
+    signinView.style.display = 'none';
+    if (view === signinView) signinView.style.display = 'block';
+    else view.classList.add('show');
+  }
+
+  // ── Sign-in ──────────────────────────────────────────────────────────
+  document.getElementById('signin-btn').addEventListener('click', async () => {
+    const email = document.getElementById('signin-email').value.trim();
+    const password = document.getElementById('signin-password').value;
+    const errEl = document.getElementById('signin-error');
+    errEl.classList.remove('show');
+    if (!email || !password) {
+      errEl.textContent = 'Enter both an email and password.';
+      errEl.classList.add('show');
+      return;
+    }
+    const btn = document.getElementById('signin-btn');
+    btn.disabled = true;
+    try {
+      await signInWithEmailAndPassword(fbAuth, email, password);
+      // onAuthStateChanged below handles what happens next.
+    } catch (e) {
+      errEl.textContent = 'Sign-in failed — check the email and password.';
+      errEl.classList.add('show');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  document.getElementById('signin-password').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('signin-btn').click();
+  });
+
+  document.getElementById('signout-btn').addEventListener('click', () => signOut(fbAuth));
+  document.getElementById('denied-signout-btn').addEventListener('click', () => signOut(fbAuth));
+
+  // ── Auth state / admin check ────────────────────────────────────────
+  onAuthStateChanged(fbAuth, async (user) => {
+    if (!user) { showOnly(signinView); return; }
+
+    let isAdmin = false;
+    try {
+      const adminSnap = await getDoc(doc(fbDb, 'admins', user.uid));
+      isAdmin = adminSnap.exists();
+    } catch (e) {
+      // Firestore rules will reject a non-admin's read of their own missing
+      // doc as "not found" rather than "permission denied" in most cases,
+      // but treat any error here as not-authorized rather than surfacing it.
+      isAdmin = false;
+    }
+
+    if (!isAdmin) {
+      document.getElementById('who-email') && (document.getElementById('who-email').textContent = user.email || '');
+      showOnly(deniedView);
+      return;
+    }
+
+    document.getElementById('who-email').textContent = user.email || user.uid;
+    showOnly(dashView);
+    loadDashboard();
+  });
+
+  // ── Dashboard data ───────────────────────────────────────────────────
+  async function loadDashboard() {
+    await Promise.all([loadMetrics(), loadEmployers(), loadPostings()]);
+  }
+
+  async function loadMetrics() {
+    const grid = document.getElementById('metrics-grid');
+    try {
+      const [employersTotal, employersVerified, postingsActive, postingsClosed] = await Promise.all([
+        getCountFromServer(collection(fbDb, 'employers')),
+        getCountFromServer(query(collection(fbDb, 'employers'), where('verified', '==', true))),
+        getCountFromServer(query(collection(fbDb, 'jobPostings'), where('status', '==', 'active'))),
+        getCountFromServer(query(collection(fbDb, 'jobPostings'), where('status', '==', 'closed')))
+      ]);
+
+      const statuses = ['applied', 'contacted', 'interviewing', 'hired', 'rejected'];
+      const statusCounts = await Promise.all(
+        statuses.map(s => getCountFromServer(query(collection(fbDb, 'applications'), where('status', '==', s))))
+      );
+      const totalApplications = statusCounts.reduce((sum, c) => sum + c.data().count, 0);
+
+      grid.innerHTML = `
+        <div class="metric-card">
+          <div class="num">${employersTotal.data().count}</div>
+          <div class="label">Employers</div>
+          <div class="breakdown">${employersVerified.data().count} verified</div>
+        </div>
+        <div class="metric-card">
+          <div class="num">${postingsActive.data().count + postingsClosed.data().count}</div>
+          <div class="label">Job postings</div>
+          <div class="breakdown">${postingsActive.data().count} active · ${postingsClosed.data().count} closed</div>
+        </div>
+        <div class="metric-card">
+          <div class="num">${totalApplications}</div>
+          <div class="label">Applications</div>
+          <div class="breakdown">${statuses.map((s, i) => `${statusCounts[i].data().count} ${s}`).join(' · ')}</div>
+        </div>
+      `;
+    } catch (e) {
+      grid.innerHTML = `<div class="empty-note">Couldn't load metrics: ${e.message || e}</div>`;
+    }
+  }
+
+  async function loadEmployers() {
+    const wrap = document.getElementById('employers-table-wrap');
+    try {
+      const snap = await getDocs(collection(fbDb, 'employers'));
+      document.getElementById('employer-count').textContent = snap.size;
+      if (snap.empty) { wrap.innerHTML = '<div class="empty-note">No employers yet.</div>'; return; }
+      const rows = snap.docs.map(d => {
+        const e = d.data();
+        const vouchCount = Array.isArray(e.vouchedBy) ? e.vouchedBy.length : 0;
+        const created = e.createdAt && e.createdAt.toDate ? e.createdAt.toDate().toLocaleDateString() : '—';
+        return `<tr>
+          <td>${escapeHtml(e.companyName || '(no name)')}</td>
+          <td>${escapeHtml(e.email || '—')}</td>
+          <td><span class="badge ${e.verified ? 'verified' : 'unverified'}">${e.verified ? 'Verified' : 'Unverified'}</span></td>
+          <td>${vouchCount}</td>
+          <td>${created}</td>
+          <td class="uid-cell" title="Click to copy UID" data-uid="${d.id}">${d.id.slice(0, 10)}…</td>
+        </tr>`;
+      }).join('');
+      wrap.innerHTML = `<table>
+        <thead><tr><th>Company</th><th>Email</th><th>Status</th><th>Vouches</th><th>Created</th><th>UID</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+      wrap.querySelectorAll('.uid-cell').forEach(cell => {
+        cell.addEventListener('click', () => {
+          navigator.clipboard?.writeText(cell.dataset.uid);
+          const orig = cell.textContent;
+          cell.textContent = 'Copied';
+          setTimeout(() => { cell.textContent = orig; }, 900);
+        });
+      });
+    } catch (e) {
+      wrap.innerHTML = `<div class="empty-note">Couldn't load employers: ${e.message || e}</div>`;
+    }
+  }
+
+  async function loadPostings() {
+    const wrap = document.getElementById('postings-table-wrap');
+    try {
+      const snap = await getDocs(collection(fbDb, 'jobPostings'));
+      document.getElementById('postings-count').textContent = snap.size;
+      if (snap.empty) { wrap.innerHTML = '<div class="empty-note">No job postings yet.</div>'; return; }
+      const rows = snap.docs.map(d => {
+        const p = d.data();
+        const created = p.createdAt && p.createdAt.toDate ? p.createdAt.toDate().toLocaleDateString() : '—';
+        return `<tr>
+          <td>${escapeHtml(p.title || '(untitled)')}</td>
+          <td>${escapeHtml(p.companyName || '—')}</td>
+          <td><span class="badge ${p.status === 'active' ? 'active' : 'closed'}">${escapeHtml(p.status || '—')}</span></td>
+          <td>${created}</td>
+        </tr>`;
+      }).join('');
+      wrap.innerHTML = `<table>
+        <thead><tr><th>Title</th><th>Company</th><th>Status</th><th>Created</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+    } catch (e) {
+      wrap.innerHTML = `<div class="empty-note">Couldn't load job postings: ${e.message || e}</div>`;
+    }
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+</script>
+</body>
+</html>
