@@ -80,6 +80,31 @@ service cloud.firestore {
       // on request).
       allow delete: if isAdmin();
     }
+
+    // ── mail ─────────────────────────────────────────────────────────────
+    // Added 2026-07-14 for applicant status-change notifications. Docs
+    // written here are picked up by the Firebase "Trigger Email" extension
+    // (installed separately in the console, not part of this rules file),
+    // which sends the actual email and writes back its own `delivery`
+    // status field using the extension's own Admin SDK privileges — that
+    // write bypasses these rules entirely, which is why there's no client
+    // update/delete path below.
+    //
+    // The create rule exists so an employer's browser can't turn this into
+    // an open "email anyone" channel: it must reference a real application
+    // that employer owns, be addressed to exactly that applicant's email
+    // on file, and be tagged with one of the four notification-worthy
+    // statuses.
+    match /mail/{mailId} {
+      allow read: if false;
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['to', 'message', 'meta'])
+        && request.resource.data.meta.employerId == request.auth.uid
+        && request.resource.data.meta.status in ['contacted', 'interviewing', 'hired', 'rejected']
+        && get(/databases/$(database)/documents/applications/$(request.resource.data.meta.applicationId)).data.employerId == request.auth.uid
+        && request.resource.data.to == [get(/databases/$(database)/documents/applications/$(request.resource.data.meta.applicationId)).data.applicantEmail];
+      allow update, delete: if false;
+    }
   }
 }
 
@@ -114,3 +139,11 @@ service cloud.firestore {
 // Bootstrap after publishing: add one doc under /admins with your own
 // Firebase Auth UID as the doc ID, done by hand in the console. No code
 // change needed for that step.
+//
+// Update 2026-07-14: added the `mail` collection rules for applicant
+// status-change email notifications (see index.html's
+// window.updateApplicationStatus). This requires the Firebase project to
+// be on the Blaze plan and the "Trigger Email" extension to be installed
+// and pointed at the `mail` collection — until that's done, mail docs
+// will get created but nothing will send. Not part of this rules file;
+// tracked in PROJECT_STATE.md.
