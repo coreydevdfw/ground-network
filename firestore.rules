@@ -1,156 +1,116 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
 
     // ── Helpers ──────────────────────────────────────────────────────────
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    // A UID is "admin" if a doc exists for it in /admins. That doc is
-    // NEVER writable from client code (see below) — it can only be
-    // created via the Firebase Admin SDK, the Firebase console's Firestore
-    // data tab, or a Cloud Function. This is the master-page gate.
+    // Added 2026-07-14 for the admin/master-page tier. Everything else in
+    // this file (employers, jobPostings, applications) is the EXISTING
+    // production ruleset — pulled directly from the Firebase console
+    // (last published 2026-07-06) rather than rewritten from scratch, so
+    // none of its validation gets weakened. See the bottom of this file
+    // for what changed vs. what stayed the same.
     function isAdmin() {
-      return isSignedIn() &&
+      return request.auth != null &&
         exists(/databases/$(database)/documents/admins/$(request.auth.uid));
-    }
-
-    function isOwner(employerId) {
-      return isSignedIn() && request.auth.uid == employerId;
     }
 
     // ── admins ───────────────────────────────────────────────────────────
     // Doc ID == Firebase Auth UID of the admin. A signed-in user may read
     // ONLY their own doc (so the client can self-check "am I admin" to
-    // decide whether to show the admin page). No client write path at all,
-    // by design — bootstrap the first admin by hand in the Firebase
-    // console: Firestore > admins > add doc with your UID as the doc ID.
+    // decide whether to show the admin page). No client write path at
+    // all, by design — bootstrap the first admin by hand in the Firebase
+    // console: Firestore > Data > admins > add doc, doc ID = your UID.
     match /admins/{uid} {
-      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow read: if request.auth != null && request.auth.uid == uid;
       allow write: if false;
     }
 
     // ── employers ────────────────────────────────────────────────────────
-    // Doc ID == Firebase Auth UID of the employer. Fields verified against
-    // the live index.html on 2026-07-14 (see note at bottom of file):
-    // verified (bool), vouchedBy (array of employer UIDs who've vouched).
+    // Unchanged from production except the `delete` line (see comment).
     match /employers/{employerId} {
-      // Public read: job cards show company name + verified badge to
-      // signed-out seekers, so this can't be locked to isSignedIn().
       allow read: if true;
-
-      allow create: if isOwner(employerId)
-        && request.resource.data.verified == false
-        && request.resource.data.get('vouchedBy', []) == [];
-
-      // Plain self-edit: employer can update their own doc, but can't
-      // grant themselves verified/vouchedBy — those only move via the
-      // vouch path below or an admin.
-      allow update: if isAdmin()
-        || (
-          isOwner(employerId)
-          && request.resource.data.verified == resource.data.verified
-          && request.resource.data.vouchedBy == resource.data.vouchedBy
-        )
-        || (
-          // Vouch path: a *different* signed-in employer appending their
-          // own UID to vouchedBy, touching nothing else. `verified` is
-          // allowed to change alongside it (client flips it to true once
-          // vouchedBy hits the 2-vouch threshold) but nothing else on the
-          // doc may move in the same write.
-          isSignedIn()
-          && request.auth.uid != employerId
-          && request.resource.data.diff(resource.data).affectedKeys()
-               .hasOnly(['vouchedBy', 'verified'])
-          && request.resource.data.vouchedBy
-               == resource.data.vouchedBy.concat([request.auth.uid])
-        );
-
-      allow delete: if isAdmin() || isOwner(employerId);
+      allow create: if request.auth != null && request.auth.uid == employerId
+        && request.resource.data.get('verified', false) == false
+        && request.resource.data.get('vouchedBy', []).size() == 0;
+      allow update: if isAdmin() || (request.auth != null && (
+        (request.auth.uid == employerId
+          && request.resource.data.get('verified', resource.data.get('verified', false)) == resource.data.get('verified', false)
+          && request.resource.data.get('vouchedBy', resource.data.get('vouchedBy', [])) == resource.data.get('vouchedBy', []))
+        ||
+        (request.auth.uid != employerId
+          && !(request.auth.uid in resource.data.get('vouchedBy', []))
+          && request.resource.data.vouchedBy == resource.data.get('vouchedBy', []).concat([request.auth.uid])
+          && request.resource.data.verified == (request.resource.data.vouchedBy.size() >= 2)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['vouchedBy','verified']))
+      ));
+      // Was `if false` in production (nobody could delete an employer doc
+      // at all). Admin-only delete now supports the account/data-deletion
+      // backlog item in LEGAL_AND_BUSINESS.md. Employers still can't
+      // self-delete — that needs a Cloud Function to also clean up owned
+      // jobPostings/applications, not a raw client-side delete.
+      allow delete: if isAdmin();
     }
 
     // ── jobPostings ──────────────────────────────────────────────────────
-    // employerId (uid of the posting employer) — verified 2026-07-14.
+    // Unchanged from production except admin is now also allowed to
+    // update/delete any posting (moderation), alongside the owning
+    // employer.
     match /jobPostings/{postingId} {
-      allow read: if true; // public job board — no login required to browse
-
-      allow create: if isOwner(request.resource.data.employerId);
-
+      allow read: if true;
+      allow create: if request.auth != null && request.resource.data.employerId == request.auth.uid;
       allow update, delete: if isAdmin()
-        || isOwner(resource.data.employerId);
+        || (request.auth != null && resource.data.employerId == request.auth.uid);
     }
 
     // ── applications ─────────────────────────────────────────────────────
-    // Contains applicant PII: applicantName, applicantEmail,
-    // applicantPhone (per LEGAL_AND_BUSINESS.md, cross-checked against
-    // index.html 2026-07-14). employerId is the denormalized owner field
-    // used for the rule check below, also verified against the live code.
-    //
-    // Two read paths have to coexist here:
-    //   1. The owning employer lists/reads applications for their own
-    //      postings (dashboard, applicant roster).
-    //   2. A seeker with no account reads exactly ONE application by its
-    //      (unguessable) doc ID via the ?application=<id> status-check
-    //      link, but must never be able to list/query the collection.
-    // Firestore rules let `get` (single doc) and `list` (collection query)
-    // be governed separately — that split is what makes both work without
-    // exposing every applicant's PII to anyone who finds the collection.
+    // Unchanged from production except `list`/`update` also allow admin,
+    // and `delete` moves from always-false to admin-only (see comment).
     match /applications/{applicationId} {
-      allow get: if true;               // status-check link
-      allow list: if isAdmin() || isOwner(resource.data.employerId);
-
-      allow create: if true;            // seekers apply without an account
-        // Worth tightening later with Firebase App Check + basic field
-        // validation (required fields present, string length caps) once
-        // this is a real abuse target — not urgent at current volume.
-
+      allow get: if true; // status-check link (?application=<id>), no login
+      allow list: if isAdmin()
+        || (request.auth != null && request.auth.uid == resource.data.employerId);
+      allow create: if request.resource.data.keys().hasAll(['postingId','employerId','applicantName','applicantEmail','status'])
+        && request.resource.data.status == 'applied';
       allow update: if isAdmin()
-        || (
-          isOwner(resource.data.employerId)
-          // Employer can only move `status` (the live code writes it
-          // together with `updatedAt: serverTimestamp()` in the same
-          // call — confirmed via GitHub code search against the actual
-          // updateDoc() call — so both must be allowed together, but
-          // nothing else, especially not applicant PII).
-          && request.resource.data.diff(resource.data).affectedKeys()
-               .hasOnly(['status', 'updatedAt'])
-        );
-
-      // Admin-only delete supports the account/data-deletion backlog item
-      // in LEGAL_AND_BUSINESS.md (deleting an applicant's PII on request).
+        || (request.auth != null && request.auth.uid == resource.data.employerId
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt']));
+      // Was `if false` in production. Admin-only delete supports the
+      // account/data-deletion backlog item (deleting an applicant's PII
+      // on request).
       allow delete: if isAdmin();
     }
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// Field names verified 2026-07-14 via GitHub code search against the live
-// index.html on main (not just PROJECT_STATE.md/LEGAL_AND_BUSINESS.md
-// descriptions):
-//   - employers: verified (bool), vouchedBy (array) — confirmed at
-//     lines ~3674-3676 (created verified:false, vouchedBy:[]) and the
-//     vouchCount/threshold check at ~3722-3723.
-//   - jobPostings: employerId (owner uid, queried via where('employerId',
-//     '==', ...) at ~3756), status ('active'/'closed', ~3762/3768).
-//   - applications: employerId (denormalized owner, ~3812), status +
-//     updatedAt written together via updateDoc(...,{status, updatedAt:
-//     serverTimestamp()}) at ~3820, applicantEmail/applicantPhone
-//     (~1785, ~2035-2037). postingId (not jobPostingId) is the field
-//     linking an application back to its jobPostings doc (~3774, ~3834).
-// One real bug this caught: the applications.update rule originally only
-// allowed changing `status`, but the live updateDoc() call always writes
-// `status` and `updatedAt` together — fixed above to allow both.
+// How this file came together (2026-07-14):
 //
-// Still worth a final human check before deploying:
-// 1. applicantName's exact field name wasn't independently confirmed the
-//    same way applicantEmail/applicantPhone were — a quick look at the
-//    application-submit handler (~line 2035 in index.html) would confirm.
-// 2. If employer PII (email, phone) lives on the same /employers/{uid}
-//    doc that's now publicly readable for the vouch badge, consider
-//    splitting private fields into a subcollection (e.g. /employers/{uid}/
-//    private/contact) rather than trying to field-mask a top-level doc —
-//    Firestore rules can't partially redact a document's fields on read.
-// 3. Bootstrap: after deploying these rules, manually add one doc under
-//    /admins with your own Firebase Auth UID as the doc ID to unlock the
-//    master page for yourself. No code change needed for that step.
+// The first draft of this file was written from PROJECT_STATE.md/
+// LEGAL_AND_BUSINESS.md descriptions plus a GitHub code search of
+// index.html, without having seen the actual rules already live in the
+// Firebase console. Before publishing, I opened the console directly
+// (project: ground-network, Firestore > Rules, last published 2026-07-06
+// 11:31 AM) and found the real production rules were more precise than
+// my draft in ways worth keeping:
+//   - `verified` is derived (`vouchedBy.size() >= 2`), not just
+//     "allowed to change alongside vouchedBy" — blocks a client from
+//     setting verified=true without actually reaching the threshold.
+//   - The vouch update explicitly blocks an employer vouching twice
+//     (`!(request.auth.uid in resource.data.vouchedBy)`) — my draft's
+//     concat-equality check didn't stop a duplicate self-vouch.
+//   - `applications.create` validates required fields
+//     (postingId/employerId/applicantName/applicantEmail/status) and
+//     pins status to 'applied' — my draft allowed `create: if true`
+//     with no field validation at all.
+// Rather than publish my weaker draft over the stronger production
+// rules, this file now uses the real production rules as the base and
+// adds only the admin/master-page layer on top (the `admins` collection,
+// `isAdmin()`, and `|| isAdmin()` added to the specific allow clauses
+// noted above). Three `delete` rules move from always-`false` to
+// admin-only, which is a deliberate new capability for the master page,
+// not an accidental loosening.
+//
+// Bootstrap after publishing: add one doc under /admins with your own
+// Firebase Auth UID as the doc ID, done by hand in the console. No code
+// change needed for that step.
