@@ -37,3 +37,7 @@ This file is the fix: commit it to the repo root, update it at the end of any se
 - Verified empirically before shipping: tested Adzuna's `/us/` endpoint directly with `lat`/`long` and `latitude`/`longitude` params — both returned HTTP 400. Adzuna does not support coordinate-based search on this endpoint; `where=` (text) is the only working location mechanism, hence the reverse-geocode approach instead of a coordinate param.
 - Committed to `main` as "Dynamic search location for Adzuna/Jooble + fix Jooble radius enum" (commit 343d16e). All 5 edits verified via direct CodeMirror document inspection + `new Function()` syntax check on the extracted inline script before committing.
 - This is groundwork for the multi-city vision (DFW/Greater North Dallas now, other cities later, eventual city transit partnerships) — location is now derived dynamically rather than hardcoded, which is a prerequisite for expanding beyond one hardcoded market.
+
+## Backlog (not urgent, noted 2026-07-14)
+- **Mobile job-scroll visibility**: the scroll-through-jobs interaction on mobile needs better visibility/affordance — worth tweaking the visual treatment or adding explicit options for how jobs are displayed while scrolling. Flagged by Corey, not yet scoped.
+- **No in-app link to admin.html**: the master page isn't linked from the consumer-facing UI at all — reaching it currently requires knowing the direct URL. Intentional for now (keeps it off regular users' radar), but worth a deliberate decision later rather than just staying that way by default.
