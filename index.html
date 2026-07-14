@@ -3816,9 +3816,75 @@ Lyft
 
   // Employer-only: update an applicant's status. Rules restrict this to the
   // owning employer and to the status/updatedAt fields only.
-  window.updateApplicationStatus = async function(applicationId, status) {
-    await updateDoc(doc(fbDb, 'applications', applicationId), { status, updatedAt: serverTimestamp() });
-  };
+  const APPLICATION_STATUS_EMAIL_COPY = {
+  contacted: {
+    subject: 'You\u2019ve been contacted about your application',
+    line: 'The employer has reached out about your application.'
+  },
+  interviewing: {
+    subject: 'You\u2019ve moved to interviewing',
+    line: 'Your application has moved to the interviewing stage.'
+  },
+  hired: {
+    subject: 'You got the job!',
+    line: 'Congratulations \u2014 the employer marked you as hired.'
+  },
+  rejected: {
+    subject: 'Update on your application',
+    line: 'The employer has updated your application status.'
+  }
+};
+
+// Employer-only: update an applicant's status. Rules restrict this to the
+// owning employer and to the status/updatedAt fields only.
+//
+// Also queues an email to the applicant for status changes worth
+// notifying about (contacted/interviewing/hired/rejected \u2014 not
+// 'applied', since that's the applicant's own action, not the
+// employer's). The Firebase "Trigger Email" extension (installed
+// separately in the console \u2014 see PROJECT_STATE.md) watches the
+// `mail` collection and sends the actual email; this function only
+// writes the doc it reads. Firestore rules cross-check the `to`
+// address and employerId against the real application doc, so this
+// can't be used to email anyone but that applicant.
+window.updateApplicationStatus = async function(applicationId, status) {
+  await updateDoc(doc(fbDb, 'applications', applicationId), { status, updatedAt: serverTimestamp() });
+
+  const copy = APPLICATION_STATUS_EMAIL_COPY[status];
+  if (!copy) return;
+
+  try {
+    const snap = await getDoc(doc(fbDb, 'applications', applicationId));
+    if (!snap.exists()) return;
+    const data = snap.data();
+    if (!data.applicantEmail) return;
+
+    let jobTitle = '', companyName = '';
+    try {
+      const pSnap = await getDoc(doc(fbDb, 'jobPostings', data.postingId));
+      if (pSnap.exists()) { jobTitle = pSnap.data().title || ''; companyName = pSnap.data().companyName || ''; }
+    } catch (e) { console.warn('Could not load posting details for status email:', e); }
+
+    const statusUrl = `${location.origin}${location.pathname}?application=${applicationId}`;
+    const jobLine = jobTitle ? ` for ${jobTitle}${companyName ? ' at ' + companyName : ''}` : '';
+
+    await addDoc(collection(fbDb, 'mail'), {
+      to: [data.applicantEmail],
+      message: {
+        subject: copy.subject,
+        text: `${copy.line}${jobLine}\n\nCheck your full status here: ${statusUrl}`,
+        html: `<p>${copy.line}${jobLine}</p><p><a href="${statusUrl}">Check your full status</a></p>`
+      },
+      meta: {
+        applicationId,
+        employerId: data.employerId,
+        status
+      }
+    });
+  } catch (e) {
+    console.warn('Could not queue status-change email:', e);
+  }
+};
 
   // Public, no-login lookup for the seeker-facing status-check link — the
   // application doc's own auto-ID is the unguessable token (see Firestore
@@ -3857,3 +3923,4 @@ Lyft
 </script>
 </body>
 </html>
+Yes
