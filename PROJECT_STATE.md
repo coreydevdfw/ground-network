@@ -1,4 +1,4 @@
-# Ground Network — Project State
+——# Ground Network — Project State
 _Last verified 2026-07-10, directly from the live `main` branch and deployed site — not from chat memory._
 
 ## Confirmed from the live repo (github.com/coreydevdfw/ground-network)
