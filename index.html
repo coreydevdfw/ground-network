@@ -2305,7 +2305,7 @@ Lyft
 
   let _watchId = null;
 
-  function requestLocation() {
+  function requestLocation(forceRecenter = false) {
     if (!navigator.geolocation) return;
     const btn = document.getElementById('locate-btn');
     // Guard against rapid repeat taps stacking extra geolocation watches and
@@ -2339,7 +2339,15 @@ Lyft
         // to surface as many jobs as possible (as cluster counts) before the
         // user commits to a category. Picking a category is what zooms in to
         // individual pins (see the category <select> change handler below).
-        if (!wasLocated) map.flyTo({ center: CENTER, zoom: 9, pitch: 0, duration: 1400 });
+        // forceRecenter (a manual tap on an already-located pin button) always
+        // flies back here too, and clears any open job popup/highlighted card
+        // — added 2026-07-16 so the pin button doubles as "back to my area"
+        // after selecting a job pulled the map away to that job's own pin.
+        if (!wasLocated || forceRecenter) {
+          if (activePopup) { activePopup.remove(); activePopup = null; }
+          if (activeCard) { activeCard.classList.remove('active'); activeCard = null; }
+          map.flyTo({ center: CENTER, zoom: 9, pitch: 0, duration: 1400 });
+        }
         updateCircle();
         btn.classList.remove('locating');
         btn.classList.add('located');
@@ -2386,7 +2394,7 @@ Lyft
     });
   }
 
-  document.getElementById('locate-btn').addEventListener('click', requestLocation);
+  document.getElementById('locate-btn').addEventListener('click', () => requestLocation(true));
   document.getElementById('uber-link').addEventListener('click', () => {
     trackEvent('uber_click', { company: currentJob ? currentJob.company : null });
   });
