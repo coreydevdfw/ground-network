@@ -248,6 +248,9 @@
     }
     #view-toggle button.active { background: rgba(0,255,136,0.14); color: #00ff88; box-shadow: 2px 2px 0 rgba(0,255,136,0.18); }
     #view-toggle button svg { width: 13px; height: 13px; }
+    /* ── Mobile Map/List switch — hidden by default, shown in the
+       max-width:640px media query below ── */
+    #mobile-view-toggle { display: none; }
     #reset-filter-btn {
       flex-shrink: 0; width: 34px; height: 34px;
       display: flex; align-items: center; justify-content: center;
@@ -984,6 +987,22 @@
       #sidebar.nav-hidden { max-height: 0; width:100%; min-width:unset;
         transition: transform 0.55s cubic-bezier(0.4,0,0.2,1), max-height 0.55s cubic-bezier(0.4,0,0.2,1); }
       #map-wrap { flex:1; min-height:0; height:50dvh; }
+
+      /* ── Mobile Map/List switch — added 2026-07-16 ── */
+      #mobile-view-toggle { display:flex; gap:6px; padding:0 14px 10px; }
+      #mobile-view-toggle button { flex:1; display:flex; align-items:center; justify-content:center; gap:5px; font-size:12px; font-weight:700; padding:8px 0; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.55); cursor:pointer; font-family:inherit; transition:all 0.15s; }
+      #mobile-view-toggle button.active { background:rgba(0,255,136,0.14); color:#00ff88; border-color:rgba(0,255,136,0.3); }
+      body.light #mobile-view-toggle button { background:rgba(0,0,0,0.05); border-color:rgba(0,0,0,0.1); color:rgba(0,0,0,0.45); }
+      body.light #mobile-view-toggle button.active { background:rgba(0,110,60,0.12); color:#006e3c; border-color:rgba(0,110,60,0.35); }
+
+      /* Map mode: hide the list/pre-select prompt and let #sidebar shrink to
+         just its always-visible header/filter rows (and the commute panel,
+         if a job happens to be focused) so #map-wrap (flex:1) takes the rest.
+         List mode is just the pre-existing 50/50 split above — no override
+         needed for it. */
+      body.mobile-map-mode #sidebar { max-height: none; }
+      body.mobile-map-mode #list-section,
+      body.mobile-map-mode #pre-select { display: none !important; }
     }
   </style>
 </head>
@@ -1058,6 +1077,16 @@
           <span id="theme-label">Light</span>
         </button>
       </div>
+    </div>
+
+    <!-- Mobile-only Map/List switch — added 2026-07-16. Phones used to
+         permanently split the screen 50/50 between map and list, which made
+         clusters/pins hard to read; this lets either pane go full-height on
+         demand. Hidden on desktop (see the max-width:640px media query),
+         where both panes already show side-by-side. -->
+    <div id="mobile-view-toggle">
+      <button id="mobile-view-map" class="active" type="button">🗺️ Map</button>
+      <button id="mobile-view-list" type="button">📋 List</button>
     </div>
 
     <!-- Commute panel — shown when a job is focused -->
@@ -2347,6 +2376,7 @@ Lyft
           if (activePopup) { activePopup.remove(); activePopup = null; }
           if (activeCard) { activeCard.classList.remove('active'); activeCard = null; }
           map.flyTo({ center: CENTER, zoom: 9, pitch: 0, duration: 1400 });
+          if (window.innerWidth <= 640) setMobileView('map');
         }
         updateCircle();
         btn.classList.remove('locating');
@@ -3033,6 +3063,25 @@ Lyft
 
   document.getElementById('toggle-theme').addEventListener('click', toggleTheme);
 
+  // ── Mobile Map/List switch ──────────────────────────────────────────────
+  // Purely a CSS-class toggle (mobile-map-mode on <body>) -- the rules that
+  // actually act on it only exist inside the max-width:640px media query, so
+  // this is a safe no-op on desktop where both panes already show side by
+  // side. map.resize() is required any time the map's container size
+  // changes, so it's called once right away and again after the sidebar's
+  // max-height CSS transition finishes. Added 2026-07-16.
+  function setMobileView(view) {
+    document.body.classList.toggle('mobile-map-mode', view === 'map');
+    document.getElementById('mobile-view-map').classList.toggle('active', view === 'map');
+    document.getElementById('mobile-view-list').classList.toggle('active', view === 'list');
+    requestAnimationFrame(() => map.resize());
+    setTimeout(() => map.resize(), 480);
+    trackEvent('mobile_view_toggle', { view });
+  }
+  document.getElementById('mobile-view-map').addEventListener('click', () => setMobileView('map'));
+  document.getElementById('mobile-view-list').addEventListener('click', () => setMobileView('list'));
+  setMobileView('map'); // default to the map so pins/clusters get full visibility first
+
   // ── Sidebar ───────────────────────────────────────────────────────────────
   function filteredJobs() {
     return (activeFilter === 'all' || activeFilter === 'placeholder')
@@ -3206,6 +3255,9 @@ Lyft
       .setLngLat([job.lng, job.lat])
       .setHTML(jobPopupHTML(job))
       .addTo(map);
+    // On mobile, jump to the Map pane so the pin/popup you just picked from
+    // the list is actually visible instead of staying behind it.
+    if (window.innerWidth <= 640) setMobileView('map');
     trackEvent('job_clicked', { source:'sidebar_card', category:job.category, company:job.company });
     loadCommute(job);
   }
