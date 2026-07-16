@@ -2259,13 +2259,14 @@ Lyft
     await updateSearchLocationText();
     const tags = CATEGORIES.filter(c => c.tag !== 'all' && c.tag !== 'placeholder').map(c => c.tag);
     joobleFailureCount = 0;
-    const [adzunaRes, joobleRes, directRes] = await Promise.all([
+    const [adzunaRes, joobleRes, directRes, directAtsRes] = await Promise.all([
       mapWithConcurrency(tags, 3, fetchCategory),
       mapWithConcurrency(tags, 3, fetchJooble),
-      fetchDirectPostings()
+      fetchDirectPostings(),
+      fetchDirectAtsEmployers()
     ]);
     showSourceWarningIfNeeded(tags.length);
-    allJobs = dedupeJobs([...adzunaRes.flat(), ...joobleRes.flat(), ...directRes]);
+    allJobs = dedupeJobs([...adzunaRes.flat(), ...joobleRes.flat(), ...directRes, ...directAtsRes]);
     hasCompletedSearch = true;
     // filteredJobs() already treats 'placeholder' the same as 'all', so the
     // map layer (clusters + pins) renders real data immediately — no need to
@@ -3121,7 +3122,9 @@ Lyft
   // now only needs to happen here.
   function jobPopupHTML({ title, company, url, source, postingId, employerId }) {
     let applyMarkup;
-    if (url) {
+    if ((source === 'greenhouse' || source === 'workday') && url) {
+      applyMarkup = `<a class="popup-apply" href="${url}" target="_blank" rel="noopener">Direct Apply →</a>`;
+    } else if (url) {
       applyMarkup = `<a class="popup-apply" href="${url}" target="_blank" rel="noopener">View & Apply →</a>`;
     } else if (source === 'direct' && postingId) {
       applyMarkup = getAppliedJobIds().has(postingId)
@@ -3459,6 +3462,112 @@ Lyft
     }
   }
 
+  // ── Shared geocode cache for any source that returns text locations instead
+  // of coordinates (Jooble, and now Greenhouse/Workday). Keyed by the raw
+  // location string so repeated hits across sources/categories are free.
+  const locationGeocodeCache = {};
+  async function geocodeLocationText(loc) {
+    if (!loc) return null;
+    if (locationGeocodeCache[loc]) return locationGeocodeCache[loc];
+    try {
+      const gRes = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(loc)}.json` +
+        `?country=US&proximity=${CENTER[0]},${CENTER[1]}&access_token=${mapboxgl.accessToken}`
+      );
+      const gData = await gRes.json();
+      if (gData.features?.length) {
+        locationGeocodeCache[loc] = gData.features[0].center;
+        return locationGeocodeCache[loc];
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  // ── Curated direct-ATS employer list (Tier 1 Greenhouse/Lever, Tier 2 Workday) ──
+  // Hand-maintained — neither platform exposes a way to discover "every company
+  // using us," so each entry here was individually confirmed. See
+  // ground_network_ats_research.xlsx for how/when each was verified.
+  // Added 2026-07-16.
+  const DIRECT_ATS_EMPLOYERS = [
+    { name: 'Toyota Connected', ats: 'greenhouse', boardToken: 'toyotaconnected', categoryHint: 'engineering-jobs' },
+    { name: 'AT&T', ats: 'workday', host: 'att.wd1.myworkdayjobs.com', tenant: 'att', site: 'ATTGeneral', categoryHint: 'admin-jobs' },
+  ];
+
+  // ── Greenhouse fetch (Tier 1 — free, public, no key) ───────────────────────
+  async function fetchGreenhouse(employer) {
+    try {
+      const res = await fetch(`${PROXY_BASE}/greenhouse/${employer.boardToken}`);
+      if (!res.ok) return [];
+      const data = await res.json();
+      const jobs = data.jobs || [];
+      const withCoords = await Promise.all(jobs.map(async j => {
+        const coords = await geocodeLocationText(j.location?.name);
+        if (!coords) return null;
+        const jitter = () => (Math.random() - 0.5) * 0.018;
+        return {
+          id:       `greenhouse-${j.id}`,
+          title:    j.title,
+          company:  employer.name,
+          url:      j.absolute_url,
+          lat:      coords[1] + jitter(),
+          lng:      coords[0] + jitter(),
+          category: employer.categoryHint,
+          created:  j.updated_at || null,
+          source:   'greenhouse'
+        };
+      }));
+      return withCoords.filter(Boolean);
+    } catch (e) {
+      console.warn('Greenhouse fetch failed:', employer.name, e);
+      return [];
+    }
+  }
+
+  // ── Workday fetch (Tier 2 — semi-public CxS endpoint, no key) ────────────
+  // NOTE: response field names (jobPostings/title/externalPath/locationsText/
+  // postedOn) are Workday's documented-by-convention CxS shape. Verify field
+  // names against a real response the first time this runs, and adjust the
+  // mapping below if they differ.
+  async function fetchWorkday(employer) {
+    try {
+      const res = await fetch(`${PROXY_BASE}/workday`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ host: employer.host, tenant: employer.tenant, site: employer.site, searchText: '' })
+      });
+      if (!res.ok) return [];
+      const data = await res.json();
+      const postings = data.jobPostings || [];
+      const withCoords = await Promise.all(postings.map(async p => {
+        const coords = await geocodeLocationText(p.locationsText || p.location);
+        if (!coords) return null;
+        const jitter = () => (Math.random() - 0.5) * 0.018;
+        return {
+          id:       `workday-${employer.tenant}-${(p.externalPath || p.title || Math.random()).toString().slice(-24)}`,
+          title:    p.title,
+          company:  employer.name,
+          url:      `https://${employer.host}${p.externalPath || ''}`,
+          lat:      coords[1] + jitter(),
+          lng:      coords[0] + jitter(),
+          category: employer.categoryHint,
+          created:  p.postedOn || null,
+          source:   'workday'
+        };
+      }));
+      return withCoords.filter(Boolean);
+    } catch (e) {
+      console.warn('Workday fetch failed:', employer.name, e);
+      return [];
+    }
+  }
+
+  async function fetchDirectAtsEmployers() {
+    const results = await Promise.all(DIRECT_ATS_EMPLOYERS.map(employer =>
+      employer.ats === 'greenhouse' ? fetchGreenhouse(employer) : fetchWorkday(employer)
+    ));
+    return results.flat();
+  }
+
   // ── Map layer setup (called on initial load + after style swap) ──────────
   function setupMapLayers() {
     const accent = isLight ? '#006e3c' : '#00ff88';
@@ -3617,13 +3726,14 @@ Lyft
     // ── Initial data load: Adzuna (4 pages) + Jooble + direct postings ────
     const tags = CATEGORIES.filter(c => c.tag !== 'all' && c.tag !== 'placeholder').map(c => c.tag);
     joobleFailureCount = 0;
-    const [adzunaRes, joobleRes, directRes] = await Promise.all([
+    const [adzunaRes, joobleRes, directRes, directAtsRes] = await Promise.all([
       mapWithConcurrency(tags, 3, fetchCategory),
       mapWithConcurrency(tags, 3, fetchJooble),
-      fetchDirectPostings()
+      fetchDirectPostings(),
+      fetchDirectAtsEmployers()
     ]);
     showSourceWarningIfNeeded(tags.length);
-    allJobs.push(...dedupeJobs([...adzunaRes.flat(), ...joobleRes.flat(), ...directRes]));
+    allJobs.push(...dedupeJobs([...adzunaRes.flat(), ...joobleRes.flat(), ...directRes, ...directAtsRes]));
     hasCompletedSearch = true;
     if (activeFilter !== 'placeholder') { renderSidebar(); updateMapLayer(); }
   });
@@ -3923,4 +4033,3 @@ window.updateApplicationStatus = async function(applicationId, status) {
 </script>
 </body>
 </html>
-Yes
