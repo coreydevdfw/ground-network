@@ -427,6 +427,20 @@
     @keyframes pulse { 0%,100%{opacity:0.3}50%{opacity:0.8} }
     /* ── Map overlays ── */
     #zoom-hint { position:absolute; bottom:28px; right:12px; z-index:6; background:rgba(10,10,10,0.7); border:1px solid rgba(255,255,255,0.07); border-radius:8px; padding:5px 10px; color:rgba(255,255,255,0.3); font-size:11px; transition:opacity 0.4s; pointer-events:none; }
+    /* ── Off-screen job nudges — added 2026-07-16 ── */
+    .offscreen-nudge { position:absolute; z-index:7; display:flex; align-items:center; gap:4px; background:rgba(15,15,15,0.85); border:1px solid rgba(0,255,136,0.35); border-radius:20px; padding:6px 10px; font-size:11px; font-weight:700; color:#00ff88; cursor:pointer; transition:opacity 0.3s, transform 0.15s; box-shadow:0 2px 10px rgba(0,0,0,0.4); }
+    .offscreen-nudge:hover { background:rgba(0,255,136,0.16); }
+    .offscreen-nudge .arrow { font-size:13px; line-height:1; }
+    .offscreen-nudge .label { opacity:0.7; font-weight:600; }
+    .offscreen-nudge.dir-n { top:12px; left:50%; transform:translateX(-50%); }
+    .offscreen-nudge.dir-n:hover { transform:translateX(-50%) scale(1.05); }
+    .offscreen-nudge.dir-s { bottom:12px; left:50%; transform:translateX(-50%); }
+    .offscreen-nudge.dir-s:hover { transform:translateX(-50%) scale(1.05); }
+    .offscreen-nudge.dir-e { right:12px; top:50%; transform:translateY(-50%); }
+    .offscreen-nudge.dir-e:hover { transform:translateY(-50%) scale(1.05); }
+    .offscreen-nudge.dir-w { left:12px; top:50%; transform:translateY(-50%); }
+    .offscreen-nudge.dir-w:hover { transform:translateY(-50%) scale(1.05); }
+    body.light .offscreen-nudge { background:rgba(255,255,255,0.92); border-color:rgba(0,110,60,0.35); color:#006e3c; box-shadow:0 2px 10px rgba(0,0,0,0.15); }
     #heatmap-caption {
       position:absolute; bottom:28px; left:12px; z-index:6;
       background:rgba(10,10,10,0.75); border:1px solid rgba(255,107,107,0.25);
@@ -1175,6 +1189,15 @@ Lyft
     <div id="map"></div>
     <div id="vignette"></div>
     <div id="zoom-hint">Zoom in to explore your neighborhood →</div>
+    <!-- ── Off-screen job nudges — added 2026-07-16. DFW spreads jobs across
+         a lot of ground, so these edge badges tell you when panning a
+         direction reveals more listings, instead of exploration depending on
+         randomly dragging the map. Populated/toggled by updateOffscreenNudges()
+         and clickable to pan that direction (see panMapDirection()). ── -->
+    <div id="offscreen-north" class="offscreen-nudge dir-n" style="display:none;"><span class="arrow">↑</span><span class="count"></span><span class="label">more</span></div>
+    <div id="offscreen-south" class="offscreen-nudge dir-s" style="display:none;"><span class="arrow">↓</span><span class="count"></span><span class="label">more</span></div>
+    <div id="offscreen-east"  class="offscreen-nudge dir-e" style="display:none;"><span class="arrow">→</span><span class="count"></span><span class="label">more</span></div>
+    <div id="offscreen-west"  class="offscreen-nudge dir-w" style="display:none;"><span class="arrow">←</span><span class="count"></span><span class="label">more</span></div>
     <div id="location-banner">
       📍 Share your location for a tighter radius
       <button onclick="requestLocation()">Allow</button>
@@ -3199,6 +3222,7 @@ Lyft
     };
     if (map.getSource('jobs')) map.getSource('jobs').setData(geojson);
     syncJobPinMarkers();
+    updateOffscreenNudges();
   }
 
   // ── 3D pin markers ────────────────────────────────────────────────────────
@@ -3208,7 +3232,13 @@ Lyft
     const emojiMap = {
       'logistics-warehouse-jobs':'📦','manufacturing-jobs':'🏭',
       'trade-construction-jobs':'🔨','retail-jobs':'🛍️',
-      'customer-services-jobs':'🎧','engineering-jobs':'⚙️','admin-jobs':'🗂️'
+      'customer-services-jobs':'🎧','engineering-jobs':'⚙️','admin-jobs':'🗂️',
+      // Added 2026-07-16 alongside the 2026-07-03 Adzuna category expansion --
+      // these existed in CATEGORIES already but were missing here, so cluster
+      // bubbles (see setupMapLayers' dominant-category expression) fell back
+      // to the generic briefcase for these four instead of a real icon.
+      'healthcare-nursing-jobs':'⚕️','hospitality-catering-jobs':'🍽️',
+      'domestic-help-cleaning-jobs':'🧹','maintenance-jobs':'🛠️'
     };
     return emojiMap[tag] || '💼';
   }
@@ -3298,6 +3328,53 @@ Lyft
       if (!activeKeys.has(key)) { jobPinMarkers[key].remove(); delete jobPinMarkers[key]; }
     });
   }
+
+  // ── Off-screen job nudges ────────────────────────────────────────────────
+  // Counts how many of the currently-filtered jobs sit outside each edge of
+  // the current viewport and shows a small directional badge when there are
+  // any, so branching out to the next suburb/city feels guided instead of
+  // relying on blind panning. A job in a corner (e.g. north AND east of the
+  // viewport) can light up both badges -- that's intentional, it really is
+  // "more that way" in both directions. Added 2026-07-16.
+  function updateOffscreenNudges() {
+    const dirEls = {
+      n: document.getElementById('offscreen-north'),
+      s: document.getElementById('offscreen-south'),
+      e: document.getElementById('offscreen-east'),
+      w: document.getElementById('offscreen-west'),
+    };
+    if (!dirEls.n || !map.isStyleLoaded()) return;
+    const bounds = map.getBounds();
+    const counts = { n:0, s:0, e:0, w:0 };
+    (activeMapJobs || []).forEach(job => {
+      if (job.lat > bounds.getNorth()) counts.n++;
+      if (job.lat < bounds.getSouth()) counts.s++;
+      if (job.lng > bounds.getEast())  counts.e++;
+      if (job.lng < bounds.getWest())  counts.w++;
+    });
+    Object.entries(counts).forEach(([dir, count]) => {
+      const el = dirEls[dir];
+      if (count > 0) {
+        el.querySelector('.count').textContent = count > 99 ? '99+' : count;
+        el.style.display = 'flex';
+      } else {
+        el.style.display = 'none';
+      }
+    });
+  }
+
+  function panMapDirection(dir) {
+    const container = map.getContainer();
+    const w = container.clientWidth, h = container.clientHeight;
+    const offsets = { n:[0,-h*0.6], s:[0,h*0.6], e:[w*0.6,0], w:[-w*0.6,0] };
+    map.panBy(offsets[dir], { duration:600 });
+    trackEvent('offscreen_nudge_click', { direction: dir });
+  }
+
+  ['north','south','east','west'].forEach(dirName => {
+    const el = document.getElementById(`offscreen-${dirName}`);
+    if (el) el.addEventListener('click', () => panMapDirection(dirName[0]));
+  });
 
   function addJobPinMarker(lng, lat, props, key) {
     const el = document.createElement('div');
@@ -3605,22 +3682,49 @@ Lyft
     map.addLayer({ id:'radius-outline', type:'line', source:'radius-circle', paint:{'line-color':accent,'line-width':1.5,'line-opacity':0.3,'line-dasharray':[4,3]} });
 
     // Jobs source + layers
+    // clusterProperties sums up a per-category count on every cluster as
+    // Mapbox builds it (e.g. cat_retail-jobs, cat_manufacturing-jobs, ...),
+    // built dynamically from CATEGORIES so it stays in sync automatically
+    // if categories are ever added/removed. Added 2026-07-16 so cluster
+    // bubbles can be tinted/labeled by what's actually inside them instead
+    // of a flat generic color -- lets you scan the map and tell "that's
+    // mostly warehouse jobs" before zooming in or picking a filter.
+    const clusterCategoryTags = CATEGORIES.filter(c => c.tag !== 'all' && c.tag !== 'placeholder').map(c => c.tag);
     map.addSource('jobs', {
       type:'geojson', data:{type:'FeatureCollection',features:[]},
-      cluster:true, clusterMaxZoom:13, clusterRadius:48
+      cluster:true, clusterMaxZoom:13, clusterRadius:48,
+      clusterProperties: clusterCategoryTags.reduce((acc, tag) => {
+        acc[`cat_${tag}`] = ['+', ['case', ['==', ['get','category'], tag], 1, 0]];
+        return acc;
+      }, {})
     });
+
+    // Dominant-category color/emoji expressions: find the max per-category
+    // count on the cluster, then walk categories in CATEGORIES order and use
+    // the first one whose count matches that max (ties go to whichever
+    // category is listed first). Falls back to the plain accent color / a
+    // generic briefcase if every count is somehow 0.
+    const clusterMaxCountExpr = ['max', ...clusterCategoryTags.map(tag => ['get', `cat_${tag}`])];
+    const clusterDominantColorExpr = ['case',
+      ...clusterCategoryTags.flatMap(tag => [['==', ['get', `cat_${tag}`], clusterMaxCountExpr], colorMap[tag] || accent]),
+      accent
+    ];
+    const clusterDominantEmojiExpr = ['case',
+      ...clusterCategoryTags.flatMap(tag => [['==', ['get', `cat_${tag}`], clusterMaxCountExpr], categoryEmoji(tag)]),
+      '💼'
+    ];
 
     // ── Cluster shadow (offset badge) ──
     map.addLayer({ id:'clusters-shadow', type:'circle', source:'jobs', filter:['has','point_count'],
       paint:{
-        'circle-color':['step',['get','point_count'], isLight?'#00a055':'#00cc6e', 5, accent, 15,'#66ffbb'],
+        'circle-color':clusterDominantColorExpr,
         'circle-radius':['step',['get','point_count'],20,5,26,15,33],
         'circle-opacity':0.28, 'circle-translate':[4,4], 'circle-blur':0.55
       }
     });
     map.addLayer({ id:'clusters', type:'circle', source:'jobs', filter:['has','point_count'],
       paint:{
-        'circle-color':['step',['get','point_count'], isLight?'#00a055':'#00cc6e', 5, accent, 15,'#66ffbb'],
+        'circle-color':clusterDominantColorExpr,
         'circle-radius':['step',['get','point_count'],20,5,26,15,33],
         'circle-opacity':0.92, 'circle-stroke-width':1.5,
         'circle-stroke-color': isLight ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.3)'
@@ -3635,7 +3739,7 @@ Lyft
     });
     map.addLayer({ id:'cluster-count', type:'symbol', source:'jobs', filter:['has','point_count'],
       layout:{
-        'text-field':['concat','💼 ','{point_count_abbreviated}'],
+        'text-field':['concat', clusterDominantEmojiExpr, ' ', '{point_count_abbreviated}'],
         'text-font':['DIN Pro Bold','Arial Unicode MS Bold'],
         'text-size':12, 'text-allow-overlap':true
       },
@@ -3675,6 +3779,14 @@ Lyft
     requestAnimationFrame(() => map.resize());
     applyMapFog();
     setupMapLayers();
+
+    // Auto-request the user's location shortly after load so the map centers
+    // on "near me" by default instead of requiring an explicit tap first --
+    // this reuses the exact same requestLocation() flow a manual "Share
+    // location" tap triggers, so a denied/unavailable permission falls back
+    // to the existing DFW default (CENTER above) exactly like today, just
+    // without making that the only path. Added 2026-07-16.
+    setTimeout(() => { if (!userLocated) requestLocation(); }, 600);
 
     // Cluster click → expand
     map.on('click', 'clusters', e => {
@@ -3720,8 +3832,8 @@ Lyft
       map.setPaintProperty('radius-outline', 'line-opacity', 0.3  * fade);
     });
 
-    map.on('moveend',    syncJobPinMarkers);
-    map.on('sourcedata', e => { if (e.sourceId === 'jobs' && e.isSourceLoaded) syncJobPinMarkers(); });
+    map.on('moveend',    () => { syncJobPinMarkers(); updateOffscreenNudges(); });
+    map.on('sourcedata', e => { if (e.sourceId === 'jobs' && e.isSourceLoaded) { syncJobPinMarkers(); updateOffscreenNudges(); } });
 
     // ── Initial data load: Adzuna (4 pages) + Jooble + direct postings ────
     const tags = CATEGORIES.filter(c => c.tag !== 'all' && c.tag !== 'placeholder').map(c => c.tag);
