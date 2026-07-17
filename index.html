@@ -1036,11 +1036,11 @@
         </button>
       </div>
       <div id="zip-row">
-        <button id="zip-toggle-link">or search by ZIP code</button>
+        <button id="zip-toggle-link">or search ZIP / job / company</button>
         <div id="zip-entry" style="display:none">
-          <input id="zip-input" type="text" inputmode="numeric" maxlength="5" placeholder="75201" aria-label="ZIP code" />
+          <input id="zip-input" type="text" inputmode="text" maxlength="60" placeholder="75201, AT&T, forklift…" aria-label="ZIP code, job title, or company search" />
           <button id="zip-go-btn">Go</button>
-          <button id="zip-cancel-btn" title="Cancel" aria-label="Cancel ZIP search">✕</button>
+          <button id="zip-cancel-btn" title="Cancel" aria-label="Cancel search">✕</button>
         </div>
         <div id="zip-status"></div>
       </div>
@@ -1515,6 +1515,11 @@ Lyft
   CATEGORIES.forEach(c => { colorMap[c.tag] = c.color; });
 
   let allJobs = [], activeFilter = 'placeholder', activePopup = null, activeCard = null;
+  // Free-text override applied on top of the category filter -- see
+  // submitZip() below, which doubles the ZIP box as a job-title/company
+  // search (e.g. typing "AT&T" surfaces just that employer's postings).
+  // Added 2026-07-16.
+  let searchTerm = '';
   // Employer IDs with 2+ peer vouches — see window.vouchForEmployer() and
   // refreshVerifiedEmployers(). Populated once the Firebase module script
   // loads; empty (no badges) until then.
@@ -2458,6 +2463,7 @@ Lyft
     zipEntry.style.display      = 'none';
     zipToggleLink.style.display = 'block';
     zipStatus.textContent = ''; zipStatus.className = ''; zipInput.value = '';
+    if (searchTerm) { searchTerm = ''; renderSidebar(); updateMapLayer(); }
   });
   zipInput.addEventListener('keydown', e => { if (e.key === 'Enter') submitZip(); });
   document.getElementById('zip-go-btn').addEventListener('click', submitZip);
@@ -2473,36 +2479,73 @@ Lyft
   async function updateSearchLocationText() { try { const [lon, lat] = CENTER; const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lon},${lat}.json?types=place&access_token=${mapboxgl.accessToken}`; const res = await fetch(url); const data = await res.json(); const feature = data.features && data.features[0]; if (!feature) return; const region = (feature.context || []).find(c => c.id.startsWith('region')); const stateAbbr = region && region.short_code ? region.short_code.replace('US-', '') : ''; searchLocationText = stateAbbr ? `${feature.text}, ${stateAbbr}` : feature.text; } catch (e) { console.warn('Reverse geocode failed:', e); } } function joobleRadiusKm(miles) { const steps = [0, 4, 8, 16, 26, 40, 80]; const km = miles * 1.60934; return String(steps.reduce((a, b) => Math.abs(b - km) < Math.abs(a - km) ? b : a)); }
 
     async function submitZip() {
-    const zip = zipInput.value.trim();
-    if (!/^\d{5}$/.test(zip)) {
-      zipStatus.textContent = 'Please enter a valid 5-digit ZIP code.';
+    const raw = zipInput.value.trim();
+    if (!raw) {
+      zipStatus.textContent = 'Enter a ZIP code, job title, or company name.';
       zipStatus.className = 'error'; return;
     }
-    if (userLocated) {
-      const confirmed = await showAppConfirm(
-        `You're currently using your shared location for the most accurate results.\n\n` +
-        `Search ZIP ${zip} instead? This will replace your shared location until you share it again.`,
-        'Search ZIP', 'Keep my location'
-      );
-      if (!confirmed) return;
+
+    // A bare 5-digit value re-centers the search on that ZIP (original
+    // behavior). Anything else is treated as a free-text filter over jobs
+    // already loaded for the current area -- e.g. typing "AT&T" surfaces
+    // just that employer's postings so a direct-ATS integration (Workday,
+    // Greenhouse, Lever) can be spot-checked without hunting through the
+    // full job list. Added 2026-07-16.
+    if (/^\d{5}$/.test(raw)) {
+      searchTerm = '';
+      const zip = raw;
+      if (userLocated) {
+        const confirmed = await showAppConfirm(
+          `You're currently using your shared location for the most accurate results.\n\n` +
+          `Search ZIP ${zip} instead? This will replace your shared location until you share it again.`,
+          'Search ZIP', 'Keep my location'
+        );
+        if (!confirmed) return;
+      }
+      zipStatus.textContent = 'Looking up ZIP code…'; zipStatus.className = '';
+      const coords = await geocodeZip(zip);
+      if (!coords) {
+        zipStatus.textContent = `Couldn't find ZIP ${zip}. Please double-check and try again.`;
+        zipStatus.className = 'error'; return;
+      }
+      CENTER = coords; userLocated = false; routeCache = {};
+      if (userMarker) { userMarker.remove(); userMarker = null; }
+      // Same cluster-first landing as requestLocation() — see the comment there.
+      map.flyTo({ center: CENTER, zoom: 9, pitch: 0, duration: 1400 });
+      updateCircle();
+      const locateBtn = document.getElementById('locate-btn');
+      locateBtn.classList.remove('located');
+      locateBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8" stroke-opacity="0.35"/></svg> Share location`;
+      zipStatus.textContent = `Showing jobs near ${zip}.`; zipStatus.className = 'success';
+      trackEvent('location_set', { method: 'zip', zip_code: zip });
+      await refetchJobsAroundCenter();
+      return;
     }
-    zipStatus.textContent = 'Looking up ZIP code…'; zipStatus.className = '';
-    const coords = await geocodeZip(zip);
-    if (!coords) {
-      zipStatus.textContent = `Couldn't find ZIP ${zip}. Please double-check and try again.`;
-      zipStatus.className = 'error'; return;
+
+    searchTerm = raw;
+    if (activeFilter === 'placeholder') {
+      activeFilter = 'all';
+      sel.value = 'all'; syncDot();
+      document.getElementById('pre-select').style.display = 'none';
+      const ls = document.getElementById('list-section');
+      ls.style.display = 'flex'; ls.style.flexDirection = 'column';
+      ls.style.overflow = 'hidden'; ls.style.flex = '1';
+      document.getElementById('reset-filter-btn').disabled = false;
     }
-    CENTER = coords; userLocated = false; routeCache = {};
-    if (userMarker) { userMarker.remove(); userMarker = null; }
-    // Same cluster-first landing as requestLocation() — see the comment there.
-    map.flyTo({ center: CENTER, zoom: 9, pitch: 0, duration: 1400 });
-    updateCircle();
-    const locateBtn = document.getElementById('locate-btn');
-    locateBtn.classList.remove('located');
-    locateBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8" stroke-opacity="0.35"/></svg> Share location`;
-    zipStatus.textContent = `Showing jobs near ${zip}.`; zipStatus.className = 'success';
-    trackEvent('location_set', { method: 'zip', zip_code: zip });
-    await refetchJobsAroundCenter();
+    renderSidebar();
+    updateMapLayer();
+    const matches = filteredJobs();
+    if (!matches.length) {
+      zipStatus.textContent = `No jobs matching "${raw}" in the current search area. Try a different term, or share/search a different location.`;
+      zipStatus.className = 'error';
+    } else {
+      zipStatus.textContent = `Found ${matches.length} job${matches.length === 1 ? '' : 's'} matching "${raw}".`;
+      zipStatus.className = 'success';
+      const bounds = new mapboxgl.LngLatBounds();
+      matches.forEach(j => bounds.extend([j.lng, j.lat]));
+      map.fitBounds(bounds, { padding: 80, maxZoom: 14, duration: 1000 });
+    }
+    trackEvent('job_text_search', { term: raw, results: matches.length });
   }
 
   // Keep banner visible longer on mobile (small screens need more time to notice it)
@@ -2993,6 +3036,10 @@ Lyft
     document.getElementById('reset-filter-btn').disabled   = true;
     closeCommute();
     if (activeCard) { activeCard.classList.remove('active'); activeCard = null; }
+    if (searchTerm) {
+      searchTerm = '';
+      zipInput.value = ''; zipStatus.textContent = ''; zipStatus.className = '';
+    }
     updateMapLayer();
   });
   document.getElementById('reset-filter-btn').disabled = true;
@@ -3092,9 +3139,14 @@ Lyft
 
   // ── Sidebar ───────────────────────────────────────────────────────────────
   function filteredJobs() {
-    return (activeFilter === 'all' || activeFilter === 'placeholder')
+    let jobs = (activeFilter === 'all' || activeFilter === 'placeholder')
       ? allJobs
       : allJobs.filter(j => j.category === activeFilter);
+    if (searchTerm) {
+      const q = searchTerm.toLowerCase();
+      jobs = jobs.filter(j => (j.title || '').toLowerCase().includes(q) || (j.company || '').toLowerCase().includes(q));
+    }
+    return jobs;
   }
 
   function renderSidebar() {
