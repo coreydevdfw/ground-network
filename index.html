@@ -3799,7 +3799,7 @@ Lyft
     });
     map.addLayer({ id:'cluster-count', type:'symbol', source:'jobs', filter:['has','point_count'],
       layout:{
-        'text-field':['concat', clusterDominantEmojiExpr, ' ', '{point_count_abbreviated}'],
+        'text-field':['concat', clusterDominantEmojiExpr, ' ', ['get','point_count_abbreviated']],
         'text-font':['DIN Pro Bold','Arial Unicode MS Bold'],
         'text-size':12, 'text-allow-overlap':true
       },
