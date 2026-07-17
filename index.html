@@ -1504,6 +1504,11 @@ Lyft
     { tag:'hospitality-catering-jobs',    label:'Hospitality & Catering', color:'#eccc68' },
     { tag:'domestic-help-cleaning-jobs',  label:'Cleaning & Domestic',    color:'#7bed9f' },
     { tag:'maintenance-jobs',             label:'Maintenance',           color:'#a4b0be' },
+    // Added 2026-07-16 -- synthetic category with no Adzuna taxonomy
+    // equivalent (adzuna:false excludes it from the Adzuna fetch loop --
+    // see adzunaTags below -- while Jooble's free-text search and direct/
+    // ATS category hints still cover it normally).
+    { tag:'ops-pm-jobs',                  label:'Operations & Project Mgmt', color:'#5f27cd', adzuna:false },
   ];
 
   const colorMap = {};
@@ -2310,9 +2315,12 @@ Lyft
     document.getElementById('job-count').textContent = '…';
     await updateSearchLocationText();
     const tags = CATEGORIES.filter(c => c.tag !== 'all' && c.tag !== 'placeholder').map(c => c.tag);
+    // Adzuna has a fixed/closed category taxonomy -- tags flagged adzuna:false
+    // (e.g. ops-pm-jobs) have no matching slug there, so exclude them here.
+    const adzunaTags = CATEGORIES.filter(c => c.tag !== 'all' && c.tag !== 'placeholder' && c.adzuna !== false).map(c => c.tag);
     joobleFailureCount = 0;
     const [adzunaRes, joobleRes, directRes, directAtsRes] = await Promise.all([
-      mapWithConcurrency(tags, 3, fetchCategory),
+      mapWithConcurrency(adzunaTags, 3, fetchCategory),
       mapWithConcurrency(tags, 3, fetchJooble),
       fetchDirectPostings(),
       fetchDirectAtsEmployers()
@@ -3298,7 +3306,8 @@ Lyft
       // bubbles (see setupMapLayers' dominant-category expression) fell back
       // to the generic briefcase for these four instead of a real icon.
       'healthcare-nursing-jobs':'⚕️','hospitality-catering-jobs':'🍽️',
-      'domestic-help-cleaning-jobs':'🧹','maintenance-jobs':'🛠️'
+      'domestic-help-cleaning-jobs':'🧹','maintenance-jobs':'🛠️',
+      'ops-pm-jobs':'📊'
     };
     return emojiMap[tag] || '💼';
   }
@@ -3534,7 +3543,8 @@ Lyft
     'healthcare-nursing-jobs':       'healthcare nursing CNA home health aide',
     'hospitality-catering-jobs':     'hospitality restaurant food service catering',
     'domestic-help-cleaning-jobs':   'cleaning janitorial housekeeping',
-    'maintenance-jobs':              'maintenance facilities technician repair'
+    'maintenance-jobs':              'maintenance facilities technician repair',
+    'ops-pm-jobs':                   'operations manager project manager program manager process improvement Six Sigma supply chain'
   };
 
   const joobleLocCache = {}; // shared across calls within a session
@@ -3628,6 +3638,10 @@ Lyft
   const DIRECT_ATS_EMPLOYERS = [
     { name: 'Toyota Connected', ats: 'greenhouse', boardToken: 'toyotaconnected', categoryHint: 'engineering-jobs' },
     { name: 'AT&T', ats: 'workday', host: 'att.wd1.myworkdayjobs.com', tenant: 'att', site: 'ATTGeneral', categoryHint: 'admin-jobs' },
+    // Added 2026-07-16 -- both confirmed live against real responses (not
+    // guessed) before being added here. See ground_network_ats_research.xlsx.
+    { name: 'Alkami', ats: 'workday', host: 'alkami.wd12.myworkdayjobs.com', tenant: 'alkami', site: 'Alkami', categoryHint: 'engineering-jobs' },
+    { name: 'Match Group', ats: 'lever', site: 'matchgroup', categoryHint: 'engineering-jobs' },
   ];
 
   // ── Greenhouse fetch (Tier 1 — free, public, no key) ───────────────────────
@@ -3660,23 +3674,78 @@ Lyft
     }
   }
 
-  // ── Workday fetch (Tier 2 — semi-public CxS endpoint, no key) ────────────
-  // NOTE: response field names (jobPostings/title/externalPath/locationsText/
-  // postedOn) are Workday's documented-by-convention CxS shape. Verify field
-  // names against a real response the first time this runs, and adjust the
-  // mapping below if they differ.
-  async function fetchWorkday(employer) {
+  // ── Lever fetch (Tier 1 — free, public, no key) ──────────────────────────
+  // Added 2026-07-16 for Match Group, confirmed against a real response
+  // (job.text/categories.location/hostedUrl/id/createdAt all match Lever's
+  // documented public postings shape).
+  async function fetchLever(employer) {
     try {
-      const res = await fetch(`${PROXY_BASE}/workday`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ host: employer.host, tenant: employer.tenant, site: employer.site, searchText: '' })
-      });
+      const res = await fetch(`${PROXY_BASE}/lever/${employer.site}`);
       if (!res.ok) return [];
-      const data = await res.json();
-      const postings = data.jobPostings || [];
-      const withCoords = await Promise.all(postings.map(async p => {
-        const coords = await geocodeLocationText(p.locationsText || p.location);
+      const jobs = await res.json();
+      const withCoords = await Promise.all((jobs || []).map(async j => {
+        const coords = await geocodeLocationText(j.categories?.location);
+        if (!coords) return null;
+        const jitter = () => (Math.random() - 0.5) * 0.018;
+        return {
+          id:       `lever-${j.id}`,
+          title:    j.text,
+          company:  employer.name,
+          url:      j.hostedUrl,
+          lat:      coords[1] + jitter(),
+          lng:      coords[0] + jitter(),
+          category: employer.categoryHint,
+          created:  j.createdAt || null,
+          source:   'lever'
+        };
+      }));
+      return withCoords.filter(Boolean);
+    } catch (e) {
+      console.warn('Lever fetch failed:', employer.name, e);
+      return [];
+    }
+  }
+
+  // ── Workday fetch (Tier 2 — semi-public CxS endpoint, no key) ────────────
+  async function fetchWorkday(employer) {
+    // Verified 2026-07-16 against a real AT&T response (the field names below
+    // were guesses that turned out correct -- jobPostings/title/externalPath/
+    // locationsText/postedOn all match). Two real gaps did turn up:
+    //  1. searchText:'' pulls the WHOLE company nationwide (AT&T alone runs
+    //     1000+ open reqs) -- passing a city keyword narrows to the metro we
+    //     actually care about, same idea as searchLocationText elsewhere in
+    //     this file, and paginating a few pages gets more than just the
+    //     first 20 of those.
+    //  2. Any posting open at multiple locations reports locationsText as a
+    //     bare count ("3 Locations") instead of an address -- about two
+    //     thirds of results in testing -- which geocodeLocationText() can't
+    //     resolve, so these were being silently dropped. They now fall back
+    //     to an approximate pin at the current search city (with the usual
+    //     jitter) instead of disappearing outright.
+    const PAGE_SIZE = 20, MAX_PAGES = 3;
+    const cityQuery = (searchLocationText || '').split(',')[0].trim();
+    try {
+      let allPostings = [];
+      for (let page = 0; page < MAX_PAGES; page++) {
+        const res = await fetch(`${PROXY_BASE}/workday`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            host: employer.host, tenant: employer.tenant, site: employer.site,
+            searchText: cityQuery, limit: PAGE_SIZE, offset: page * PAGE_SIZE
+          })
+        });
+        if (!res.ok) break;
+        const data = await res.json();
+        const postings = data.jobPostings || [];
+        allPostings = allPostings.concat(postings);
+        if (postings.length < PAGE_SIZE || allPostings.length >= (data.total || 0)) break;
+      }
+      const withCoords = await Promise.all(allPostings.map(async p => {
+        const isLocationCount = /^\d+\s+Location/.test(p.locationsText || '');
+        const coords = isLocationCount
+          ? await geocodeLocationText(cityQuery || p.locationsText || p.location)
+          : await geocodeLocationText(p.locationsText || p.location);
         if (!coords) return null;
         const jitter = () => (Math.random() - 0.5) * 0.018;
         return {
@@ -3699,8 +3768,9 @@ Lyft
   }
 
   async function fetchDirectAtsEmployers() {
+    const atsFetchers = { greenhouse: fetchGreenhouse, workday: fetchWorkday, lever: fetchLever };
     const results = await Promise.all(DIRECT_ATS_EMPLOYERS.map(employer =>
-      employer.ats === 'greenhouse' ? fetchGreenhouse(employer) : fetchWorkday(employer)
+      (atsFetchers[employer.ats] || fetchGreenhouse)(employer)
     ));
     return results.flat();
   }
@@ -3897,9 +3967,12 @@ Lyft
 
     // ── Initial data load: Adzuna (4 pages) + Jooble + direct postings ────
     const tags = CATEGORIES.filter(c => c.tag !== 'all' && c.tag !== 'placeholder').map(c => c.tag);
+    // Adzuna has a fixed/closed category taxonomy -- tags flagged adzuna:false
+    // (e.g. ops-pm-jobs) have no matching slug there, so exclude them here.
+    const adzunaTags = CATEGORIES.filter(c => c.tag !== 'all' && c.tag !== 'placeholder' && c.adzuna !== false).map(c => c.tag);
     joobleFailureCount = 0;
     const [adzunaRes, joobleRes, directRes, directAtsRes] = await Promise.all([
-      mapWithConcurrency(tags, 3, fetchCategory),
+      mapWithConcurrency(adzunaTags, 3, fetchCategory),
       mapWithConcurrency(tags, 3, fetchJooble),
       fetchDirectPostings(),
       fetchDirectAtsEmployers()
