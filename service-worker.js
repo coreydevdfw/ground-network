@@ -2,7 +2,7 @@
 // Lives in the repo root, alongside index.html.
 //
 // Bump CACHE_VERSION any time you change ANY file listed in APP_SHELL below.
-const CACHE_VERSION = 'v4';
+const CACHE_VERSION = 'v5';
 const CACHE_NAME = `ground-network-${CACHE_VERSION}`;
 
 const APP_SHELL = [
