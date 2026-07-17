@@ -3776,22 +3776,52 @@ Lyft
     //     jitter) instead of disappearing outright.
     const PAGE_SIZE = 20, MAX_PAGES = 3;
     const cityQuery = (searchLocationText || '').split(',')[0].trim();
-    try {
-      let allPostings = [];
+
+    // Fetch a batch of pages for a given Workday searchText keyword. Pulled
+    // out into a helper because of the fallback below -- Workday's search is
+    // a literal keyword match against each posting's location text, not a
+    // radius search, so searching the exact suburb Mapbox reverse-geocodes
+    // the user to (e.g. "Farmers Branch", "Coppell", "Addison") frequently
+    // returns zero results even for an employer with plenty of open DFW reqs,
+    // because those reqs are tagged with the metro hub city (e.g. "Dallas")
+    // rather than the specific suburb. Found 2026-07-16 after AT&T came back
+    // empty for a real DFW location outside Dallas proper.
+    async function fetchPages(searchText) {
+      let postings = [];
       for (let page = 0; page < MAX_PAGES; page++) {
         const res = await fetch(`${PROXY_BASE}/workday`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             host: employer.host, tenant: employer.tenant, site: employer.site,
-            searchText: cityQuery, limit: PAGE_SIZE, offset: page * PAGE_SIZE
+            searchText, limit: PAGE_SIZE, offset: page * PAGE_SIZE
           })
         });
         if (!res.ok) break;
         const data = await res.json();
-        const postings = data.jobPostings || [];
-        allPostings = allPostings.concat(postings);
-        if (postings.length < PAGE_SIZE || allPostings.length >= (data.total || 0)) break;
+        const batch = data.jobPostings || [];
+        postings = postings.concat(batch);
+        if (batch.length < PAGE_SIZE || postings.length >= (data.total || 0)) break;
+      }
+      return postings;
+    }
+
+    try {
+      let allPostings = await fetchPages(cityQuery);
+      // Suburb-specific search came up empty -- retry against a short list of
+      // major DFW hub cities before giving up. Different employers' Workday
+      // reqs tend to be tagged with wherever their own office actually is
+      // (AT&T -> mostly "Dallas", Alkami/Toyota Connected -> mostly "Plano"),
+      // not the specific suburb the user happens to be standing in, so a
+      // single hardcoded fallback city missed some employers entirely. Try
+      // each hub in turn and stop at the first one that returns results.
+      // Pragmatic single-market list (matches the app's current DFW-only
+      // scope); worth revisiting if/when the app expands to other metros.
+      const DFW_HUB_FALLBACKS = ['Dallas', 'Plano', 'Fort Worth', 'Irving'];
+      for (const hub of DFW_HUB_FALLBACKS) {
+        if (allPostings.length > 0) break;
+        if (cityQuery && cityQuery.toLowerCase() === hub.toLowerCase()) continue;
+        allPostings = await fetchPages(hub);
       }
       const withCoords = await Promise.all(allPostings.map(async p => {
         const isLocationCount = /^\d+\s+Location/.test(p.locationsText || '');
