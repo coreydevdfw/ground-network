@@ -399,6 +399,11 @@
       background: rgba(255,255,255,0.06); border-radius: 4px;
       padding: 1px 5px; letter-spacing: 0.03em;
     }
+    .card-similar {
+      font-size: 9px; font-weight: 600; color: rgba(255,193,7,0.75);
+        background: rgba(255,193,7,0.1); border-radius: 4px;
+        padding: 1px 5px; letter-spacing: 0.03em;
+    }
     /* ── Peer-verification badges & vouch controls ── */
     .card-verified, .popup-verified {
       font-size: 9px; font-weight: 700; color: #00ff88;
@@ -2341,7 +2346,7 @@ Lyft
       fetchDirectAtsEmployers()
     ]);
     showSourceWarningIfNeeded(tags.length);
-    allJobs = dedupeJobs([...adzunaRes.flat(), ...joobleRes.flat(), ...directRes, ...directAtsRes]);
+    allJobs = groupSimilarJobs(dedupeJobs([...adzunaRes.flat(), ...joobleRes.flat(), ...directRes, ...directAtsRes]));
     hasCompletedSearch = true;
     // filteredJobs() already treats 'placeholder' the same as 'all', so the
     // map layer (clusters + pins) renders real data immediately — no need to
@@ -3206,6 +3211,14 @@ Lyft
         ? '<span class="card-stale">⚠️ Posted 30+ days ago</span>'
         : '';
 
+      // "Hiring across DFW" badge -- set by groupSimilarJobs() when this same
+    // title+company showed up 3+ times at different coordinates in one fetch
+    // (gig-platform pattern). Nearest instance is shown; this is transparency
+    // about the others rather than hiding them outright.
+  const similarBadge = (job.similarCount && job.similarCount > 1)
+    ? `<span class="card-similar" title="This role is posted in multiple DFW areas">Hiring in ${job.similarCount} areas</span>`
+    : '';
+
       // Direct (employer-posted) jobs use the in-app application form instead
       // of an outbound link. Aggregated (Adzuna/Jooble) jobs still route out
       // via job.url. A job already applied to (tracked client-side, since
@@ -3227,7 +3240,7 @@ Lyft
 
       card.innerHTML = `
         <div class="card-title">${job.title}</div>
-        <div class="card-company">${job.company}${sourceBadge}${verifiedBadge}</div>
+        <div class="card-company">${job.company}${sourceBadge}${verifiedBadge}${similarBadge}</div>
         <div class="card-drivetime" id="drivetime-${i}">
           <span class="dt-dot clear"></span><span class="dt-text">…</span>
         </div>
@@ -3412,6 +3425,36 @@ Lyft
       seenKeys.add(dupeKey);
       result.push(job);
     });
+    return result;
+  }
+
+  // -- Group regional/gig postings (same title+company, different cities) --
+  // dedupeJobs() above only catches TRUE duplicates: same title+company+
+  // location. It does not catch DoorDash/Instacart/Spark-Driver-style
+  // postings, which get listed separately per hub city with different
+  // coordinates but an identical title+company. When the same title+company
+  // shows up 3+ times in one fetch, that's a reliable signal it's a
+  // regional/gig posting rather than a handful of real nearby branches --
+  // so those collapse into a single card (nearest instance to CENTER wins)
+  // with a similarCount the card template uses to show "hiring in N areas"
+  // instead of letting the same company bury every other listing.
+  function groupSimilarJobs(jobs) {
+    const groups = new Map();
+    jobs.forEach(job => {
+      const key = `${(job.title || '').trim().toLowerCase()}|${(job.company || '').trim().toLowerCase()}`;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(job);
+  });
+    const result = [];
+    groups.forEach(group => {
+      if (group.length < 3) { result.push(...group); return; }
+      const nearest = [...group].sort((a, b) =>
+        haversineMiles(CENTER[1], CENTER[0], a.lat, a.lng) -
+        haversineMiles(CENTER[1], CENTER[0], b.lat, b.lng)
+      )[0];
+      nearest.similarCount = group.length;
+      result.push(nearest);
+  });
     return result;
   }
 
@@ -4070,7 +4113,7 @@ Lyft
       fetchDirectAtsEmployers()
     ]);
     showSourceWarningIfNeeded(tags.length);
-    allJobs.push(...dedupeJobs([...adzunaRes.flat(), ...joobleRes.flat(), ...directRes, ...directAtsRes]));
+    allJobs.push(...groupSimilarJobs(dedupeJobs([...adzunaRes.flat(), ...joobleRes.flat(), ...directRes, ...directAtsRes])));
     hasCompletedSearch = true;
     if (activeFilter !== 'placeholder') { renderSidebar(); updateMapLayer(); }
   });
