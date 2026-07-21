@@ -62,6 +62,10 @@
       --tg-btn-grad: linear-gradient(180deg, #e4ffab 0%, #8ee62e 45%, #2fa85a 100%);
       --tg-btn-hover-grad: linear-gradient(180deg, #eeffc4 0%, #a3ec4a 45%, #3bbf67 100%);
       --tg-btn-shadow: 0 10px 24px -6px rgba(94,201,63,0.5), inset 0 1px 0 rgba(255,255,255,0.55);
+      /* Motion system (see INTERACTION_SPEC.md) -- two durations, one structural easing curve. Anything that slides, collapses, or opens should use these instead of a new one-off duration/curve. */
+      --ease-standard: cubic-bezier(0.4,0,0.2,1);
+      --dur-micro: 160ms;
+      --dur-structural: 400ms;
     }
     body { font-family: 'Inter', system-ui, sans-serif; background: #0a0a0a; overflow: hidden; padding-top: env(safe-area-inset-top); }
 
@@ -977,15 +981,21 @@
 
     @media (max-width:640px) {
       #app { flex-direction:column; }
-      #sidebar { width:100%; min-width:unset; height:auto; max-height:50dvh; border-right:none; border-bottom:1px solid rgba(255,255,255,0.07);
-        transition: transform 0.45s cubic-bezier(0.4,0,0.2,1), max-height 0.45s cubic-bezier(0.4,0,0.2,1); }
+      #sidebar { width:100%; min-width:unset; height:auto; max-height:82dvh; border-right:none; border-bottom:1px solid rgba(255,255,255,0.07);
+        transition: transform var(--dur-structural) var(--ease-standard), max-height var(--dur-structural) var(--ease-standard); }
+      /* List mode was capped at 50dvh, which -- after the header, locate/zip/
+         employer rows, and filter bar each took their share -- left the actual
+         job list closer to 15% of the screen than 50%. Raised to 82dvh so the
+         list gets real room; #map-wrap (flex:1) keeps a visible strip above it
+         for context. Transition now uses the shared motion tokens from :root
+         instead of one-off values (see INTERACTION_SPEC.md). */
       /* In the column layout it's HEIGHT, not width, that #sidebar reserves —
          same bug as desktop, different axis. Collapse max-height too so
          #map-wrap (flex:1) actually grows to fill the freed vertical space
          instead of leaving a blank reserved band where the sidebar used to
          sit stacked above the map. */
       #sidebar.nav-hidden { max-height: 0; width:100%; min-width:unset;
-        transition: transform 0.55s cubic-bezier(0.4,0,0.2,1), max-height 0.55s cubic-bezier(0.4,0,0.2,1); }
+        transition: transform var(--dur-structural) var(--ease-standard), max-height var(--dur-structural) var(--ease-standard); }
       #map-wrap { flex:1; min-height:0; height:50dvh; }
 
       /* ── Mobile Map/List switch — added 2026-07-16 ── */
