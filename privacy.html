@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>Privacy Policy — Ground Network</title>
+  <meta name="description" content="How Ground Network collects, uses, and protects your information."/>
+  <meta name="theme-color" content="#0a0a0a"/>
+  <meta name="robots" content="noindex"/>
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #0a0a0a; color: rgba(255,255,255,0.85);
+      line-height: 1.6; padding: 40px 20px 80px;
+    }
+    #wrap { max-width: 680px; margin: 0 auto; }
+    a { color: #00ff88; }
+    .back-link {
+      display: inline-block; font-size: 12px; color: rgba(255,255,255,0.4);
+      text-decoration: underline; text-decoration-color: rgba(255,255,255,0.2);
+      margin-bottom: 28px;
+    }
+    .back-link:hover { color: rgba(255,255,255,0.65); }
+    h1 {
+      font-size: 26px; font-weight: 800; color: #00ff88; letter-spacing: 0.01em;
+      text-shadow: 2px 2px 0 rgba(0,255,136,0.25), 4px 4px 0 rgba(0,255,136,0.1);
+      margin-bottom: 6px;
+    }
+    .updated { font-size: 12px; color: rgba(255,255,255,0.35); margin-bottom: 32px; }
+    h2 {
+      font-size: 16px; font-weight: 700; color: #fff; margin-top: 34px; margin-bottom: 10px;
+      padding-bottom: 8px; border-bottom: 1px solid rgba(0,255,136,0.15);
+    }
+    p, li { font-size: 14px; color: rgba(255,255,255,0.7); }
+    p { margin-bottom: 12px; }
+    ul { margin: 0 0 12px 20px; }
+    li { margin-bottom: 6px; }
+    strong { color: rgba(255,255,255,0.9); }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0 16px; font-size: 13px; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.08); vertical-align: top; }
+    th { color: rgba(255,255,255,0.5); font-weight: 600; font-size: 12px; }
+    td { color: rgba(255,255,255,0.7); }
+    .note {
+      font-size: 12px; color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 12px 14px;
+      margin: 14px 0;
+    }
+    .contact-box {
+      margin-top: 12px; padding: 14px 16px; background: rgba(0,255,136,0.05);
+      border: 1px solid rgba(0,255,136,0.2); border-radius: 8px; font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div id="wrap">
+    <a class="back-link" href="./">← Back to Ground Network</a>
+    <h1>Privacy Policy</h1>
+    <div class="updated">Last updated: July 22, 2026</div>
+
+    <p>Ground Network ("we," "us," "the app," "the platform") is a hyperlocal job-search tool for the Dallas-Fort Worth area, operated by Corey as an individual. This page explains what information we collect, why, and how it's handled. It's written in plain language to describe what the app actually does — not a substitute for legal advice, and not yet reviewed by an attorney (see note at the bottom).</p>
+
+    <h2>Information we collect</h2>
+    <p><strong>If you're searching for a job (no account required):</strong></p>
+    <ul>
+      <li><strong>Location</strong> — if you tap "Share your location," your device's GPS coordinates are used to center the map and job search around you. If you decline, you can still search by ZIP code, or the map falls back to a general DFW view.</li>
+      <li><strong>Applications you submit</strong> — if you apply directly to an employer-posted job through the in-app form, we collect your <strong>full name, email address, and optional phone number</strong>. This is stored so the employer can see and respond to your application, and so you can check your application status later via a private status link (no login required).</li>
+      <li><strong>"Applied" status</strong> — which jobs you've applied to is remembered on your own device (via browser local storage) so applied jobs show as "Applied ✓." This isn't sent to us or stored on a server.</li>
+    </ul>
+    <p><strong>If you're an employer posting jobs:</strong></p>
+    <ul>
+      <li><strong>Account info</strong> — company name and email address. Your password is handled by Firebase Authentication (Google Cloud) and is never stored by us in plain text.</li>
+      <li><strong>Job postings and applicant data</strong> — the jobs you post, and the applications job seekers submit to them, are visible in your employer dashboard.</li>
+    </ul>
+
+    <h2>How we use this information</h2>
+    <ul>
+      <li>To show you relevant jobs near your location.</li>
+      <li>To connect job seekers' applications with the employers who posted the job.</li>
+      <li>To let you check an application's status without creating an account.</li>
+      <li>To understand how the app is used, in aggregate, so we can improve it (see Analytics below).</li>
+    </ul>
+    <p>We do not sell your personal information, and we do not use your name, email, or phone number for advertising.</p>
+
+    <h2>Location data</h2>
+    <p>Sharing your location is optional and only used to improve search relevance (a tighter, more accurate radius around you). It is not stored long-term on our servers tied to your identity — it's used to run the search and center the map for that session.</p>
+
+    <h2>Third parties we work with</h2>
+    <p>These services help the app function. Each has its own privacy practices, linked below.</p>
+    <table>
+      <tr><th>Service</th><th>What it's used for</th></tr>
+      <tr><td>Firebase (Google Cloud)</td><td>Account authentication and the database (Firestore) that stores accounts, job postings, and applications.</td></tr>
+      <tr><td>Google Analytics 4</td><td>Aggregate, anonymized usage analytics (e.g. which categories get searched, how many people apply) — not tied to your name or contact info.</td></tr>
+      <tr><td>Mapbox</td><td>Map rendering, geocoding (turning an address/ZIP into map coordinates), and driving/commute-time estimates.</td></tr>
+      <tr><td>Adzuna &amp; Jooble</td><td>Job-listing data aggregated from these job boards. We don't send your personal information to them — job search queries may include a general location (e.g. "Plano, TX"), not your precise identity.</td></tr>
+      <tr><td>Direct employer ATS partners (e.g. Greenhouse, Workday, Lever)</td><td>Job-listing data pulled from these employers' own career sites. If you apply through an outbound link to one of these employers' own listings (rather than the in-app form), your application goes directly to them under their own privacy policy — not ours.</td></tr>
+    </table>
+
+    <h2>Cookies &amp; local storage</h2>
+    <p>Google Analytics may set cookies to distinguish sessions. We use your browser's local storage (not a cookie) to remember which jobs you've applied to and your light/dark mode preference — this stays on your device.</p>
+
+    <h2>Data retention &amp; deletion</h2>
+    <p>We keep account and application data for as long as your account or a job posting is active, so employers and applicants can see application history.</p>
+    <div class="note">
+      A self-service "delete my data" option isn't built into the app yet. In the meantime, if you'd like your information removed — as an applicant, an employer, or both — email us at the address below and we'll handle it manually.
+    </div>
+
+    <h2>Children's privacy</h2>
+    <p>Ground Network is intended for job seekers and employers, not children. We don't knowingly collect information from anyone under 16.</p>
+
+    <h2>Changes to this policy</h2>
+    <p>If how we collect or use information changes meaningfully, we'll update this page and the "last updated" date above.</p>
+
+    <h2>Contact</h2>
+    <p>Questions, or want your data deleted? Reach out:</p>
+    <div class="contact-box">
+      <a href="mailto:corey.spence.shs@gmail.com">corey.spence.shs@gmail.com</a>
+    </div>
+
+    <div class="note" style="margin-top:32px;">
+      This policy describes Ground Network's current data practices as of the date above, written directly from the app's code. It has not yet been reviewed by an attorney. If anything here seems unclear or you have concerns about how your data is handled, please reach out using the contact above.
+    </div>
+  </div>
+</body>
+</html>
