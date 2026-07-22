@@ -143,7 +143,20 @@
     body.light .tagline { color: rgba(0,0,0,0.4) !important; }
     body.light #zip-row button { color: rgba(0,0,0,0.4) !important; }
     body.light #locate-btn { color: #111 !important; background: rgba(0,0,0,0.06) !important; border-color: rgba(0,0,0,0.12) !important; }
+/* --- Privacy Policy link + legal notes (added 2026-07-22) --- */
+    #privacy-footer-link {
+                          display: inline-block; font-size: 10px; margin-top: 4px;
+                          color: rgba(255,255,255,0.25); text-decoration: underline;
+                          text-decoration-color: rgba(255,255,255,0.15);
+    }
+    #privacy-footer-link:hover { color: rgba(255,255,255,0.5); }
+    body.light #privacy-footer-link { color: rgba(0,0,0,0.3) !important; }
+    .legal-note { font-size: 10px; color: rgba(255,255,255,0.35); margin-top: 8px; line-height: 1.4; }
+    .legal-note a { color: rgba(0,255,136,0.75); text-decoration: underline; }
+    .legal-note a:hover { color: #00ff88; }
+    body.light .legal-note { color: rgba(0,0,0,0.35) !important; }
     #app { display: flex; height: 100dvh; width: 100vw; }
+      
     /* ── Sidebar ── */
     #sidebar {
       width: 320px; min-width: 320px; height: 100dvh;
@@ -1041,6 +1054,7 @@
         <div>
           <div class="logo">Ground Network</div>
           <div class="tagline">Hyperlocal jobs · DFW</div>
+          <a href="./privacy.html" id="privacy-footer-link">Privacy Policy</a>
         </div>
         <button id="locate-btn">
           <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1317,6 +1331,7 @@ Lyft
     <button id="employer-modal-close" type="button" aria-label="Close">✕</button>
     <div id="employer-modal-title">Post jobs on Ground Network</div>
     <div id="employer-modal-sub">Free to post. Free to browse applicants. You only pay a placement fee if you hire someone through the app.</div>
+        <div class="legal-note">By creating an account, you agree to our <a href="./privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.</div>
     <div id="employer-modal-error"></div>
     <form id="employer-modal-form">
       <div class="employer-field" id="employer-field-company">
@@ -1383,6 +1398,7 @@ Lyft
     <button id="apply-modal-close" type="button" aria-label="Close">✕</button>
     <div id="apply-modal-title">Apply</div>
     <div id="apply-modal-sub">Ground Network</div>
+        <div class="legal-note">By applying, you agree to our <a href="./privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.</div>
     <div id="apply-modal-error"></div>
     <form id="apply-form">
       <div class="employer-field">
